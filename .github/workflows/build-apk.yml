@@ -1,6 +1,6 @@
 name: Build APK
 
-# Run it from the Actions tab ("Run workflow"), or automatically when index.html changes.
+# Run from the Actions tab ("Run workflow"), or automatically when index.html changes.
 on:
   workflow_dispatch:
   push:
@@ -12,34 +12,31 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get the files
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Prepare the app files
+      - name: Create the Android project
         run: |
           mkdir -p app/www app/assets
           cp index.html app/www/index.html
           cp icon-192.png icon-512.png app/www/ 2>/dev/null || true
-          cp icon-512.png app/assets/logo.png
-
-      - name: Create the Android project
-        working-directory: app
-        run: |
+          cp icon-512.png app/assets/logo.png 2>/dev/null || true
+          cd app
           npm init -y > /dev/null
-          npm install --legacy-peer-deps \
+          npm install --no-audit --no-fund --legacy-peer-deps \
             @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 \
             @capacitor-community/speech-recognition@7 \
             @capacitor-community/text-to-speech@6
@@ -54,11 +51,11 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Allow the microphone
-        working-directory: app/android/app/src/main
+      - name: Microphone permission and version number
         run: |
+          cd app/android/app
           python3 - <<'PY'
-          p = 'AndroidManifest.xml'
+          p = 'src/main/AndroidManifest.xml'
           s = open(p).read()
           add = ''
           if 'RECORD_AUDIO' not in s:
@@ -68,45 +65,79 @@ jobs:
                       ' <intent><action android:name="android.speech.RecognitionService" /></intent>\n'
                       ' <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>\n'
                       ' </queries>\n')
-          s = s.replace('</manifest>', add + '</manifest>')
-          open(p, 'w').write(s)
-          print(s)
+          open(p, 'w').write(s.replace('</manifest>', add + '</manifest>'))
           PY
-
-      - name: App icon
-        working-directory: app
-        continue-on-error: true
-        run: |
-          npx --yes @capacitor/assets@3 generate --android \
-            --iconBackgroundColor '#13202A' --iconBackgroundColorDark '#13202A' \
-            --splashBackgroundColor '#13202A' --splashBackgroundColorDark '#13202A'
-
-      - name: Version number
-        working-directory: app/android/app
-        run: |
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" build.gradle
-          grep -n "version" build.gradle
+          cp -r src/main/res /tmp/res-original
+          cp build.gradle /tmp/build.gradle.original
 
-      - name: Use the same signing key every time
-        working-directory: app/android/app
+      - name: Build the APK
         run: |
-          python3 - <<'PY'
-          p = 'build.gradle'
+          cd app
+          LOG="$GITHUB_WORKSPACE/gradle.log"
+          NOTE=""
+
+          add_icons() {
+            npx --yes @capacitor/assets@3 generate --android \
+              --iconBackgroundColor '#13202A' --iconBackgroundColorDark '#13202A' \
+              --splashBackgroundColor '#13202A' --splashBackgroundColorDark '#13202A' || echo "Icon generation skipped"
+          }
+          use_fixed_key() {
+            [ -f "$GITHUB_WORKSPACE/debug.keystore" ] || return 0
+            python3 - <<'PY'
+          import os
+          p = 'android/app/build.gradle'
           s = open(p).read()
-          block = '''android { signingConfigs { debug { storeFile file("../../../debug.keystore") storePassword "android" keyAlias "androiddebugkey" keyPassword "android" } } '''
+          ks = os.environ['GITHUB_WORKSPACE'] + '/debug.keystore'
+          block = ('android {\n signingConfigs {\n debug {\n'
+                   ' storeFile file("' + ks + '")\n'
+                   ' storePassword "android"\n keyAlias "androiddebugkey"\n keyPassword "android"\n'
+                   ' }\n }\n')
           if 'debug.keystore' not in s:
               s = s.replace('android {', block, 1)
           open(p, 'w').write(s)
           PY
-          head -30 build.gradle
+          }
+          build() {
+            echo "===== Build attempt: $1 ====="
+            (cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace) > "$LOG" 2>&1
+            local code=$?
+            tail -40 "$LOG"
+            return $code
+          }
 
-      - name: Build the APK
-        working-directory: app/android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../../RT-Trainer.apk
+          add_icons
+          use_fixed_key
+          if build "full"; then NOTE="Built normally."
+          else
+            echo "::warning::First attempt failed, retrying with default icons."
+            rm -rf android/app/src/main/res && cp -r /tmp/res-original android/app/src/main/res
+            if build "default icons"; then NOTE="Built with the default Android icon."
+            else
+              echo "::warning::Retrying without the fixed signing key."
+              cp /tmp/build.gradle.original android/app/build.gradle
+              if build "default key"; then NOTE="Built without the fixed signing key: uninstall the old app before installing."
+              else
+                echo "::warning::Retrying without the text-to-speech plugin."
+                npm uninstall --legacy-peer-deps @capacitor-community/text-to-speech && npx cap sync android
+                if build "no TTS plugin"; then NOTE="Built without the native voice plugin."
+                else
+                  echo "## Build failed" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  grep -A20 "What went wrong" "$LOG" | head -60 >> "$GITHUB_STEP_SUMMARY" || tail -60 "$LOG" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  grep -A6 "What went wrong" "$LOG" | head -14 | while IFS= read -r line; do
+                    [ -n "$line" ] && echo "::error title=Gradle::$line"
+                  done
+                  exit 1
+                fi
+              fi
+            fi
+          fi
+          cp android/app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/RT-Trainer.apk"
+          echo "$NOTE" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "NOTE=$NOTE" >> "$GITHUB_ENV"
 
       - name: Save the APK (Actions → this run → Artifacts)
         uses: actions/upload-artifact@v4
@@ -119,5 +150,7 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: RT Trainer 1.0.${{ github.run_number }}
-          body: Download RT-Trainer.apk below and open it on your Android phone.
+          body: |
+            Download RT-Trainer.apk below and open it on your Android phone.
+            ${{ env.NOTE }}
           files: RT-Trainer.apk
