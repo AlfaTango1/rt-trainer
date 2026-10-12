@@ -1,28 +1,28 @@
 # ICAO RT Trainer
 
-Aviation English training app (ICAO radiotelephony, COMPLANG Units 1–8).
+Aviation English training app (ICAO radiotelephony, COMPLANG Units 1–8): radio practice with ATC, emergencies, phrase games, numbers and phonetic alphabet, METAR/TAF decoding, aerodrome layouts.
 
-- Radio practice with ATC, live situation diagrams and a **Speak** button
-- Selectable emergencies (Mayday / Pan Pan)
-- Phrase games: flashcards, listening, speaking, matching
-- Number and phonetic alphabet drills
-- METAR / TAF decoding games
-- Your own aerodromes with a layout editor, plus a library of famous airports
+## Files
 
-## Publish on GitHub Pages
+| File | Purpose |
+|---|---|
+| `index.html` | The whole app |
+| `manifest.json` | App name, colours and icons (makes it installable) |
+| `sw.js` | Offline support (service worker) |
+| `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `icon.svg` | App icons |
+| `.nojekyll` | Tells GitHub Pages to publish files as they are |
 
-1. Create a **public** repository, for example `rt-trainer`.
-2. **Add file → Upload files**: upload every file from this ZIP (`index.html`, `manifest.json`, `icon.svg`, `.nojekyll`, `README.md`). Click **Commit changes**.
-3. **Settings → Pages** → Source: *Deploy from a branch* → Branch: `main`, folder `/ (root)` → **Save**.
-4. After 1–2 minutes, open `https://<your-username>.github.io/rt-trainer/`.
+## Website (GitHub Pages)
 
-## Use it like an app
+Settings → Pages → Deploy from a branch → `main` / `(root)` → Save.
+Site: `https://<username>.github.io/rt-trainer/`
 
-- Android (Chrome): ⋮ → **Add to Home screen** / **Install app**
-- iPhone (Safari): Share → **Add to Home Screen**
+## Android app
 
-## Notes
+Build it with https://www.pwabuilder.com from the site address.
 
-- Allow microphone access when the browser asks, so the Speak button works. Use Chrome or Edge.
-- Progress and the aerodromes you add are saved in each browser separately.
-- To update, upload the new `index.html` with the same name. It replaces the old one.
+## Updating
+
+1. Upload the new `index.html`.
+2. Open `sw.js` → edit (pencil) → change `rt-v1` to `rt-v2` (next time `rt-v3` …) → Commit.
+   This makes installed apps download the new version.

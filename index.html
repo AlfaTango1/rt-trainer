@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ICAO RT Trainer</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#13202A">
+<meta name="description" content="Aviation English radiotelephony trainer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -65,7 +66,7 @@ p{margin:0}
 .brand small{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);font-weight:400}
 nav{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
-nav button{border:0;background:none;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:var(--f-disp);font-weight:600;font-size:1rem;letter-spacing:.03em;color:var(--muted)}
+nav button{border:0;background:none;padding:6px 8px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:var(--f-disp);font-weight:600;font-size:1rem;letter-spacing:.03em;color:var(--muted)}
 nav button:hover{color:var(--ink);background:var(--sunk)}
 nav button[aria-current="true"]{color:var(--ink);background:var(--surface);box-shadow:inset 0 -2px 0 var(--accent)}
 
@@ -343,7 +344,7 @@ textarea{width:100%;resize:vertical;min-height:70px;font-family:var(--f-mono);fo
 .tbar{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}.tbar div{height:100%;background:var(--accent);transition:width .25s linear}
 .ibtn{border:1px solid var(--line);background:var(--surface);border-radius:50%;width:24px;height:24px;font-size:.65rem;cursor:pointer;vertical-align:1px}
 .lvl{font-size:.6rem;color:var(--good);letter-spacing:1px;margin-left:4px}
-@media (max-width:720px){.gpick{display:flex;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}.gpick::-webkit-scrollbar{display:none}.gbtn{flex:0 0 auto;padding:8px 12px}.gbtn span{display:none}.pgrid{grid-template-columns:1fr 1fr}.mast{min-width:0;width:100%}}
+@media (max-width:720px){.pgrid{grid-template-columns:1fr 1fr}.mast{min-width:0;width:100%}}
 @media (prefers-reduced-motion:reduce){.obank .tile{animation:none}.tbar div{transition:none}}
 .libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .libcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
@@ -391,6 +392,102 @@ body.noscroll{overflow:hidden}
 .flatmap .halo{fill:var(--accent);opacity:.16}
 .flatmap .route{stroke:var(--accent);stroke-width:3;opacity:.9}
 .mic{display:inline-flex;align-items:center;gap:6px} .mic.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:blink 1s steps(2) infinite}
+
+/* home menu */
+.home{display:flex;flex-direction:column;gap:14px;min-height:calc(100dvh - 120px)}
+.hhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hhead h1{font-size:2rem;margin-top:4px}
+.hgo{display:inline-flex;align-items:center;gap:8px}
+.hgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;flex:1}
+.htile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px;cursor:pointer;min-width:0;min-height:120px;position:relative;transition:transform .12s,border-color .12s}
+.htile:hover{border-color:var(--ink);transform:translateY(-2px)}
+.htile:active{transform:scale(.98)}
+.htile b{font-family:var(--f-disp);font-size:1.35rem;margin-top:auto}
+.htile .hs{font-size:.82rem;color:var(--muted);line-height:1.25}
+.htile .hd{font-size:.86rem;color:var(--muted);line-height:1.4;margin-top:6px;max-width:34ch}
+.hgrid{max-height:560px}
+.htile .hst{position:absolute;top:14px;right:14px;font:600 .7rem var(--f-mono);color:var(--muted)}
+.hic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--ink)}
+.hic .ico{width:24px;height:24px}
+.t-dep .hic{background:var(--dep)} .t-arr .hic{background:var(--arr)} .t-misc .hic{background:var(--misc)} .t-wx .hic{background:var(--wx)}
+.hfoot{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.hmini{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;cursor:pointer;font-family:var(--f-disp);font-weight:600}
+.hprog{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px}
+.hprog summary{display:flex;justify-content:space-between;cursor:pointer;font-family:var(--f-disp);font-weight:600;list-style:none}
+.hprog summary::-webkit-details-marker{display:none}
+@media (max-width:720px){
+  .home{gap:10px;min-height:calc(100dvh - 200px)}
+  .hhead h1{font-size:1.5rem}
+  .hhead .hgo{width:100%;justify-content:center}
+  .hgrid{grid-template-columns:1fr 1fr;gap:10px}
+  .htile{min-height:0;padding:12px;border-radius:12px}
+  .htile .hd{display:none}
+  .hgrid{max-height:none}
+  .htile b{font-size:1.15rem}
+  .hic{width:38px;height:38px;border-radius:10px}
+  .hfoot{grid-template-columns:1fr}
+  .hmini{justify-content:center}
+  .gpick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;overflow:visible;margin:0;padding:0}
+  .gbtn{padding:7px 3px;align-items:center;text-align:center}
+  .gbtn b{font-size:.78rem;line-height:1.1}
+  .gbtn span{display:none}
+}
+@media (min-width:721px) and (max-width:1060px){nav button span{display:none} nav button{padding:8px}}
+@media (min-width:721px){.brand small{display:none}.top .wrap{gap:12px}}
+/* diagram overlays */
+.zctl{flex-direction:column;top:8px;right:8px;gap:5px}
+.zb{width:32px;height:32px;background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.zb.mob{display:none}
+.zlab{position:absolute;right:40px;top:0;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.zlab.show{opacity:1}
+.ibx{position:absolute;top:8px;left:8px;z-index:3;height:32px;min-width:32px;border-radius:16px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--ink);font:700 .78rem var(--f-mono);cursor:pointer;padding:0 10px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.ibx .ii{width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 .72rem var(--f-body);font-style:italic}
+.ipanel{position:absolute;top:46px;left:8px;z-index:3;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:8px 10px;font:.74rem var(--f-mono);display:grid;grid-template-columns:auto 1fr;gap:3px 12px;max-width:calc(100% - 64px)}
+.ipanel[hidden]{display:none}
+.ipanel i{font-style:normal;color:var(--muted);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;align-self:center}
+.ipanel .full{grid-column:1/-1;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:2px}
+.scap{position:absolute;left:8px;bottom:8px;z-index:2;max-width:calc(100% - 56px);display:flex;flex-direction:column;gap:3px;pointer-events:none}
+.scap div{display:flex;align-items:center;gap:7px;background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:.8rem;line-height:1.25;box-shadow:0 1px 4px rgba(0,0,0,.12);width:max-content;max-width:100%}
+.scap div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scap .k{font:700 .64rem var(--f-mono);letter-spacing:.08em;flex:none;display:inline-flex;align-items:center;gap:5px}
+.scap .k::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
+.scap .you .k{color:var(--accent)} .scap .trf .k{color:var(--tr)}
+.scap .em{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700;letter-spacing:.04em}
+.scap .em .k{color:#fff}
+.rleft .scenebox .scene{display:block}
+@media (max-width:720px){
+  .zb{width:30px;height:30px}
+  .zb.mob{display:grid}
+  .rleft .zb[data-z=in],.rleft .zb[data-z=out],.rleft .zb[data-z=reset]{display:none}
+  .scenebox.full .zb[data-z=in],.scenebox.full .zb[data-z=out],.scenebox.full .zb[data-z=reset]{display:grid}
+  .scenebox.full .zb[data-z=size]{display:none}
+  .rleft .ibx{padding:0;width:32px;justify-content:center}
+  .rleft .ibx .il{display:none}
+  .rleft.compact .zb:not([data-z=size]):not([data-z=full]),.rleft.typing .zb:not([data-z=size]):not([data-z=full]){display:none}
+  .rleft.compact .ibx,.rleft.typing .ibx{display:none}
+  .rleft.compact .scap .trf,.rleft.typing .scap .trf{display:none}
+  .scap div{font-size:.74rem;padding:3px 8px}
+}
+/* auto-hide overlays */
+.hintap{display:none}
+.rleft .zctl,.rleft .ibx{opacity:.45;transition:opacity .3s}
+.rleft .scap div{transition:opacity .5s,transform .5s}
+.rleft #sfig.act .zctl,.rleft #sfig.act .ibx{opacity:1}
+.rleft #sfig:not(.act) .scap div:not(.em){opacity:0;transform:translateY(6px)}
+.rleft #sfig .hintap{display:block;position:absolute;right:8px;bottom:8px;z-index:2;font:600 .62rem var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface) 85%,transparent);border-radius:6px;padding:2px 6px;opacity:0;transition:opacity .5s;pointer-events:none}
+.rleft #sfig:not(.act) .hintap{opacity:1}
+@media (prefers-reduced-motion:reduce){.rleft .scap div{transition:none}}
+/* voice confirm */
+.vconf{border:1px solid var(--blue);background:color-mix(in srgb,var(--blue) 9%,var(--surface));border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;animation:rise .25s ease-out}
+.vconf{scroll-margin-bottom:90px}
+.vconf .heard{font-size:.85rem;color:var(--muted)}
+.vconf .said{font-family:var(--f-mono);font-size:.95rem}
+.mic.rec .lvl{display:inline-block}
+.vbars{display:none;gap:2px;align-items:flex-end;height:14px}
+.mic.rec .vbars{display:inline-flex}
+.vbars i{width:3px;background:#fff;border-radius:1px;animation:vb .6s ease-in-out infinite alternate}
+.vbars i:nth-child(2){animation-delay:.15s}.vbars i:nth-child(3){animation-delay:.3s}
+@keyframes vb{from{height:3px}to{height:14px}}
 /* phases */
 .phases{display:flex;overflow-x:auto;scrollbar-width:none;padding-block:2px}
 .ph{flex:1 0 74px;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--f-disp);font-weight:600;font-size:.82rem;letter-spacing:.04em;color:var(--muted);position:relative;text-transform:uppercase}
@@ -466,6 +563,13 @@ let S={ads:[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'},{n
 try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d)S=Object.assign(S,d)}catch(e){}
 try{S.ads.forEach(x=>{if(x.i==='XNFD'&&x.r==='08'&&!x.lay)x.r='08L'})}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+(function fixState(){const A=x=>Array.isArray(x),O=x=>x&&typeof x==='object'&&!A(x);
+  if(!A(S.ads)||S.ads.length<2)S.ads=[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'},{n:'Lakeview',i:'XLKV',r:'27'}];
+  S.ads=S.ads.filter(a=>O(a)&&a.n&&a.i&&a.r);if(S.ads.length<2)S.ads.push({n:'Riverside',i:'XRSD',r:'18'},{n:'Lakeview',i:'XLKV',r:'27'});
+  S.ads.forEach(a=>{if(a.lay&&!(O(a.lay)&&A(a.lay.rwy)&&a.lay.rwy.length))delete a.lay;else if(a.lay)['twy','apr','std','hp','bld'].forEach(k=>{if(!A(a.lay[k]))a.lay[k]=[]})});
+  if(!(S.dep>=0&&S.dep<S.ads.length))S.dep=0;if(!(S.dst>=0&&S.dst<S.ads.length)||S.dst===S.dep)S.dst=S.dep?0:1;
+  if(!O(S.cs))S.cs={};if(!String(S.cs.name||'').trim())S.cs.name='Air Force';if(!String(S.cs.num||'').trim())S.cs.num='123';
+  if(!O(S.stats))S.stats={};if(!A(S.mist))S.mist=[];if(S.pm!==undefined&&!O(S.pm))S.pm={}})();
 function stat(mod,ok,item){const s=S.stats[mod]||(S.stats[mod]={t:0,r:0});s.t++;if(ok)s.r++;else if(item){S.mist.unshift({m:mod,x:item});S.mist=S.mist.slice(0,20)}save()}
 
 /* ---------- ICAO speech ---------- */
@@ -488,10 +592,10 @@ try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged'
 const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
 const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>WORDS.includes(w)?w[0]+w.slice(1).toLowerCase():w);
 function say(text,cb,rate){text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
-  try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();if(!VOICE)loadVoices();
+  try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
     const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||.92;
     let started=false;u.onstart=()=>{started=true;cb&&cb(true)};u.onerror=()=>{if(!started)cb&&cb(false)};
-    speechSynthesis.resume();speechSynthesis.speak(u);if(cb)setTimeout(()=>{if(!started)cb(false)},2500)}catch(e){cb&&cb(false)}}
+    const go=()=>{try{speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){}};if(busy)setTimeout(go,80);else go();if(cb)setTimeout(()=>{if(!started)cb(false)},2600)}catch(e){cb&&cb(false)}}
 function testVoice(el){el.textContent='Playing…';say('Air Force one two tree, radio check, read you fife',ok=>{el.textContent=ok?'Voice works. Turn up the volume if you hear nothing.':'No sound started. Your device or this view blocks speech: open the page in Chrome or Safari, and check that silent mode is off.'})}
 
 /* ---------- answer normaliser ---------- */
@@ -505,7 +609,7 @@ function norm(raw){
    .replace(/\brwy\s?(?=\d)/g,'runway ').replace(/\brwy\b/g,'runway')
    .replace(/\bhdg\b/g,'heading').replace(/\bft\b/g,'feet').replace(/\bkts?\b/g,'knots').replace(/\btwy\b/g,'taxiway')
    .replace(/\balpha\b/g,'alfa').replace(/\bjuliett\b/g,'juliet').replace(/\bpob\b/g,'persons on board')
-   .replace(/(\d{2})l\b/g,'$1 left').replace(/(\d{2})r\b/g,'$1 right')
+   .replace(/(\d{2})l\b/g,'$1 left').replace(/(\d{2})r\b/g,'$1 right').replace(/(\d{2})c\b/g,'$1 centre').replace(/\bcenter\b/g,'centre')
    .replace(/(\d)([a-z])/g,'$1 $2').replace(/([a-z])(\d)/g,'$1 $2')
    .replace(/-/g,' ').replace(/[,;:!?]|\.(?!\d)/g,' zzsep ').replace(/[^a-z0-9.\s]/g,' ');
   const toks=s.split(/\s+/).map(t=>/^\d*\.\d+$|^\d+\.\d+$/.test(t)?t:t.replace(/\./g,'')).filter(Boolean);
@@ -544,10 +648,10 @@ const SCN=[
  {atc:'{CS}, cleared to {DST} via ZARIN 1A departure, flight planned route, climb to altitude 6000 feet initially, contact Departure 125.8 when airborne, squawk 3472.',task:'Read back the clearance in full.',need:[['{DSTN}','Clearance limit {DST}'],['zarin 1 (a|alfa)\\b','Departure ZARIN 1A'],['flight planned route','"flight planned route"'],['6000','6000 feet initially'],['125\\.8','125.8 when airborne'],['3472','Squawk 3472']],model:'Cleared to {DST} via ZARIN 1A departure, flight planned route, 6000 feet initially, 125.8 when airborne, squawk 3472, {CS}'},
  {atc:'{CS}, that is correct.',task:'Request start-up. Give your stand and ATIS information.',need:[['stand {STDX}','Stand {STD}'],['start ?up','"start-up"'],['information charlie','Information Charlie']],model:'{CS}, stand {STD}, request start-up, information Charlie'},
  {atc:'{CS}, start-up approved.',task:'Read back.',need:[['start ?up approved','"Start-up approved"']],model:'Start-up approved, {CS}'},
- {sit:'Both engines started. The tug is connected.',task:'Request pushback.',need:[['request push ?back','"request pushback"']],model:'{CS}, stand {STD}, request pushback'},
+ {sit:'Both engines started. The tug is connected.',task:'Request pushback.',need:[['request push ?back','"request pushback"'],['stand {STDX}','Stand {STD}']],model:'{CS}, stand {STD}, request pushback'},
  {atc:'{CS}, pushback approved, facing {FACE}.',task:'Read back.',need:[['push ?back approved','"Pushback approved"'],['facing {FACEX}','Facing {FACE}']],model:'Pushback approved, facing {FACE}, {CS}'},
  {sit:'Pushback complete, tug disconnected.',task:'Request taxi.',need:[['request taxi','"request taxi"']],model:'{CS}, request taxi'},
- {atc:'{CS}, taxi to holding point {HPS}runway {DR} via {TXR}.',task:'Read back the taxi clearance.',need:[['taxi','"taxi"'],['holding point','"holding point"'],['{DRX}','Runway {DR}'],['{TXRX}','Route: {TXR}']],model:'Taxi to holding point {HPS}runway {DR} via {TXR}, {CS}'},
+ {atc:'{CS}, taxi to holding point {HPS}runway {DR} via {TXR}.',task:'Read back the taxi clearance.',need:[['taxi','"taxi"'],['holding point {HPX}','Holding point {HPS}'],['{DRX}','Runway {DR}'],['{TXRX}','Route: {TXR}']],model:'Taxi to holding point {HPS}runway {DR} via {TXR}, {CS}'},
  {atc:'{CS}, hold short of runway {DR}, traffic on final.',task:'Read back the hold instruction.',need:[['holding short','"Holding short" (not only "roger")'],['{DRX}','Runway {DR}']],model:'Holding short runway {DR}, {CS}'},
  {atc:'{CS}, contact Tower 118.1.',task:'Read back the frequency.',need:[['118\\.1','Frequency 118.1']],model:'118.1, {CS}'},
  {st:'{DEP} Tower|118.1',sit:'You are at holding point {HPS}runway {DR}, checks complete.',task:'Call Tower, ready for departure.',need:[['{DEPN} tower','Station name "{DEP} Tower"'],['ready','"ready for departure"']],model:'{DEP} Tower, {CS}, holding point runway {DR}, ready for departure'},
@@ -589,8 +693,8 @@ const SCN=[
  {atc:'{CS}, turn left heading 200, cleared ILS approach runway {AR}, report established on the localizer.',task:'Read back.',need:[['left heading 200','Left heading 200'],['cleared( for)? ils( approach)? {ARX}','Cleared ILS approach runway {AR}'],['report(ing)? established|wilco','Will report established']],model:'Left heading 200, cleared ILS approach runway {AR}, will report established, {CS}'},
  {sit:'The localizer is captured.',task:'Report.',need:[['established( on)?( the)? localizer|localizer established','"Established on the localizer"']],model:'{CS}, established on the localizer'},
  {atc:'{CS}, contact Tower 119.1.',task:'Read back.',need:[['119\\.1','Frequency 119.1']],model:'119.1, {CS}'},
- {st:'{DST} Tower|119.1',sit:'6 miles final on the ILS.',task:'Call Tower.',need:[['{DSTN} tower','Station name "{DST} Tower"'],['established','"Established"'],['{ARX}','Runway 18']],model:'{DST} Tower, {CS}, established ILS runway {AR}'},
- {atc:'{CS}, {DST} Tower, runway {AR}, cleared to land, wind {AW} degrees 12 knots.',task:'Read back.',need:[['{ARX}','Runway 18'],['cleared to land','"cleared to land"']],model:'Runway 18, cleared to land, {CS}'},
+ {st:'{DST} Tower|119.1',sit:'6 miles final on the ILS.',task:'Call Tower.',need:[['{DSTN} tower','Station name "{DST} Tower"'],['established','"Established"'],['{ARX}','Runway {AR}']],model:'{DST} Tower, {CS}, established ILS runway {AR}'},
+ {atc:'{CS}, {DST} Tower, runway {AR}, cleared to land, wind {AW} degrees 12 knots.',task:'Read back.',need:[['{ARX}','Runway {AR}'],['cleared to land','"cleared to land"']],model:'Runway {AR}, cleared to land, {CS}'},
  {sit:'At 300 feet a vehicle enters the runway. You start a go-around.',task:'Tell Tower.',need:[['going around','"Going around"']],model:'{CS}, going around'},
  {atc:'{CS}, roger, climb straight ahead 4000 feet, contact Approach 124.3.',task:'Read back.',need:[['straight ahead','Straight ahead'],['4000','4000 feet'],['124\\.3','Frequency 124.3']],model:'Climbing straight ahead 4000 feet, 124.3, {CS}'}
 ]},
@@ -661,7 +765,7 @@ function sRoute(o){
   g+=tag(Math.min(490,x+14),Math.max(4,y-50),[csShort(),(o.lvl||'FL320')+'  GS 450'],80);
   if(o.report)g+=tag(14,14,['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
   if(o.mach)g+=tag(14,14,['SPEED CONTROL','M.78 OR GREATER'],120);
-  if(o.back)g+=banner(590,24,'BACK ON ROUTE','goodt','end');
+  if(o.back)g+=banner(300,24,'BACK ON ROUTE','goodt','middle');
   g+=scaleBar(420,288,63,'30 NM')+northArrow(570,30,0);
   return SVG(g,'En-route chart');
 }
@@ -698,7 +802,7 @@ function sVector(o){
   for(let i=0;i<o.stage;i++)g+=`<path class="route" d="${P[i]}"/>`;
   if(o.stage===1)g+=`<text class="lvt" x="300" y="150">INTERCEPT 30°</text>`;
   g+=mv(P[o.stage],E[o.stage],{dur:5});
-  g+=tag(14,14,[['HDG 210 · 4000 FT','HDG 200 · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH 1018'],150);
+  g+=tag(58,12,[['HDG 210 · 4000 FT','HDG 200 · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH 1018'],150);
   g+=northArrow(570,30,0);
   return SVG(g,'Radar vectors to ILS');
 }
@@ -721,12 +825,12 @@ function sProf(o){
     g+=`<line class="lvl" x1="0" y1="${Y(200)}" x2="440" y2="${Y(200)}"/><text class="sl" x="6" y="${Y(200)-5}">DA 200 FT</text>`;
     const sd={d:ACS,s:.8};
     if(o.mode==='final'){const land=o.p===6;g+=mv(land?`M${X(5)},${Y(1600)} L440,${Y(50)} Q452,264 470,264 L540,264`:`M${X(5)},${Y(1600)} L${X(.4)},${Y(130)}`,land?[540,264,0]:[X(.4),Y(130),8.5],Object.assign({dur:land?9:8,rep:'indefinite'},sd));
-      g+=tag(14,14,['ILS RWY '+rw,land?'CLEARED TO LAND':'ESTABLISHED'],120);
+      g+=tag(240,12,['ILS RWY '+rw,land?'CLEARED TO LAND':'ESTABLISHED'],120);
       if(o.medical)g+=`<g transform="translate(560 252)"><rect class="amb" x="-12" y="-7" width="24" height="13" rx="2"/><path class="crossr" d="M-2,-5 H2 V-2 H5 V2 H2 V5 H-2 V2 H-5 V-2 H-2 Z"/></g><text class="sl" x="592" y="240" text-anchor="end">AMBULANCE</text>`}
     else if(o.mode==='lowpass'){g+=`<line class="lvl clr" x1="300" y1="${Y(500)}" x2="600" y2="${Y(500)}"/><text class="lvt" x="595" y="${Y(500)-6}" text-anchor="end">NOT BELOW 500 FT</text>`+mv(`M${X(5)},${Y(1600)} L${X(1.6)},${Y(500)} L540,${Y(500)} L600,${Y(800)}`,[560,Y(500),0],Object.assign({dur:8,rep:'indefinite'},sd));
-      g+=`<g transform="translate(520 266)"><rect class="twr" x="-3" y="-34" width="6" height="34"/><path class="twrcab" d="M-9,-34 L9,-34 L7,-44 L-7,-44 Z"/></g><text class="sl" x="532" y="232">TOWER</text>`+banner(590,24,'LOW PASS · GEAR CHECK','goodt','end')}
-    else if(o.ws){g+=`<g class="dd">${[300,330,360].map(x=>`<path d="M${x},150 V196 M${x-5},189 L${x},197 L${x+5},189"/>`).join('')}</g>`+mv(`M${X(5)},${Y(1600)} L${X(2)},${Y(600)} Q${X(1.7)},${Y(520)} ${X(1.3)},${Y(700)} L600,${Y(2400)}`,[600,Y(2400),-28],Object.assign({dur:8,rep:'indefinite'},sd))+`<text class="warnt blink" x="330" y="140" text-anchor="middle">WINDSHEAR · −20 KT AT 600 FT</text>`+banner(590,24,'GOING AROUND · 4000 FT','goodt','end')}
-    else{g+=`<rect class="truckr" x="500" y="255" width="18" height="9" rx="1"/><circle class="lr blink" cx="509" cy="253" r="2"/><text class="warnt blink" x="509" y="244" text-anchor="middle">VEHICLE ON RUNWAY</text>`+mv(`M${X(5)},${Y(1600)} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L600,${Y(1500)}`,[600,Y(1500),-30],Object.assign({dur:8,rep:'indefinite'},sd))+banner(590,24,'GOING AROUND · 4000 FT','goodt','end')}
+      g+=`<g transform="translate(520 266)"><rect class="twr" x="-3" y="-34" width="6" height="34"/><path class="twrcab" d="M-9,-34 L9,-34 L7,-44 L-7,-44 Z"/></g><text class="sl" x="532" y="232">TOWER</text>`+banner(300,24,'LOW PASS · GEAR CHECK','goodt','middle')}
+    else if(o.ws){g+=`<g class="dd">${[300,330,360].map(x=>`<path d="M${x},150 V196 M${x-5},189 L${x},197 L${x+5},189"/>`).join('')}</g>`+mv(`M${X(5)},${Y(1600)} L${X(2)},${Y(600)} Q${X(1.7)},${Y(520)} ${X(1.3)},${Y(700)} L600,${Y(2400)}`,[600,Y(2400),-28],Object.assign({dur:8,rep:'indefinite'},sd))+`<text class="warnt blink" x="330" y="140" text-anchor="middle">WINDSHEAR · −20 KT AT 600 FT</text>`+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
+    else{g+=`<rect class="truckr" x="500" y="255" width="18" height="9" rx="1"/><circle class="lr blink" cx="509" cy="253" r="2"/><text class="warnt blink" x="509" y="244" text-anchor="middle">VEHICLE ON RUNWAY</text>`+mv(`M${X(5)},${Y(1600)} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L600,${Y(1500)}`,[600,Y(1500),-30],Object.assign({dur:8,rep:'indefinite'},sd))+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
     return SVG(g,'Approach profile');
   }
   const L=uniq([o.a,o.b,o.m].filter(Boolean)),lo=Math.max(0,Math.min(...L)-35),hi=Math.max(...L)+30,Y=f=>262-(f-lo)/(hi-lo)*220;
@@ -744,10 +848,10 @@ function sProf(o){
   if(o.mode==='level')g+=mv(`M60,${ya} L590,${ya}`,[320,ya,0],Object.assign({dur:10,rep:'indefinite'},sd));
   if(o.mode==='descent')g+=mv(`M60,${ya} L200,${ya} C320,${ya} 360,${yb} 460,${yb} L580,${yb}`,[575,yb,0],Object.assign({dur:7},sd));
   if(o.mode==='turb'){g+=cb(400,ya+60,ya-70);let d=`M60,${ya}`;for(let x=80;x<=590;x+=20)d+=` L${x},${ya+(x/20%2?-8:8)}`;g+=mv(d,[320,ya,0],Object.assign({dur:10,rep:'indefinite'},sd));
-    for(const x of [140,250,520])g+=`<path class="turbg" d="M${x},${ya-28} q6,-6 12,0 t12,0 t12,0"/>`;g+=banner(590,24,'SEVERE TURBULENCE · UNABLE RVSM','warnt','end')}
+    for(const x of [140,250,520])g+=`<path class="turbg" d="M${x},${ya-28} q6,-6 12,0 t12,0 t12,0"/>`;g+=banner(300,24,'SEVERE TURBULENCE · UNABLE RVSM','warnt','middle')}
   if(o.mode==='tcas'){g+=mv(`M60,${ya} L240,${ya} Q300,${ya} 360,${ya-42} L580,${ya-58}`,[575,ya-58,-4],Object.assign({dur:6},sd))+mv(`M620,${ya+3} L-20,${ya+3}`,[230,ya+3,0],{dur:6,cls:'tr',s:.75,d:ACSL,rot:'0'});
     g+=`<g transform="translate(130 14)"><rect class="vsi" x="0" y="0" width="70" height="120" rx="6"/><rect class="vsired" x="8" y="64" width="8" height="48"/><rect class="vsigrn" x="8" y="10" width="8" height="40"/><path class="vsiarr" d="M38,58 L38,22 M30,32 L38,20 L46,32"/><text class="rat" x="35" y="76" text-anchor="middle">CLIMB</text><text class="sl" x="35" y="100" text-anchor="middle">TCAS RA</text></g>`}
-  if(o.mode==='clear'){g+=pl(90,ya+3,0,'tr',.6,ACSL)+mv(`M60,${ya-58} L260,${ya-58} Q320,${ya-58} 380,${ya} L580,${ya}`,[575,ya,0],Object.assign({dur:6},sd))+banner(590,24,'CLEAR OF CONFLICT','goodt','end')}
+  if(o.mode==='clear'){g+=pl(90,ya+3,0,'tr',.6,ACSL)+mv(`M60,${ya-58} L260,${ya-58} Q320,${ya-58} 380,${ya} L580,${ya}`,[575,ya,0],Object.assign({dur:6},sd))+banner(300,24,'CLEAR OF CONFLICT','goodt','middle')}
   {const fl=o.b||o.a;g+=tag(300,224,[csShort(),o.note||(fl>=290&&fl<=410?'RVSM · FL'+fl:(o.mode==='descent'?'DESCEND FL'+fl:o.mode==='climb'?'CLIMB FL'+fl:'FL'+fl))],110)}
   return SVG(g,'Vertical profile');
 }
@@ -786,7 +890,7 @@ function sMay(o){
   const fi=o.fire!==false;
   if(o.stage===0)g+=pl(330,110,50,'ac',.95)+(fi?fire(318,104):'')+tag(360,140,o.tags||['MAYDAY · ENGINE FIRE','FL180  HDG 140'],150);
   if(o.stage===1)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60"/>`+mv('M330,110 Q420,165 440,95 Q445,35 360,60 L210,160',[210,160,146],{dur:9,s:.95})+tag(420,196,o.tags||['SQUAWK 7700','LEFT HDG 320','DESCEND FL100'],130)+(fi?`<g transform="translate(340 260)">${fire()}</g><text class="warnt" x="352" y="265">FIRE</text>`:'');
-  if(o.stage===2)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60 L210,160"/>`+pl(210,160,146,'ac',.95)+banner(590,24,'FIRE OUT · DISTRESS CANCELLED','goodt','end')+tag(420,196,['RETURNING','TO '+v.DEP.toUpperCase()],140);
+  if(o.stage===2)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60 L210,160"/>`+pl(210,160,146,'ac',.95)+banner(300,24,'FIRE OUT · DISTRESS CANCELLED','goodt','middle')+tag(420,196,['RETURNING','TO '+v.DEP.toUpperCase()],140);
   g+=northArrow(570,60,0);
   return SVG(g,'Distress chart');
 }
@@ -1006,7 +1110,7 @@ function renderFlat(L,o){
   if(L.twr){const [x,y]=L.twr;g+=`<g transform="translate(${x} ${y})"><circle class="fterm" r="5"/><circle class="twrwin" r="2.6"/><text class="ftlab2" x="8" y="3.5">TWR</text></g>`}
   return g;
 }
-let SCENE_FOCUS=null,SCENE_INFO='';
+let SCENE_FOCUS=null,SCENE_INFO='',SCENE_CAP=null;
 function bbox(pts,m=20){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return {x0:Math.min(...xs)-m,y0:Math.min(...ys)-m,x1:Math.max(...xs)+m,y1:Math.max(...ys)+m}}
 function focusZ(b){const w=Math.max(b.x1-b.x0,(b.y1-b.y0)*2,300),s=Math.max(1,Math.min(2,600/w));return {s,cx:(b.x0+b.x1)/2,cy:(b.y0+b.y1)/2}}
 function sGround(o){
@@ -1016,11 +1120,17 @@ function sGround(o){
   const grd=['stand','push','pushed','taxi','hp'].includes(o.ac);
   let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
   SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/8 KT`;
+  {const hpn=P.hp&&P.hp.n?P.hp.n:'',via=P.names.length?' via '+P.names.join(', '):'';
+   const Y={stand:`On stand ${P.std}${o.tug?' · tug connected':''}`,push:`Pushing back from stand ${P.std}`,pushed:'Push-back complete · ready to taxi',
+     taxi:`Taxiing to holding point ${hpn}${via}`,hp:`Holding short of RWY ${P.des}${hpn?' at '+hpn:''}`,lineup:`Lining up on RWY ${P.des}`,
+     roll:`Take-off roll · RWY ${P.des}`,rto:`${o.txt?o.txt.charAt(0)+o.txt.slice(1).toLowerCase()+' · ':'Rejected take-off · '}stopped on RWY ${P.des}${o.trucks?' · fire trucks coming':''}`,
+     remote:'Taxiing to a remote stand'};
+   SCENE_CAP={you:Y[o.ac]||Y.stand,tr:o.traffic==='final'?'A320 on final · lands first':o.traffic==='landing'?'A320 landing now':''}}
   if(!P.ok&&!off)g+=`<text class="warnt" x="300" y="292" text-anchor="middle">NO TAXI ROUTE: EDIT THE LAYOUT</text>`;
   let fp=[];
   if(o.traffic==='final'||o.traffic==='landing'){const s0=sub(P.A,mul(P.u,110)),e0=o.traffic==='final'?sub(P.A,mul(P.u,10)):add(P.A,mul(P.u,P.len*.6));
     g+=mv(`M${s0[0]},${s0[1]} L${e0[0]},${e0[1]}`,[e0[0],e0[1],ua],{dur:o.traffic==='final'?8:9,rep:'indefinite',cls:'tr',s:GS});
-    const lp=add(sub(P.A,mul(P.u,85)),mul([-P.u[1],P.u[0]],-16));g+=`<text class="trt" x="${lp[0].toFixed(0)}" y="${lp[1].toFixed(0)}" text-anchor="middle">A320 ${o.traffic==='final'?'ON FINAL':'LANDING'}</text>`;fp.push(sub(P.A,mul(P.u,70)))}
+    const lp=add(sub(P.A,mul(P.u,85)),mul([-P.u[1],P.u[0]],-16));fp.push(sub(P.A,mul(P.u,70)),lp)}
   const own=(x,y,r)=>pl(x,y,r,'ac',GS);
   const A={
     stand:()=>{fp.push(st.p,pb,add(st.p,mul(dirH(st.h),20)));return own(st.p[0],st.p[1],st.h-90)+(o.tug?(()=>{const t=add(st.p,mul(dirH(st.h),13));return `<rect class="tug" x="${(t[0]-4).toFixed(1)}" y="${(t[1]-3).toFixed(1)}" width="8" height="6" rx="1"/>`})():'')},
@@ -1202,7 +1312,7 @@ function svgPt(svg,x,y){const m=svg.getScreenCTM();if(!m)return [300,150];const 
 function zoomable(svg,key,canPan=()=>true){
   if(!svg)return null;const z=ZS[key]||(ZS[key]={s:1,cx:300,cy:150});svg.classList.add('zoomable');
   const apply=()=>{z.s=Math.max(1,Math.min(10,z.s));const w=600/z.s,h=300/z.s;z.cx=Math.max(w/2-40,Math.min(640-w/2,z.cx));z.cy=Math.max(h/2-30,Math.min(330-h/2,z.cy));
-    svg.setAttribute('viewBox',`${(z.cx-w/2).toFixed(2)} ${(z.cy-h/2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);const lab=svg.closest('figure,.edbox');const l=lab&&lab.querySelector('.zlab');if(l)l.textContent=Math.round(z.s*100)+'%'};
+    svg.setAttribute('viewBox',`${(z.cx-w/2).toFixed(2)} ${(z.cy-h/2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);const lab=svg.closest('figure,.edbox');const l=lab&&lab.querySelector('.zlab');if(l){const t=Math.round(z.s*100)+'%';if(l.textContent!==t){if(l._t){l.classList.add('show');clearTimeout(l._h);l._h=setTimeout(()=>l.classList.remove('show'),900)}l._t=1;l.textContent=t}}};
   const zoomAt=(f,px,py)=>{const ns=Math.max(1,Math.min(10,z.s*f)),k=z.s/ns;z.cx=px-(px-z.cx)*k;z.cy=py-(py-z.cy)*k;z.s=ns;apply()};
   const ptr=new Map();let pan=null,pinch=null;
   svg.addEventListener('wheel',e=>{e.preventDefault();const [x,y]=svgPt(svg,e.clientX,e.clientY);zoomAt(e.deltaY<0?1.2:1/1.2,x,y)},{passive:false});
@@ -1217,10 +1327,10 @@ function zoomable(svg,key,canPan=()=>true){
   svg.addEventListener('dblclick',e=>{if(!canPan(e))return;const [x,y]=svgPt(svg,e.clientX,e.clientY);zoomAt(2,x,y)});
   apply();return {apply,zoomAt,z};
 }
-const zoomCtl=(full=true,foc=false)=>`<div class="zctl"><span class="zlab">100%</span>${foc?'<button class="zb" data-z="focus" aria-label="Focus on my aircraft" title="Focus on my aircraft">◎</button>':''}<button class="zb" data-z="in" aria-label="Zoom in">+</button><button class="zb" data-z="out" aria-label="Zoom out">−</button><button class="zb" data-z="reset" aria-label="Show whole chart">⤢</button>${full?'<button class="zb" data-z="full" aria-label="Full screen">⛶</button>':''}</div>`;
+const zoomCtl=(full=true,foc=false,size=false)=>`<div class="zctl"><span class="zlab">100%</span>${size?`<button class="zb mob" data-z="size" aria-label="Diagram size" title="Diagram size">${S.compact?'▢':'▭'}</button>`:''}${foc?'<button class="zb" data-z="focus" aria-label="Focus on my aircraft" title="Focus on my aircraft">◎</button>':''}<button class="zb" data-z="in" aria-label="Zoom in">+</button><button class="zb" data-z="out" aria-label="Zoom out">−</button><button class="zb" data-z="reset" aria-label="Show whole chart">⤢</button>${full?'<button class="zb" data-z="full" aria-label="Full screen">⛶</button>':''}</div>`;
 function bindZoom(root,svg,key,canPan){const Zo=zoomable(svg,key,canPan);if(!Zo)return;
   root.querySelectorAll('[data-z]').forEach(b=>b.onclick=e=>{e.stopPropagation();const z=Zo.z,a=b.dataset.z;
-    if(a==='focus'&&RD.focus){Object.assign(z,focusZ(RD.focus));S.autoFocus=true;save();Zo.apply()}else if(a==='in')Zo.zoomAt(1.5,z.cx,z.cy);else if(a==='out')Zo.zoomAt(1/1.5,z.cx,z.cy);else if(a==='reset'){z.s=1;z.cx=300;z.cy=150;if(RD.focus){S.autoFocus=false;save()}Zo.apply()}
+    if(a==='size'){S.compact=!S.compact;save();const rl=$('#rleft');if(rl)rl.classList.toggle('compact',S.compact);b.textContent=S.compact?'▢':'▭';return}if(a==='focus'&&RD.focus){Object.assign(z,focusZ(RD.focus));S.autoFocus=true;save();Zo.apply()}else if(a==='in')Zo.zoomAt(1.5,z.cx,z.cy);else if(a==='out')Zo.zoomAt(1/1.5,z.cx,z.cy);else if(a==='reset'){z.s=1;z.cx=300;z.cy=150;if(RD.focus){S.autoFocus=false;save()}Zo.apply()}
     else{const on=!root.classList.contains('full');
       if(on){root._ph=document.createComment('chart');root.parentNode.insertBefore(root._ph,root);document.body.appendChild(root)}else if(root._ph&&root._ph.parentNode){root._ph.parentNode.replaceChild(root,root._ph)}else root.remove();
       root.classList.toggle('full',on);document.body.classList.toggle('noscroll',on);svg.setAttribute('preserveAspectRatio',on?'xMidYMid slice':'xMidYMid meet');b.textContent=on?'✕':'⛶';Zo.apply()}})}
@@ -1233,6 +1343,17 @@ function flightData(sc,i,step){const st=fill(RD.st||'|').split('|');let sq=sc.id
   const o=step.sc||{};if(o.sq)sq=o.sq;let alt='—';
   if(o.t==='ground')alt='GND';else if(o.t==='route')alt=o.lvl||'FL320';else if(o.t==='profile')alt=['final','goaround','lowpass'].includes(o.mode)?'APPROACH':'FL'+pad(o.a,3);else if(o.t==='hold')alt='FL110';else if(o.t==='vector')alt=['4000 FT','4000 FT','ILS'][o.stage];else if(o.t==='radar')alt='FL'+(o.fl||'320');else if(o.t==='mayday')alt=['FL180','FL180 ↓','FL100'][o.stage];
   return {com:st[1]?(+st[1]).toFixed(3):'',stn:st[0],sq,alt,em:/7[5-7]00/.test(sq)}}
+function sceneCap(o){if(!o)return null;if(o.t==='ground')return SCENE_CAP;
+  const lv=o.lvl?o.lvl.replace(/\s*↑/,' · climbing').replace(/\s*↓/,' · descending'):'',fl=x=>x?'FL'+x:'';
+  let y='',t='';
+  if(o.t==='route'){y=o.back?'Back on route after the weather':o.dev?'Deviating around a thunderstorm':o.cell?'Thunderstorm ahead on your route':o.report?'Over the reporting point · give a position report':o.mach?'Cruise · Mach number control':o.pos<.6?'Departure climb on the SID':'En route on the airway';if(lv)y+=' · '+lv;if(o.traffic)t='Crossing traffic at your level'}
+  else if(o.t==='profile'){const a=o.a,b=o.b;y=({climb:`Climbing ${fl(a)} → ${fl(b)}`,expedite:`Expedite climb through ${fl(o.m)} to ${fl(b)}`,level:`Level at ${fl(a)}`,turb:`Severe turbulence at ${fl(a)}`,tcas:`TCAS RA at ${fl(a)} · follow the RA`,clear:`Clear of conflict · returning to ${fl(a)}`,descent:`Descending ${fl(a)} → ${fl(b)}`,final:o.dep?'Final approach on one engine':'Final approach · ILS',goaround:o.ws?'Windshear on final · go-around':'Go-around · climb to 4000 ft',lowpass:'Low pass by the tower for a gear check'})[o.mode]||'Vertical profile';
+    if(o.mode==='tcas')t='Intruder at your level';if(o.mode==='goaround'&&!o.ws)t='Vehicle on the runway';if(o.medical)t='Ambulance waiting'}
+  else if(o.t==='hold')y='Holding at KUVA · expect approach'+(o.fuel?' · fuel is low':'');
+  else if(o.t==='vector')y=['Radar vectors to the ILS','Turning to intercept the localizer','Established on the localizer'][o.stage||0];
+  else if(o.t==='radar')y=({ident:'ATC radar: your label after IDENT',check:'ATC radar: checking your level',wrong:'ATC radar: wrong level shown',primary:'ATC sees only a primary return',lost:'ATC has lost your radar label',nordo:'Radio failure · squawk 7600',hijack:'Unlawful interference · squawk 7500'})[o.mode]||'ATC radar display';
+  else if(o.t==='mayday'){y=o.tags?o.tags[0].replace(/ · /,': ').toLowerCase().replace(/^./,c=>c.toUpperCase()):['Emergency declared','Turning back to the aerodrome','Returning · situation under control'][o.stage||0]}
+  return {you:y,tr:t}}
 function scene(o){if(!o)return '';try{let s=({ground:sGround,route:sRoute,hold:sHold,vector:sVector,profile:sProf,radar:sRadar,mayday:sMay})[o.t](o);if(o.ban)s=s.replace('</svg>',`<g transform="translate(8 270)"><rect class="banb" width="${Math.round(o.ban.length*10.5+22)}" height="24" rx="3"/><text class="bant" x="10" y="17">${esc(o.ban)}</text></g></svg>`);return s}catch(e){return ''}}
 const PHN=['Ground','Take-off','Climb','Cruise','Descent','Approach','Landing'];
 function phaseBar(p){return `<div class="phases" role="list" aria-label="Flight phase">${PHN.map((n,k)=>`<div role="listitem" class="ph ${k<p?'past':''} ${k===p?'now':''}"><span class="dot"></span><span>${n}</span></div>`).join('')}</div>`}
@@ -1257,18 +1378,18 @@ const EMG=[
  {atc:'{CS}, {DEP} Tower, runway {DR}, cleared to land, wind {DW1} degrees 8 knots.',task:'Read back.',need:[['{DRX}','Runway {DR}'],['cleared to land','"cleared to land"']],model:'Runway {DR}, cleared to land, {CS}',sc:P('final',0,0,6,{dep:true,ban:'SINGLE ENGINE LANDING'})}]},
 {id:'emg',cat:'Engine & fire',sev:'MAYDAY',title:'Rejected take-off & engine fire',desc:'Stop on the runway, then a bird strike and engine fire in the climb.',ref:'emg'},
 {id:'e-smoke',cat:'Engine & fire',sev:'MAYDAY',title:'Smoke in the cabin',desc:'Smoke of unknown origin at FL280: descend, divert, prepare to evacuate.',end:'{CS}, {DST} Approach, roger, fire services at the runway, continue approach.',steps:[
- {st:'{DEP} Control|132.4',sit:'FL280. Smoke of unknown origin is filling the passenger cabin.',task:'Declare a distress and request descent and diversion to {DST}.',need:[[MD,'"Mayday" three times'],['smoke','Nature: smoke in the cabin'],['descen','Request descent'],['divert|diversion|{DSTN}','Divert to {DST}']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, smoke in the cabin, FL280, request immediate descent and diversion to {DST}',sc:P('level',280,null,3,{ban:'SMOKE IN CABIN'})},
+ {st:'{DEP} Control|132.4',sit:'FL280. Smoke of unknown origin is filling the passenger cabin.',task:'Declare a distress and request descent and diversion to {DST}.',need:[[MD,'"Mayday" three times'],['smoke','Nature: smoke in the cabin'],['flight level 280','Level FL280'],['descen','Request descent'],['divert|diversion|{DSTN}','Divert to {DST}']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, smoke in the cabin, FL280, request immediate descent and diversion to {DST}',sc:P('level',280,null,3,{ban:'SMOKE IN CABIN'})},
  {atc:'{CS}, roger Mayday. Descend FL100, turn right heading 150, direct {DST} when able.',task:'Read back.',need:[['descend(ing)?( to)? flight level 100','Descend FL100'],['right heading 150','Right heading 150']],model:'Descending FL100, right heading 150, {CS}',sc:P('descent',280,100,4,{ban:'MAYDAY · SMOKE'})},
  {atc:'{CS}, say persons on board and fuel endurance.',sit:'84 persons on board, endurance 3 hours.',task:'Answer.',need:[['84','84 persons'],['3 hours?','3 hours endurance']],model:'{CS}, 84 persons on board, endurance 3 hours',sc:{t:'route',pos:2.8,lvl:'FL100 ↓',p:4,ban:'84 POB · 3 HOURS'}},
  {atc:'{CS}, contact {DST} Approach 124.3.',task:'Read back.',need:[['124\\.3','Frequency 124.3']],model:'124.3, {CS}',sc:{t:'route',pos:3.4,lvl:'FL100',p:5}},
- {st:'{DST} Approach|124.3',sit:'Smoke is still present. You may need to evacuate on the runway.',task:'First call: say you are Mayday, give the problem and request fire services.',need:[['{DSTN} approach','Station "{DST} Approach"'],['mayday','Mayday status'],['smoke','Smoke'],['fire|emergency services','Fire services']],model:'{DST} Approach, {CS}, Mayday, smoke in the cabin, FL100, request fire services, may evacuate on the runway',sc:P('final',0,0,5,{ban:'FIRE SERVICES REQUESTED'})}]},
+ {st:'{DST} Approach|124.3',sit:'Smoke is still present. You may need to evacuate on the runway.',task:'First call: say you are Mayday, give the problem and request fire services.',need:[['{DSTN} approach','Station "{DST} Approach"'],['mayday','Mayday status'],['smoke','Smoke'],['fire|emergency services','Fire services']],model:'{DST} Approach, {CS}, Mayday, smoke in the cabin, request fire services, may evacuate on the runway',sc:P('final',0,0,5,{ban:'FIRE SERVICES REQUESTED'})}]},
 {id:'e-press',cat:'Aircraft systems',sev:'MAYDAY',title:'Cabin depressurisation',desc:'Cabin altitude rising at FL350: emergency descent, then diversion.',end:'{CS}, maintain FL100, contact {DST} Approach 124.3.',steps:[
- {st:'{DEP} Control|132.4',sit:'FL350. Cabin altitude is rising fast, masks on. You start an emergency descent turning right.',task:'Declare a distress and say what you are doing.',need:[[MD,'"Mayday" three times'],['pressur|decompress','Nature: depressurisation'],['emergency descent|descending','Emergency descent']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, cabin depressurisation, emergency descent to FL100',sc:P('descent',350,100,3,{ban:'EMERGENCY DESCENT',note:'MASKS ON'})},
+ {st:'{DEP} Control|132.4',sit:'FL350. Cabin altitude is rising fast, masks on. You start an emergency descent to FL100, turning right.',task:'Declare a distress and say what you are doing.',need:[[MD,'"Mayday" three times'],['pressur|decompress','Nature: depressurisation'],['emergency descent|descending','Emergency descent'],['flight level 100','Descending to FL100']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, cabin depressurisation, emergency descent to FL100',sc:P('descent',350,100,3,{ban:'EMERGENCY DESCENT',note:'MASKS ON'})},
  {atc:'{CS}, roger Mayday. Descend FL100, no reported traffic. Squawk 7700.',task:'Read back.',need:[['descend(ing)?( to)? flight level 100','Descend FL100'],['7700','Squawk 7700']],model:'Descending FL100, squawk 7700, {CS}',sc:P('descent',350,100,4,{ban:'SQUAWK 7700'})},
  {sit:'Level at FL100. Cabin is under control, passengers are fine.',task:'Report reaching and request diversion to {DST}.',need:[['flight level 100','FL100'],['{DSTN}','Destination {DST}'],['request|divert','Request diversion']],model:'{CS}, reaching FL100, request diversion to {DST}',sc:P('level',100,null,4,{note:'CABIN OK'})},
  {atc:'{CS}, cleared direct {DST}, maintain FL100.',task:'Read back.',need:[['direct {DSTN}','Direct {DST}'],['flight level 100','Maintain FL100']],model:'Direct {DST}, maintaining FL100, {CS}',sc:{t:'route',pos:2.5,lvl:'FL100',p:4}}]},
 {id:'e-elec',cat:'Aircraft systems',sev:'MAYDAY',title:'Electrical failure',desc:'Both generators fail: battery power only, transponder switched off.',end:'{CS}, continue heading 180, report field in sight.',steps:[
- {st:'{DEP} Control|132.4',sit:'FL260. Both generators have failed. You are on battery power, about 30 minutes left.',task:'Declare a distress and request diversion to {DST}.',need:[[MD,'"Mayday" three times'],['electric|generator|power','Nature: electrical failure'],['{DSTN}','Divert to {DST}']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, total generator failure, battery power 30 minutes, FL260, request immediate diversion to {DST}',sc:P('level',260,null,3,{ban:'BATTERY 30 MIN'})},
+ {st:'{DEP} Control|132.4',sit:'FL260. Both generators have failed. You are on battery power, about 30 minutes left.',task:'Declare a distress and request diversion to {DST}.',need:[[MD,'"Mayday" three times'],['electric|generator|power','Nature: electrical failure'],['flight level 260','Level FL260'],['{DSTN}','Divert to {DST}']],model:'Mayday, Mayday, Mayday, {DEP} Control, {CS}, total generator failure, battery power 30 minutes, FL260, request immediate diversion to {DST}',sc:P('level',260,null,3,{ban:'BATTERY 30 MIN'})},
  {atc:'{CS}, roger Mayday. Cleared direct {DST}, descend FL100, report field in sight.',task:'Read back.',need:[['direct {DSTN}','Direct {DST}'],['flight level 100','Descend FL100'],['wilco|report(ing)? field','Will report field in sight']],model:'Direct {DST}, descending FL100, wilco, {CS}',sc:{t:'route',pos:2.7,lvl:'FL100 ↓',p:4}},
  {sit:'To save the battery you must switch off the transponder.',task:'Tell ATC.',need:[['transponder|squawk','Transponder'],['off|standby','Switching off']],model:'{CS}, switching off transponder to save battery',sc:{t:'radar',mode:'primary',p:4}},
  {atc:'{CS}, roger, primary contact 30 miles north of {DST}. Turn left heading 180.',task:'Read back.',need:[['left heading 180','Left heading 180']],model:'Left heading 180, {CS}',sc:{t:'radar',mode:'primary',p:5}}]},
@@ -1291,10 +1412,10 @@ const EMG=[
  {atc:'{CS}, identified. Squawk 2341, descend FL150.',task:'Read back.',need:[['2341','Squawk 2341'],['descend(ing)?( to)? flight level 150','Descend FL150']],model:'Squawk 2341, descending FL150, {CS}',sc:P('descent',240,150,4)}]},
 {id:'e-ws',cat:'Weather & birds',sev:'NON-ROUTINE',title:'Wind shear on final',desc:'Airspeed loss at 600 ft: go around and give a wind shear report.',end:'{CS}, hold at KUVA, expect further clearance at 20.',steps:[
  {st:'{DST} Tower|119.1',sit:'2 miles final runway {AR}, 600 feet. Airspeed drops 20 knots and the wind shear warning sounds. You go around.',task:'Tell Tower.',need:[['going around','"Going around"'],['wind ?shear','Reason: wind shear']],model:'{CS}, going around, wind shear',sc:P('goaround',0,0,6,{ws:true})},
- {atc:'{CS}, roger, climb straight ahead 4000 feet. Report the wind shear.',task:'Give the wind shear report.',need:[['600','At 600 feet'],['20','Airspeed loss 20 knots'],['loss|lost|decrease','"Airspeed loss"']],model:'{CS}, climbing straight ahead 4000 feet, wind shear at 600 feet on 2 mile final, airspeed loss 20 knots',sc:P('goaround',0,0,6,{ws:true})},
+ {atc:'{CS}, roger, climb straight ahead 4000 feet. Report the wind shear.',task:'Give the wind shear report.',need:[['4000','Climbing 4000 feet'],['600','At 600 feet'],['20','Airspeed loss 20 knots'],['loss|lost|decrease','"Airspeed loss"']],model:'{CS}, climbing straight ahead 4000 feet, wind shear at 600 feet on 2 mile final, airspeed loss 20 knots',sc:P('goaround',0,0,6,{ws:true})},
  {atc:'{CS}, roger. Say intentions.',task:'Request holding until the weather improves.',need:[['request','"Request"'],['hold','Holding']],model:'{CS}, request holding until the weather improves',sc:{t:'hold',p:5}}]},
 {id:'e-bird',cat:'Weather & birds',sev:'PAN PAN',title:'Bird strike',desc:'Captain\'s windscreen cracked in the climb: urgency call and return.',end:'{CS}, contact {DEP} Tower 118.1.',steps:[
- {st:'{DEP} Departure|125.8',sit:'Passing 3000 feet. Large bird strike: the captain\'s windscreen is cracked, engines normal.',task:'Make an urgency call and request return to {DEP}.',need:[[PP,'"Pan Pan" three times'],['bird','Nature: bird strike'],['windscreen|windshield','Windscreen cracked'],['return|land','Request return']],model:'Pan Pan, Pan Pan, Pan Pan, {DEP} Departure, {CS}, bird strike, captain\'s windscreen cracked, passing 3000 feet, request return to {DEP}',sc:{t:'mayday',stage:0,p:2,fire:false,tags:['PAN PAN · BIRD STRIKE','WINDSCREEN CRACKED']}},
+ {st:'{DEP} Departure|125.8',sit:'Passing 3000 feet. Large bird strike: the captain\'s windscreen is cracked, engines normal.',task:'Make an urgency call and request return to {DEP}.',need:[[PP,'"Pan Pan" three times'],['bird','Nature: bird strike'],['windscreen|windshield','Windscreen cracked'],['3000','Passing 3000 feet'],['return|land','Request return']],model:'Pan Pan, Pan Pan, Pan Pan, {DEP} Departure, {CS}, bird strike, captain\'s windscreen cracked, passing 3000 feet, request return to {DEP}',sc:{t:'mayday',stage:0,p:2,fire:false,tags:['PAN PAN · BIRD STRIKE','WINDSCREEN CRACKED']}},
  {atc:'{CS}, roger Pan Pan. Stop climb at 4000 feet, turn left heading 270.',task:'Read back.',need:[['stop(ping)? climb','Stop climb'],['4000','4000 feet'],['left heading 270','Left heading 270']],model:'Stopping climb 4000 feet, left heading 270, {CS}',sc:{t:'mayday',stage:1,p:2,fire:false,tags:['STOP CLIMB 4000 FT','LEFT HDG 270']}},
  {atc:'{CS}, cleared ILS approach runway {DR}, report established.',task:'Read back.',need:[['cleared( for)? ils( approach)? {DRX}','Cleared ILS runway {DR}'],['wilco|report(ing)? established','Will report established']],model:'Cleared ILS approach runway {DR}, wilco, {CS}',sc:{t:'vector',stage:1,p:5,dep:true}}]},
 {id:'e-fuel',cat:'Fuel',sev:'MAYDAY',title:'Minimum fuel to fuel emergency',desc:'Holding delay grows until your fuel reaches final reserve.',end:'{CS}, cleared ILS approach runway {AR}.',steps:[
@@ -1302,14 +1423,14 @@ const EMG=[
  {atc:'{CS}, roger. Delay not determined due traffic congestion.',sit:'You will now land below final reserve fuel.',task:'Declare a fuel emergency.',need:[[MD,'"Mayday" three times'],['fuel','"Fuel"'],['request|immediate','Request immediate approach']],model:'Mayday, Mayday, Mayday, fuel, {CS}, request immediate approach',sc:{t:'hold',p:5,fuel:true,ban:'MAYDAY FUEL'}},
  {atc:'{CS}, roger Mayday fuel. Leave KUVA heading 210, descend 3000 feet, you are number 1.',task:'Read back.',need:[['heading 210','Heading 210'],['3000','Descend 3000 feet']],model:'Leaving KUVA heading 210, descending 3000 feet, {CS}',sc:{t:'vector',stage:0,p:5}}]},
 {id:'e-med',cat:'Passengers & security',sev:'PAN PAN',title:'Medical emergency',desc:'Passenger with a heart attack: urgency call, diversion, ambulance.',end:'{CS}, {DST} Approach, descend 4000 feet.',steps:[
- {st:'{DEP} Control|132.4',sit:'FL330. A passenger has a heart attack. A doctor on board says he needs a hospital quickly.',task:'Make an urgency call and request diversion to {DST}.',need:[[PP,'"Pan Pan" three times'],['medical|heart','Nature: medical emergency'],['divert|diversion|land','Request diversion'],['{DSTN}','To {DST}']],model:'Pan Pan, Pan Pan, Pan Pan, {DEP} Control, {CS}, medical emergency, passenger with heart attack, FL330, request diversion to {DST}',sc:P('level',330,null,3,{ban:'PAN PAN · MEDICAL'})},
+ {st:'{DEP} Control|132.4',sit:'FL330. A passenger has a heart attack. A doctor on board says he needs a hospital quickly.',task:'Make an urgency call and request diversion to {DST}.',need:[[PP,'"Pan Pan" three times'],['medical|heart','Nature: medical emergency'],['flight level 330','Level FL330'],['divert|diversion|land','Request diversion'],['{DSTN}','To {DST}']],model:'Pan Pan, Pan Pan, Pan Pan, {DEP} Control, {CS}, medical emergency, passenger with heart attack, FL330, request diversion to {DST}',sc:P('level',330,null,3,{ban:'PAN PAN · MEDICAL'})},
  {atc:'{CS}, roger Pan Pan. Cleared direct {DST}, descend FL150.',task:'Read back.',need:[['direct {DSTN}','Direct {DST}'],['flight level 150','Descend FL150']],model:'Direct {DST}, descending FL150, {CS}',sc:{t:'route',pos:2.6,lvl:'FL150 ↓',p:4}},
  {atc:'{CS}, what assistance do you require on arrival?',task:'Request an ambulance with a cardiologist.',need:[['ambulance|medical','Ambulance'],['cardiolog|doctor','Cardiologist'],['arrival|landing','On arrival']],model:'{CS}, request ambulance with a cardiologist on arrival',sc:P('final',0,0,5,{medical:true})},
  {atc:'{CS}, ambulance will meet you at the stand. Contact {DST} Approach 124.3.',task:'Read back.',need:[['124\\.3','Frequency 124.3']],model:'124.3, {CS}',sc:{t:'route',pos:3.5,lvl:'FL150',p:5}}]},
 {id:'e-bomb',cat:'Passengers & security',sev:'MAYDAY',title:'Bomb threat',desc:'Company reports a possible bomb on board: descend, land, remote stand.',end:'{CS}, follow-me car is in position.',steps:[
  {st:'{DEP} Control|132.4',atc:'{CS}, {DEP} Control, your company informs us you may have a bomb on board. Say intentions.',task:'Request immediate descent and landing at {DST}.',need:[['request','"Request"'],['descen|land','Descent and landing'],['{DSTN}','At {DST}']],model:'{CS}, request immediate descent and landing at {DST}',sc:{t:'route',pos:2,lvl:'FL290',p:3,ban:'BOMB THREAT'}},
  {atc:'{CS}, cleared direct {DST}, descend FL100, squawk 7700.',task:'Read back.',need:[['direct {DSTN}','Direct {DST}'],['flight level 100','Descend FL100'],['7700','Squawk 7700']],model:'Direct {DST}, descending FL100, squawk 7700, {CS}',sc:P('descent',290,100,4,{ban:'SQUAWK 7700'})},
- {atc:'{CS}, after landing vacate the runway and taxi to remote stand 20, follow the follow-me car.',task:'Read back.',need:[['remote stand|stand 20','Remote stand 20'],['follow','Follow the follow-me car']],model:'Remote stand 20, following the follow-me car, {CS}',sc:G('remote',6,{arr:true})}]},
+ {atc:'{CS}, after landing vacate the runway and taxi to remote stand 20, follow the follow-me car.',task:'Read back.',need:[['stand 20','Remote stand 20'],['follow','Follow the follow-me car']],model:'Remote stand 20, following the follow-me car, {CS}',sc:G('remote',6,{arr:true})}]},
 {id:'e-hijack',cat:'Passengers & security',sev:'7500',title:'Unlawful interference',desc:'Armed persons in the cockpit: squawk 7500 and forced diversion.',end:'{CS}, your message will be passed to the appropriate authority.',steps:[
  {st:'{DEP} Control|132.4',atc:'{CS}, confirm you are squawking 7500.',sit:'FL310. Armed persons have entered the cockpit. You managed to set 7500 but cannot speak freely.',task:'Confirm.',need:[['affirm','"Affirm"']],model:'Affirm, {CS}',sc:{t:'radar',mode:'hijack',sq:'7500',fl:'310',p:3}},
  {atc:'{CS}, roger. Say your intentions.',sit:'The hijackers demand to land at {DST}.',task:'Report that you are forced to divert.',need:[['forced|request|divert','Forced to divert'],['{DSTN}','To {DST}']],model:'{CS}, we are forced to proceed to {DST}, request descent',sc:{t:'radar',mode:'hijack',sq:'7500',fl:'310',p:3}},
@@ -1339,14 +1460,14 @@ function V(){const d=S.ads[S.dep]||S.ads[0],a=S.ads[S.dst]||S.ads[1]||d,h=r=>(pa
 const fill=t=>{const v=V();return t.replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m)};
 const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const nameRe=n=>reEsc(norm(n).trim()).replace(/\s+/g,'\\s+');
-function rwyRe(r){const m=String(r).toUpperCase().match(/^(\d{1,2})([LRC])?$/);if(!m)return 'runway';const n=+m[1];return 'runway '+(n<10?'0?'+n:n)+(m[2]?' '+{L:'left',R:'right',C:'cent(er|re)'}[m[2]]:'')+'\\b'}
-function fillRe(p){const d=S.ads[S.dep]||S.ads[0],a=S.ads[S.dst]||S.ads[1]||d;let P={};try{P=groundPlan(d)}catch(e){}p=p.replace(/\{TXRX\}/g,P.txrx||'').replace(/\{STDX\}/g,reEsc(norm(String(P.std||'4')).trim())).replace(/\{FACEX\}/g,P.facing||'west');return p.replace(/\{DRX\}/g,rwyRe(d.r)).replace(/\{ARX\}/g,rwyRe(a.r)).replace(/\{DEPN\}/g,nameRe(d.n)).replace(/\{DSTN\}/g,nameRe(a.n))}
+function rwyRe(r){const m=String(r).toUpperCase().match(/^(\d{1,2})([LRC])?$/);if(!m)return 'runway';const n=+m[1];return 'runway '+(n<10?'0?'+n:n)+(m[2]?' '+{L:'left',R:'right',C:'centre'}[m[2]]:'')+'\\b'}
+function fillRe(p){const d=S.ads[S.dep]||S.ads[0],a=S.ads[S.dst]||S.ads[1]||d;let P={};try{P=groundPlan(d)}catch(e){}p=p.replace(/\{HPX\}/g,P.hp&&P.hp.n?nameRx(P.hp.n):'').replace(/\{TXRX\}/g,P.txrx||'').replace(/\{STDX\}/g,reEsc(norm(String(P.std||'4')).trim())).replace(/\{FACEX\}/g,P.facing||'west');return p.replace(/\{DRX\}/g,rwyRe(d.r)).replace(/\{ARX\}/g,rwyRe(a.r)).replace(/\{DEPN\}/g,nameRe(d.n)).replace(/\{DSTN\}/g,nameRe(a.n))}
 const showAtc=t=>S.spoken?spoken(fill(t)):fill(t);
 function csRe(){return new RegExp(norm(csText()).trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')+'\\b')}
 function checkTx(step,raw){
   const n=norm(raw),miss=[],warn=[];
   if(!csRe().test(n)){const first=norm(S.cs.name).trim();miss.push(n.includes(first)?'Complete call sign "'+csText()+'" (it was cut off)':'Your call sign "'+csText()+'"')}
-  step.need.forEach(([p,l])=>{if(!new RegExp(fillRe(p)).test(n))miss.push(fill(l))});
+  step.need.forEach(([p,l])=>{const pp=/^\d+$/.test(p)?'\\b'+p+'\\b':p;if(!new RegExp(fillRe(pp)).test(n))miss.push(fill(l))});
   if(/\b(three|four|five|nine)\b/i.test(raw))warn.push('ICAO digits: tree, fower, fife, niner.');
   if(/\b(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b/i.test(raw))warn.push('Say numbers digit by digit (whole thousands and hundreds excepted).');
   if(/\b(good ?bye|good (morning|afternoon|evening|day)|thank(s| you)|bye)\b/i.test(raw))warn.push('No greetings or thanks on frequency.');
@@ -1408,9 +1529,10 @@ function vRadio(){
   view.innerHTML=`<div class="stack"><div class="row" style="justify-content:space-between"><h2>${esc(sc.title)}</h2><button class="btn ghost" id="quit">Leave flight</button></div>
   ${phaseBar(ph)}
   <div class="rgrid">
-    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';const s=scene(step.sc);return zoomCtl(true,!!SCENE_FOCUS)+(SCENE_INFO?`<div class="sinfo">${esc(SCENE_INFO)}</div>`:'')+s})()}
-      <div class="fdata">${(f=>`<span><i>COM</i>${f.com}</span><span><i>Squawk</i><b class="${f.em?'emsq':''}">${f.sq}</b></span><span><i>Alt</i>${esc(f.alt)}</span><span><i>Phase</i>${PHN[ph]}</span>`)(flightData(sc,RD.i,step))}</div>
-      <figcaption><span>${esc(SCAP[step.sc&&step.sc.t]||'')}${step.sc&&step.sc.t==='ground'?(S.autoFocus===false?' · ◎ follows your aircraft':' · following your aircraft · ⤢ whole chart'):''}</span><button class="linkbtn" id="dsize">${S.compact?'Larger diagram':'Smaller diagram'}</button></figcaption></figure></div>
+    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const s=scene(so),cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
+        return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
+        <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
+        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span></div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure></div>
     <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc)}
     <div class="turn" id="turn">
       ${step.sit?`<div class="sit"><b>Situation</b>${esc(fill(step.sit))}</div>`:''}
@@ -1420,14 +1542,16 @@ function vRadio(){
       <textarea id="tx" placeholder="Type or dictate… Enter to transmit" aria-label="Your transmission" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
       <div class="chips qk">${QW.map(w=>`<button class="chip" data-ins="${esc(w)}">${w==='{CS}'?esc(csText()):esc(w)}</button>`).join('')}</div>
       <div class="row"><button class="btn pri" id="send">Transmit</button><button class="btn mic" id="mic" aria-label="Speak your transmission"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button><button class="btn" id="hint">What to include</button><button class="btn ghost" id="model">Model</button><button class="btn ghost" id="skip">Skip</button></div>
-      <p class="muted" style="font-size:.8rem">Tap <b>Speak</b> and say your transmission; it is sent when you stop talking. If the page cannot use the microphone, use the microphone on your keyboard.</p>
+      <p class="muted" style="font-size:.8rem">Tap <b>Speak</b>, wait for the beep and say your transmission. It is checked when you stop talking. If the microphone mishears a close answer, you are asked to confirm.</p>
       <div id="fb">${RD.fb}</div>
     </div></div>
     ${RD.log.length?`<details class="radio logbox" ${S.logOpen!==false?'open':''} id="logd"><summary class="lbl">Transcript (${RD.log.length})</summary><div class="log" id="log">${logHtml()}</div></details>`:''}</div>
   </div></div>`;
   $('#quit').onclick=leave;
   {const f=$('#sfig'),o=step.sc||{},key='p-'+o.t+(o.t==='ground'?'-'+(adOf(o)||{}).i:'');const stepId=(RD.sc&&RD.sc.id)+'#'+RD.i;if(!ZS[key]||ZS[key].step!==stepId){ZS[key]=(SCENE_FOCUS&&S.autoFocus!==false)?focusZ(SCENE_FOCUS):{s:1,cx:300,cy:150};ZS[key].step=stepId}RD.focus=SCENE_FOCUS;if(f)bindZoom(f,f.querySelector('svg.scene'),key)}
-  $('#dsize').onclick=()=>{S.compact=!S.compact;save();$('#rleft').classList.toggle('compact',S.compact);$('#dsize').textContent=S.compact?'Larger diagram':'Smaller diagram'};
+  {const fg=$('#sfig');const act=(ms=6000)=>{if(!fg)return;fg.classList.add('act');clearTimeout(fg._a);fg._a=setTimeout(()=>{if(!S.infoOpen)fg.classList.remove('act')},ms)};
+   act(8000);if(fg){fg.addEventListener('pointerdown',()=>act());fg.addEventListener('mousemove',()=>act());fg.addEventListener('focusin',()=>act())}
+   $('#ibx').onclick=e=>{e.stopPropagation();S.infoOpen=!S.infoOpen;save();$('#ipanel').hidden=!S.infoOpen;$('#ibx').setAttribute('aria-expanded',S.infoOpen);act()}}
   if($('#logd'))$('#logd').addEventListener('toggle',e=>{S.logOpen=e.target.open;save()});
   const mob=matchMedia('(max-width:720px)').matches;
   if(mob){const tq=$('#tx');tq.addEventListener('focus',()=>$('#rleft').classList.add('typing'));tq.addEventListener('blur',()=>setTimeout(()=>{const r=$('#rleft');if(r)r.classList.remove('typing')},150))}
@@ -1442,10 +1566,24 @@ function vRadio(){
     else{const s=tx.selectionStart??v.length,pre=v.slice(0,s),post=v.slice(s);const ins=(pre&&!/[\s]$/.test(pre)?' ':'')+w+(pre?'':', ');tx.value=pre+ins+post}
     tx.focus({preventScroll:true});const n=tx.value.length;try{tx.setSelectionRange(n,n)}catch(e){}});
   $('#send').onclick=send;
-  $('#mic').onclick=()=>startMic(tx,$('#mic'),$('#fb'),()=>{if(tx.value.trim())send()});
+  $('#mic').onclick=()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c));
   $('#hint').onclick=()=>{$('#fb').innerHTML=`<div class="fb wa">Include: <ul><li>Your full call sign</li>${step.need.map(n=>`<li>${esc(fill(n[1]))}</li>`).join('')}</ul></div>`};
   $('#model').onclick=()=>{RD.tries++;$('#fb').innerHTML=`<div class="fb wa">Model answer:<span class="model">${esc(spoken(fill(step.model)))}</span></div>`};
   $('#skip').onclick=()=>advance(step,'(skipped)',false,['skipped']);
+  function sendVoice(cands){
+    let best=null;cands.forEach(c=>{const r=checkTx(step,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});
+    tx.value=best.c;if(!best.r.miss.length){send();return}
+    const model=spoken(fill(step.model)),sim=wdiff(words(model),words(best.c)).score,need=step.need.length+1;
+    if(sim>=.6||(best.r.miss.length===1&&sim>=.45)){
+      $('#fb').innerHTML=`<div class="vconf" role="alertdialog" aria-label="Confirm what you said"><b>Close. The microphone may have misheard you.</b>
+        <span class="heard">Heard: “${esc(best.c)}”</span><span>Did you say:</span><span class="said">${esc(model)}</span>
+        <div class="row"><button class="btn pri" id="vyes">Yes, I said that</button><button class="btn" id="vno">No, show my mistakes</button><button class="btn ghost" id="vagain">Say it again</button></div></div>`;
+      {const vb=$('.vconf');if(vb&&vb.scrollIntoView)vb.scrollIntoView({block:'end',behavior:RM?'auto':'smooth'})}
+      $('#vyes').onclick=()=>{const led=$('.led.tx');if(led)led.classList.add('on');advance(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[])};
+      $('#vno').onclick=()=>send();
+      $('#vagain').onclick=()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c));
+      return}
+    send()}
   function send(){
     const raw=tx.value.trim();if(!raw)return;
     const led=$('.led.tx');if(led){led.classList.add('on');setTimeout(()=>led.classList.remove('on'),600)}
@@ -1460,18 +1598,44 @@ function vRadio(){
   }
   scrollLog();
 }
+function speechFix(t){return (' '+t+' ').replace(/\b(will|wil|we'll) ?(co|go|coe|ko)\b/gi,'wilco').replace(/\bwill call\b/gi,'wilco')
+  .replace(/\ba ?firm(ed)?\b/gi,'affirm').replace(/\baffirmative\b/gi,'affirm')
+  .replace(/\bq\.? ?(and|n) ?h\b|\bqueue ?(and|n) ?h\b|\bq ?nh\b|\bcue ?n ?h\b/gi,'QNH')
+  .replace(/\b(nina|nyner|niner|nine er|nine-er)\b/gi,'niner').replace(/\b(fife|fyfe)\b/gi,'fife')
+  .replace(/\bsquak|squawks|square k|squaw\b/gi,'squawk').replace(/\bair ?force\b/gi,'Air Force').replace(/\bairforce\b/gi,'Air Force')
+  .replace(/\bmay ?day\b/gi,'Mayday').replace(/\b(pan ?pan|pom pom|pam pam|pon pon)\b/gi,'Pan Pan')
+  .replace(/\bline ?up\b/gi,'line up').replace(/\bdeci ?mal\b/gi,'decimal').replace(/\blocaliser\b/gi,'localizer')
+  .replace(/\broger roger\b/gi,'roger').replace(/\bwind shear\b/gi,'windshear')
+  .replace(/\s+/g,' ').trim()}
+let MIC_AC=null;
+function micBeep(f=880){try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const o=MIC_AC.createOscillator(),g=MIC_AC.createGain();o.frequency.value=f;g.gain.value=.06;o.connect(g);g.connect(MIC_AC.destination);o.start();o.stop(MIC_AC.currentTime+.09)}catch(e){}}
 function startMic(tx,btn,fbEl,done){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition,lab=btn.querySelector('span');
   const fallback=msg=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${msg}</div>`;tx.focus()};
   if(btn.classList.contains('rec')){try{btn._r&&btn._r.stop()}catch(e){}return}
-  if(!SR){fallback('Voice input is not available in this view. Tap the microphone on your phone keyboard and speak, then press Transmit. In Chrome on a computer the Speak button works directly.');return}
-  try{const r=new SR();btn._r=r;r.lang='en-GB';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-    btn.classList.add('rec');lab.textContent='Listening… tap to stop';tx.value='';
-    r.onresult=e=>{let s='';for(const res of e.results)s+=res[0].transcript;tx.value=s};
-    r.onerror=e=>{btn.classList.remove('rec');lab.textContent='Speak';
-      fallback(e.error==='not-allowed'||e.error==='service-not-allowed'?'The microphone is blocked for this page. Use the microphone on your keyboard instead, or open the page in Chrome and allow the microphone.':e.error==='no-speech'?'No speech heard. Tap Speak and talk after the beep.':'Voice input stopped ('+e.error+'). Try again or use the keyboard microphone.')};
-    r.onend=()=>{const was=btn.classList.contains('rec');btn.classList.remove('rec');lab.textContent='Speak';if(was&&tx.value.trim())done&&done()};
-    r.start()}catch(e){btn.classList.remove('rec');lab.textContent='Speak';fallback('Voice input could not start here. Use the microphone on your keyboard instead.')}}
+  if(!SR){fallback('Voice input is not available in this browser. Tap the microphone on your phone keyboard and speak, then press Transmit. In Chrome or Edge the Speak button works directly.');return}
+  if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');
+  try{if(canSpeak()&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel()}catch(e){}
+  try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();if(MIC_AC.state==='suspended')MIC_AC.resume()}catch(e){}
+  let res=null,got=false,heard=false,errShown=false,wd=null,cap=null;
+  const reset=()=>{clearTimeout(wd);clearTimeout(cap);btn.classList.remove('rec');lab.textContent='Speak'};
+  const showErr=m=>{errShown=true;fallback(m)};
+  try{const r=new SR();btn._r=r;r.lang='en-GB';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
+    btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
+    r.onstart=()=>{lab.textContent='Listening…';micBeep(880);clearTimeout(wd);wd=setTimeout(()=>{if(!heard){try{r.abort()}catch(e){}}},9000)};
+    r.onspeechstart=()=>{heard=true};
+    wd=setTimeout(()=>{if(btn.classList.contains('rec')&&lab.textContent==='Starting…'){try{r.abort()}catch(e){}reset();showErr('The microphone did not start. Allow microphone access for this page (lock icon next to the address → Microphone → Allow) and try again, or use the microphone on your keyboard.')}},5000);
+    cap=setTimeout(()=>{try{r.stop()}catch(e){}},20000);
+    r.onresult=e=>{res=e.results;got=true;heard=true;let s='';for(const x of e.results)s+=x[0].transcript+' ';tx.value=speechFix(s)};
+    r.onerror=e=>{reset();got=false;if(e.error==='aborted'&&errShown)return;
+      showErr(e.error==='not-allowed'||e.error==='service-not-allowed'?'The microphone is blocked for this page. Tap the lock icon next to the web address → Microphone → Allow, then reload. Or use the microphone on your keyboard.':e.error==='no-speech'?'No speech heard. Tap Speak, wait for the beep, then talk.':e.error==='network'?'Voice input needs an internet connection. Check your connection or use the keyboard microphone.':e.error==='aborted'?'Nothing was heard. Tap Speak, wait for the beep, then talk.':e.error==='audio-capture'?'No microphone was found on this device. Use the keyboard microphone or type.':'Voice input stopped ('+e.error+'). Try again or use the keyboard microphone.')};
+    r.onend=()=>{const was=btn.classList.contains('rec');reset();
+      if(!was)return;micBeep(620);
+      if(!got||!tx.value.trim()){if(!errShown)showErr('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
+      const cands=[];const best=[...res].map(x=>x[0].transcript);cands.push(best.join(' '));
+      [...res].forEach((x,i)=>{for(let k=1;k<x.length;k++){const c=best.slice();c[i]=x[k].transcript;cands.push(c.join(' '))}});
+      const uniq=[...new Set(cands.map(speechFix).filter(Boolean))];done&&done(uniq.length?uniq:[tx.value])};
+    r.start()}catch(e){reset();fallback('Voice input could not start here. Use the microphone on your keyboard instead.')}}
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
@@ -1565,7 +1729,7 @@ function vPhrases(){
       <textarea id="pin" placeholder="Type the phrase… Enter to check" ${g.done?'disabled':''} autocapitalize="off" spellcheck="false">${esc(g.typed||'')}</textarea>
       ${g.done?`${diffHtml(g.d)}<p class="ans">${esc(PCL[g.i].c)}</p><p class="muted">${esc(it.r)}</p><div class="fb ${g.ok?'ok':'no'}">${Math.round(g.d.score*100)}% · ${g.ok?'Good copy.':'Listen again and compare.'}</div>${nextBtn}`:`<div class="row"><button class="btn pri" id="pcheck">Check</button><button class="btn ghost" id="pshowtxt">Show text</button></div>`}</div>`;
   }else if(m==='speak'){
-    body=`<div class="panel stack">${head}<p class="q">${esc(it.r)}</p><p class="muted" style="font-size:.88rem">Say it in English out loud. To have it checked, use the microphone on your keyboard to dictate it into the box (or type it).</p>
+    body=`<div class="panel stack">${head}<p class="q">${esc(it.r)}</p><p class="muted" style="font-size:.88rem">Say it in English out loud: tap <b>Speak</b>, wait for the beep and talk. You can also dictate with your keyboard microphone or type it.</p>
       <textarea id="pin" placeholder="Dictate or type the English phrase… Enter to check" ${g.done?'disabled':''} autocapitalize="off" spellcheck="false">${esc(g.typed||'')}</textarea>
       ${g.done?`${diffHtml(g.d)}<p class="ans">${esc(PCL[g.i].c)}</p><div class="fb ${g.ok?'ok':'no'}">${Math.round(g.d.score*100)}% · ${g.ok?'Well said.':'Hear the model and try once more.'}</div><div class="row"><button class="btn" id="psay">▶ Hear the model</button><button class="btn ghost" id="pretry">Try again</button><button class="btn pri" id="pnext">Next phrase</button></div>`
         :`<div class="row"><button class="btn pri" id="pcheck">Check</button><button class="btn mic" id="pmic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button><button class="btn ghost" id="pselfok">I said it, show me</button></div><div id="pfb"></div>`}</div>`;
@@ -1617,7 +1781,11 @@ function vPhrases(){
   if($('#pcheck')&&(m==='listen'||m==='speak'))$('#pcheck').onclick=()=>{const v=pin.value.trim();if(!v)return;g.typed=v;g.d=wdiff(words(PCL[g.i].c),words(v));g.ok=g.d.score>=(m==='listen'?.85:.75);g.done=true;learn(g.i,g.ok);vPhrases()};
   if($('#pshowtxt'))$('#pshowtxt').onclick=()=>{g.typed=pin.value;g.d=wdiff(words(PCL[g.i].c),words(pin.value||''));g.ok=false;g.done=true;learn(g.i,false);vPhrases()};
   if($('#pselfok'))$('#pselfok').onclick=()=>{g.typed='';g.d={out:words(PCL[g.i].c).map(w=>({w,t:'ok'})),score:1};g.ok=true;g.done=true;vPhrases();sayP(g.i)};
-  if($('#pmic'))$('#pmic').onclick=()=>startMic(pin,$('#pmic'),$('#pfb'),()=>$('#pcheck').click());
+  if($('#pmic'))$('#pmic').onclick=()=>startMic(pin,$('#pmic'),$('#pfb'),cands=>{const exp=words(PCL[g.i].c);let best=null;cands.forEach(c=>{const sc=wdiff(exp,words(c)).score;if(!best||sc>best.sc)best={c,sc}});pin.value=best.c;
+    if(best.sc>=.75||best.sc<.6){$('#pcheck').click();return}
+    $('#pfb').innerHTML=`<div class="vconf"><b>Close. The microphone may have misheard you.</b><span class="heard">Heard: “${esc(best.c)}”</span><span>Did you say:</span><span class="said">${esc(PCL[g.i].c)}</span><div class="row"><button class="btn pri" id="pvyes">Yes, I said that</button><button class="btn" id="pvno">No, check it</button></div></div>`;
+    $('#pvyes').onclick=()=>{g.typed=PCL[g.i].c;g.d=wdiff(exp,exp);g.ok=true;g.done=true;learn(g.i,true);vPhrases()};
+    $('#pvno').onclick=()=>$('#pcheck').click()});
   if($('#pretry'))$('#pretry').onclick=()=>{g.done=false;g.typed='';vPhrases()};
   $$('[data-b]').forEach(b=>b.onclick=()=>{const j=+b.dataset.b;g.ans.push(g.bank[j]);g.bank.splice(j,1);vPhrases()});
   $$('[data-a]').forEach(b=>b.onclick=()=>{const j=+b.dataset.a;g.bank.push(g.ans[j]);g.ans.splice(j,1);vPhrases()});
@@ -1908,31 +2076,28 @@ function vMatch(){
 /* ---------- home ---------- */
 const MODS=[['radio','Radio practice'],['phrases','Phrases'],['numbers','Numbers'],['letters','Phonetic alphabet'],['metar','METAR'],['taf','TAF'],['match','Match']];
 function vHome(){
-  const all=SCN.flatMap(s=>s.steps.filter(x=>x.atc).map(x=>({x,s})));const ex=pick(all);
-  const st=(ex.x.st||ex.s.steps[0].st).split('|');
-  view.innerHTML=`<div class="stack">
-   <section class="hero"><div><span class="lbl">COMPLANG · ICAO Doc 9432 phraseology</span><h1 style="margin-top:6px">Train your radiotelephony until every readback is complete.</h1>
-     <p class="lead">Fly full radio scenarios against a checking controller, drill ${PHR.length} non-routine phrases, fix your number pronunciation and decode METAR and TAF through games.</p>
-     <div class="row" style="margin-top:16px"><button class="btn pri" data-go="radio">Start radio practice</button><button class="btn" data-go="weather">Decode weather</button></div></div>
-    <div class="stack" style="gap:10px"><figure class="scenebox" id="hfig">${zoomCtl()}${sGround({ac:'hp',traffic:'landing'})}<figcaption><span>Every radio step comes with a live situation diagram</span><span>Ground</span></figcaption></figure>
-    <div class="tx" aria-label="Sample transmission"><div class="freqline"><span>${esc(ex.s.title)}</span><span>${st[1]?(+st[1]).toFixed(3):''}</span></div>
-     <span class="who">ATC</span><span>${esc(spoken(fill(ex.x.atc)))}</span><span class="written">${esc(fill(ex.x.atc))}</span>
-     <span class="who">You</span><span>${esc(spoken(fill(ex.x.model)))}</span></div></div></section>
-   <div class="strips">
-    ${strip('radio','s-dep','R/T','Units 1–8','Radio practice','Four flights: departure, en route, arrival, emergency. Every readback is checked item by item.',[['Flights',SCN.length],['Steps',SCN.reduce((a,s)=>a+s.steps.length,0)]])}
-    ${strip('emergency','s-arr','EMG','Phrases IX–XI','Emergencies','Pick one of '+EMG.length+' emergencies: engine failure, smoke, depressurisation, radio failure, medical, fuel, security and more.',[['Situations',EMG.length],['Types','Mayday · Pan Pan']])}
-    ${strip('phrases','s-misc','PHR','11 sections','Phrases','Ten games: quiz, dictation, listen & choose, speaking, word order, fill the gap, pairs, time attack, flashcards and a searchable list.',[['Phrases',PHR.length],['Games',10]])}
-    ${strip('numbers','s-arr','123','Unit 1','Numbers & letters','Flight levels, frequencies, QNH, squawks, Mach, runways and the ICAO alphabet.',[['Types',NT.length],['Spell types',4]])}
-    ${strip('weather','s-wx','WX','Unit 2','METAR / TAF','Group hunt, decode quiz, pilot questions, TAF timeline and a free decoder.',[['Games',4],['Tool','Decoder']])}
-    ${strip('match','s-misc','ABC','Unit 1','Match','Standard words, Q-codes, weather codes, cloud and trend codes, abbreviations.',[['Sets',Object.keys(SETS).length],['Pairs',Object.values(SETS).reduce((a,s)=>a+s.length,0)]])}
-   </div>
-   <div class="panel"><div class="row" style="justify-content:space-between"><h2>Your progress</h2><span id="rs"><button class="btn ghost" id="reset">Reset progress</button></span></div>
-    <div class="bars" style="margin-top:14px">${MODS.map(([k,l])=>{const s=S.stats[k]||{t:0,r:0},p=s.t?Math.round(s.r/s.t*100):0;return `<div class="bar"><div class="t"><span>${l}</span><span class="mono">${s.t?p+'% of '+s.t:'—'}</span></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>`}).join('')}</div>
-    <h3 style="margin-top:20px">Recent mistakes to review</h3>
-    ${S.mist.length?`<div class="mist"><ul>${S.mist.slice(0,8).map(m=>`<li><span class="lbl">${esc(m.m)}</span> ${esc(m.x)}</li>`).join('')}</ul></div>`:'<p class="muted" style="margin-top:6px">Nothing yet. Mistakes from every game collect here.</p>'}
+  const T=k=>TABS.find(t=>t[0]===k)[2];
+  const stp=k=>{const x=S.stats[k];return x&&x.t?Math.round(x.r/x.t*100)+'%':''};
+  const tiles=[
+    ['radio','Radio','Fly with ATC',SCN.length+' flights','t-dep','Departure, en route, arrival and non-routine flights. Every readback is checked item by item, with a live diagram.'],
+    ['emergency','Mayday','Emergencies',EMG.length+' situations','t-arr','Engine failure, smoke, depressurisation, radio failure, medical, fuel, security and more.'],
+    ['phrases','Phrases','10 games',PHR.length+' phrases','t-misc','Quiz, dictation, listening, speaking, word order, gaps, pairs, time attack and flashcards.'],
+    ['numbers','Numbers','Digits · alphabet',stp('numbers')||'Unit 1','t-arr','Flight levels, frequencies, QNH, squawks, headings and the ICAO alphabet.'],
+    ['weather','Weather','METAR · TAF',stp('metar')||'4 games','t-wx','Group hunt, decode quiz, pilot questions, TAF timeline and a free decoder.'],
+    ['match','Match','Codes · terms',Object.keys(SETS).length+' sets','t-misc','Standard words, Q-codes, weather and cloud codes, abbreviations.']];
+  const tot=MODS.reduce((a,[k])=>a+((S.stats[k]||{}).t||0),0),ok=MODS.reduce((a,[k])=>a+((S.stats[k]||{}).r||0),0);
+  view.innerHTML=`<div class="home">
+   <div class="hhead"><div><span class="lbl">ICAO radiotelephony · Units 1–8</span><h1>Choose your training</h1></div>
+    <button class="btn pri hgo" data-go="radio"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${T('radio')}"/></svg>Start a flight</button></div>
+   <div class="hgrid">${tiles.map(([k,l,sub,st,c,d])=>`<button class="htile ${c}" data-go="${k}"><span class="hic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${T(k)}"/></svg></span><b>${l}</b><span class="hs">${sub}</span><span class="hd">${d}</span><span class="hst">${esc(String(st))}</span></button>`).join('')}</div>
+   <div class="hfoot">
+    <button class="hmini" data-go="library"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>Airports</button>
+    <details class="hprog"><summary><span>Progress</span><b class="mono">${tot?Math.round(ok/tot*100)+'% · '+tot:'—'}</b></summary>
+     <div class="bars" style="margin-top:10px">${MODS.map(([k,l])=>{const s=S.stats[k]||{t:0,r:0},p=s.t?Math.round(s.r/s.t*100):0;return `<div class="bar"><div class="t"><span>${l}</span><span class="mono">${s.t?p+'% of '+s.t:'—'}</span></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>`}).join('')}</div>
+     ${S.mist.length?`<h3 style="margin-top:14px">Recent mistakes</h3><div class="mist"><ul>${S.mist.slice(0,6).map(m=>`<li><span class="lbl">${esc(m.m)}</span> ${esc(m.x)}</li>`).join('')}</ul></div>`:''}
+     <div style="margin-top:10px" id="rs"><button class="btn ghost" id="reset">Reset progress</button></div></details>
    </div></div>`;
   $$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-  {const f=$('#hfig');if(f)bindZoom(f,f.querySelector('svg.scene'),'home')}
   $('#reset').onclick=()=>{$('#rs').innerHTML='<span class="confirm">Clear all scores? <button class="btn" id="ry">Clear</button><button class="btn ghost" id="rn">Keep</button></span>';$('#ry').onclick=()=>{S.stats={};S.mist=[];save();vHome()};$('#rn').onclick=vHome};
 }
 function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls}" data-go="${go}"><div class="cs">${code}<span>${sub}</span></div><div class="bd"><h3>${title}</h3><p>${desc}</p></div><div class="fx">${fx.map(f=>`<div><i>${f[0]}</i><b>${f[1]}</b></div>`).join('')}</div></button>`}
@@ -1941,8 +2106,9 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Overview','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t){closeFull();if(!VIEWS[t])t='home';cur=t;$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+function go(t){closeFull();if(!VIEWS[t])t='home';cur=t;$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 go((location.hash||'').slice(1));
 </script>
 
+<script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
 </html>
