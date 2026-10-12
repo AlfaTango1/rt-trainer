@@ -477,6 +477,26 @@ body.noscroll{overflow:hidden}
 .rleft #sfig .hintap{display:block;position:absolute;right:8px;bottom:8px;z-index:2;font:600 .62rem var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface) 85%,transparent);border-radius:6px;padding:2px 6px;opacity:0;transition:opacity .5s;pointer-events:none}
 .rleft #sfig:not(.act) .hintap{opacity:1}
 @media (prefers-reduced-motion:reduce){.rleft .scap div{transition:none}}
+/* voice result sheet */
+.vsheet{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--bad-bg);border-top:3px solid var(--bad);box-shadow:0 -8px 24px rgba(0,0,0,.25);animation:sheetup .22s ease-out;max-height:75vh;overflow-y:auto}
+.vs-in{max-width:980px;margin:0 auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
+.vs-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.vs-h b{font-family:var(--f-disp);font-size:1.8rem;color:var(--bad);line-height:1}
+.vs-mic{display:inline-flex;align-items:center;gap:6px;background:var(--surface)}
+.vs-said{font-family:var(--f-mono);font-size:1rem;line-height:1.7}
+.vs-said .vs-l{color:var(--muted)}
+.vs-said .ok{color:var(--good);font-weight:600}
+.vs-said .bad{color:var(--bad);text-decoration:line-through;text-decoration-thickness:2px}
+.vs-note{font-size:.85rem;color:var(--bad)}
+.vs-model{font-family:var(--f-mono);font-weight:700;font-size:1.08rem;color:var(--ink)}
+.vs-sub{color:var(--muted);font-size:.95rem}
+.vs-hint{font-size:.78rem;color:var(--muted)}
+.vs-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.vs-btns .btn{padding:13px 10px;font-family:var(--f-disp);font-weight:700;font-size:1.15rem;border-radius:12px;border-width:2px}
+.vs-ok{background:var(--surface);border-color:var(--line)}
+.vs-go{background:var(--bad);border-color:var(--bad);color:#fff}
+@keyframes sheetup{from{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){.vsheet{animation:none}}
 /* voice confirm */
 .vconf{border:1px solid var(--blue);background:color-mix(in srgb,var(--blue) 9%,var(--surface));border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;animation:rise .25s ease-out}
 .vconf{scroll-margin-bottom:90px}
@@ -1482,7 +1502,7 @@ function checkTx(step,raw){
   return {miss,warn};
 }
 function vRadio(){
-  closeFull();
+  closeFull();closeSheet();
   if(RD.sc&&RD.from==='emergency'&&cur==='radio'){RD.sc=null}
   if(!RD.sc){
     view.innerHTML=`<div class="stack">
@@ -1580,17 +1600,12 @@ function vRadio(){
   function sendVoice(cands){
     let best=null;cands.forEach(c=>{const r=checkTx(step,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});
     tx.value=best.c;if(!best.r.miss.length){send();return}
-    const model=spoken(fill(step.model)),sim=wdiff(words(model),words(best.c)).score,need=step.need.length+1;
-    if(sim>=.6||(best.r.miss.length===1&&sim>=.45)){
-      $('#fb').innerHTML=`<div class="vconf" role="alertdialog" aria-label="Confirm what you said"><b>Close. The microphone may have misheard you.</b>
-        <span class="heard">Heard: “${esc(best.c)}”</span><span>Did you say:</span><span class="said">${esc(model)}</span>
-        <div class="row"><button class="btn pri" id="vyes">Yes, I said that</button><button class="btn" id="vno">No, show my mistakes</button><button class="btn ghost" id="vagain">Say it again</button></div></div>`;
-      {const vb=$('.vconf');if(vb&&vb.scrollIntoView)vb.scrollIntoView({block:'end',behavior:RM?'auto':'smooth'})}
-      $('#vyes').onclick=()=>{const led=$('.led.tx');if(led)led.classList.add('on');advance(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[])};
-      $('#vno').onclick=()=>send();
-      $('#vagain').onclick=()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c));
-      return}
-    send()}
+    if(RD.tries===0){RD.firstMiss=best.r.miss;RD.firstSaid=best.c}
+    const model=spoken(fill(step.model));
+    voiceSheet({heard:best.c,model,note:'Missing: '+best.r.miss.join(' · '),
+      onAccept:()=>advance(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[]),
+      onContinue:()=>advance(step,best.c,false,best.r.miss,[]),
+      onAgain:()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c))})}
   function send(){
     const raw=tx.value.trim();if(!raw)return;
     const led=$('.led.tx');if(led){led.classList.add('on');setTimeout(()=>led.classList.remove('on'),600)}
@@ -1666,6 +1681,20 @@ function nativeMic(tx,btn,fbEl,done){
     }catch(e){reset();if(btn._stop)return;const t=String(e&&e.message||e);
       msg(/no match|no speech|didn.t understand|timeout|\b[67]\b/i.test(t)?'Nothing was heard. Tap Speak, wait for the beep, then talk clearly.':/busy|\b8\b/i.test(t)?'The recognizer is busy. Wait a second and tap Speak again.':/network|server|\b[124]\b/i.test(t)?'Voice input needs an internet connection. Check your connection and try again.':'Voice input stopped ('+esc(t)+'). Try again or type your answer.')}
   })()}
+function closeSheet(){document.querySelectorAll('.vsheet').forEach(x=>x.remove())}
+function voiceSheet(o){closeSheet();
+  const df=wdiff(words(o.model),words(o.heard||''));
+  const said=df.out.filter(x=>x.t!=='miss').map(x=>`<span class="${x.t==='ok'?'ok':'bad'}">${esc(x.w)}</span>`).join(' ');
+  const d=document.createElement('div');d.className='vsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Check what you said');
+  d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Say again</b><button class="btn vs-mic" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Speak again</button></div>
+    <p class="vs-said"><span class="vs-l">You said:</span> ${said||'<i>nothing recognised</i>'}</p>
+    ${o.note?`<p class="vs-note">${esc(o.note)}</p>`:''}
+    <p class="vs-model">${esc(o.model)}</p>${o.sub?`<p class="vs-sub">${esc(o.sub)}</p>`:''}
+    <p class="vs-hint">The microphone often mishears. If you said it correctly, tap <b>Count as correct</b>.</p>
+    <div class="vs-btns"><button class="btn vs-ok" type="button">Count as correct</button><button class="btn vs-go" type="button">Continue</button></div></div>`;
+  document.body.appendChild(d);
+  const fire=f=>()=>{closeSheet();f&&f()};
+  d.querySelector('.vs-ok').onclick=fire(o.onAccept);d.querySelector('.vs-go').onclick=fire(o.onContinue);d.querySelector('.vs-mic').onclick=fire(o.onAgain);}
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
@@ -1731,7 +1760,7 @@ function newG(){
     g.opts=shuffle([c.w,...shuffle(oth).slice(0,3)])}
   PH.g=g;
 }
-function vPhrases(){
+function vPhrases(){closeSheet();
   if(PH.ta&&PH.ta.timer&&PH.mode!=='time'){clearInterval(PH.ta.timer);PH.ta=null}
   if(!PH.g&&!['list','time'].includes(PH.mode))newG();
   const P=pool(false),learned=P.filter(i=>(S.pm[i]||0)>=3).length,pct=P.length?Math.round(learned/P.length*100):0;
@@ -1812,10 +1841,11 @@ function vPhrases(){
   if($('#pshowtxt'))$('#pshowtxt').onclick=()=>{g.typed=pin.value;g.d=wdiff(words(PCL[g.i].c),words(pin.value||''));g.ok=false;g.done=true;learn(g.i,false);vPhrases()};
   if($('#pselfok'))$('#pselfok').onclick=()=>{g.typed='';g.d={out:words(PCL[g.i].c).map(w=>({w,t:'ok'})),score:1};g.ok=true;g.done=true;vPhrases();sayP(g.i)};
   if($('#pmic'))$('#pmic').onclick=()=>startMic(pin,$('#pmic'),$('#pfb'),cands=>{const exp=words(PCL[g.i].c);let best=null;cands.forEach(c=>{const sc=wdiff(exp,words(c)).score;if(!best||sc>best.sc)best={c,sc}});pin.value=best.c;
-    if(best.sc>=.75||best.sc<.6){$('#pcheck').click();return}
-    $('#pfb').innerHTML=`<div class="vconf"><b>Close. The microphone may have misheard you.</b><span class="heard">Heard: “${esc(best.c)}”</span><span>Did you say:</span><span class="said">${esc(PCL[g.i].c)}</span><div class="row"><button class="btn pri" id="pvyes">Yes, I said that</button><button class="btn" id="pvno">No, check it</button></div></div>`;
-    $('#pvyes').onclick=()=>{g.typed=PCL[g.i].c;g.d=wdiff(exp,exp);g.ok=true;g.done=true;learn(g.i,true);vPhrases()};
-    $('#pvno').onclick=()=>$('#pcheck').click()});
+    if(best.sc>=.75){$('#pcheck').click();return}
+    voiceSheet({heard:best.c,model:PCL[g.i].c,sub:PHR[g.i].r,
+      onAccept:()=>{g.typed=PCL[g.i].c;g.d=wdiff(exp,exp);g.ok=true;g.done=true;learn(g.i,true);vPhrases()},
+      onContinue:()=>{learn(g.i,false);next()},
+      onAgain:()=>{const b=$('#pmic');if(b)b.click()}})});
   if($('#pretry'))$('#pretry').onclick=()=>{g.done=false;g.typed='';vPhrases()};
   $$('[data-b]').forEach(b=>b.onclick=()=>{const j=+b.dataset.b;g.ans.push(g.bank[j]);g.bank.splice(j,1);vPhrases()});
   $$('[data-a]').forEach(b=>b.onclick=()=>{const j=+b.dataset.a;g.bank.push(g.ans[j]);g.ans.splice(j,1);vPhrases()});
@@ -2136,10 +2166,10 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Overview','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t,pop){closeFull();if(!VIEWS[t])t='home';const prev=cur;cur=t;
+function go(t,pop){closeFull();closeSheet();if(!VIEWS[t])t='home';const prev=cur;cur=t;
   if(t!=='phrases'&&PH.ta&&PH.ta.timer){clearInterval(PH.ta.timer);PH.ta=null}
   document.querySelectorAll('.mic.rec').forEach(b=>{try{b._r&&b._r.abort()}catch(e){}try{NATIVE&&NATIVE.SR&&b._stop!==undefined&&(b._stop=true,NATIVE.SR.stop())}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
-addEventListener('popstate',()=>{const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
+addEventListener('popstate',()=>{if(document.querySelector('.vsheet')){closeSheet();try{history.pushState(null,'','#'+cur)}catch(e){}return}const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
 go((location.hash||'').slice(1));
 </script>
 
