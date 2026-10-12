@@ -7,22 +7,17 @@ Aviation English training app (ICAO radiotelephony, COMPLANG Units 1–8): radio
 | File | Purpose |
 |---|---|
 | `index.html` | The whole app |
-| `manifest.json` | App name, colours and icons (makes it installable) |
-| `sw.js` | Offline support (service worker) |
-| `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `icon.svg` | App icons |
+| `manifest.json`, `sw.js` | Install as a web app, offline support |
+| `icon-*.png`, `icon.svg` | App icons |
+| `debug.keystore` | Signing key for the Android APK (keeps updates installable) |
+| `.github/workflows/build-apk.yml` | Builds the Android APK on GitHub (Actions tab) |
 | `.nojekyll` | Tells GitHub Pages to publish files as they are |
 
-## Website (GitHub Pages)
+## Android APK
 
-Settings → Pages → Deploy from a branch → `main` / `(root)` → Save.
-Site: `https://<username>.github.io/rt-trainer/`
+Actions → **Build APK** → **Run workflow**. About 4–6 minutes later the APK is under **Releases** (`RT-Trainer.apk`).
+The workflow also runs by itself every time `index.html` changes.
 
-## Android app
+## Website
 
-Build it with https://www.pwabuilder.com from the site address.
-
-## Updating
-
-1. Upload the new `index.html`.
-2. Open `sw.js` → edit (pencil) → change `rt-v1` to `rt-v2` (next time `rt-v3` …) → Commit.
-   This makes installed apps download the new version.
+Settings → Pages → Deploy from a branch → `main` / `(root)`.

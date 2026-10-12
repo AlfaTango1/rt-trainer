@@ -586,12 +586,17 @@ function spoken(t){return t
   .replace(/\bA(\d{3})\b/g,(m,n)=>'A '+dg(n))
   .replace(/\d+(?:\.\d+)?/g,m=>dg(m))}
 let VOICE=null;
-function canSpeak(){try{return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance)}catch(e){return false}}
+/* Android app (Capacitor): native speech recognition and text-to-speech */
+const NATIVE=(()=>{try{const C=window.Capacitor;if(!C)return null;const nat=C.isNativePlatform?C.isNativePlatform():!!C.nativePromise;if(!nat)return null;
+  const get=n=>(C.Plugins&&C.Plugins[n])||(C.nativePromise?new Proxy({},{get:(_,m)=>o=>C.nativePromise(n,String(m),o||{})}):null);
+  return {SR:get('SpeechRecognition'),TTS:get('TextToSpeech')}}catch(e){return null}})();
+function canSpeak(){if(NATIVE&&NATIVE.TTS)return true;try{return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance)}catch(e){return false}}
 function loadVoices(){try{const v=speechSynthesis.getVoices();VOICE=v.find(x=>/en[-_]GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
 try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged',loadVoices)}}catch(e){}
 const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
 const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>WORDS.includes(w)?w[0]+w.slice(1).toLowerCase():w);
 function say(text,cb,rate){text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
+  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;T.speak({text,lang:'en-GB',rate:rate||.92,pitch:1,volume:1}).catch(()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
   try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
     const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||.92;
     let started=false;u.onstart=()=>{started=true;cb&&cb(true)};u.onerror=()=>{if(!started)cb&&cb(false)};
@@ -1615,6 +1620,7 @@ function startMic(tx,btn,fbEl,done){
   if(btn.classList.contains('rec')){try{btn._r&&btn._r.stop()}catch(e){}return}
   if(!SR){fallback('Voice input is not available in this browser. Tap the microphone on your phone keyboard and speak, then press Transmit. In Chrome or Edge the Speak button works directly.');return}
   if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');
+  if(NATIVE&&NATIVE.SR){nativeMic(tx,btn,fbEl,done);return}
   try{if(canSpeak()&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel()}catch(e){}
   try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();if(MIC_AC.state==='suspended')MIC_AC.resume()}catch(e){}
   let res=null,got=false,heard=false,errShown=false,wd=null,cap=null;
@@ -1636,6 +1642,28 @@ function startMic(tx,btn,fbEl,done){
       [...res].forEach((x,i)=>{for(let k=1;k<x.length;k++){const c=best.slice();c[i]=x[k].transcript;cands.push(c.join(' '))}});
       const uniq=[...new Set(cands.map(speechFix).filter(Boolean))];done&&done(uniq.length?uniq:[tx.value])};
     r.start()}catch(e){reset();fallback('Voice input could not start here. Use the microphone on your keyboard instead.')}}
+function nativeMic(tx,btn,fbEl,done){
+  const R=NATIVE.SR,lab=btn.querySelector('span'),msg=m=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${m}</div>`};
+  if(btn.classList.contains('rec')){btn._stop=true;Promise.resolve(R.stop()).catch(()=>{});return}
+  if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');
+  const reset=()=>{clearTimeout(btn._cap);btn.classList.remove('rec');lab.textContent='Speak'};
+  try{NATIVE.TTS&&NATIVE.TTS.stop&&Promise.resolve(NATIVE.TTS.stop()).catch(()=>{})}catch(e){}
+  btn._stop=false;btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
+  (async()=>{
+    try{let p=await R.checkPermissions().catch(()=>null);
+      if(!p||p.speechRecognition!=='granted'){p=await R.requestPermissions().catch(()=>null);
+        if(!p||p.speechRecognition!=='granted'){reset();msg('Microphone permission is off. Open phone Settings → Apps → RT Trainer → Permissions → Microphone → Allow.');return}}
+      const av=await R.available().catch(()=>({available:false}));
+      if(!av||!av.available){reset();msg('Speech recognition is not available on this phone. Install or update the Google app (it provides voice typing), then try again.');return}
+      lab.textContent='Listening…';micBeep(880);btn._cap=setTimeout(()=>{Promise.resolve(R.stop()).catch(()=>{})},20000);
+      const r=await R.start({language:'en-GB',maxResults:5,partialResults:false,popup:false,prompt:'Say your transmission'});
+      reset();micBeep(620);
+      const m=(r&&r.matches||[]).map(speechFix).filter(Boolean);
+      if(!m.length){msg('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
+      tx.value=m[0];done&&done([...new Set(m)]);
+    }catch(e){reset();if(btn._stop)return;const t=String(e&&e.message||e);
+      msg(/no match|no speech|didn.t understand|timeout|\b[67]\b/i.test(t)?'Nothing was heard. Tap Speak, wait for the beep, then talk clearly.':/busy|\b8\b/i.test(t)?'The recognizer is busy. Wait a second and tap Speak again.':/network|server|\b[124]\b/i.test(t)?'Voice input needs an internet connection. Check your connection and try again.':'Voice input stopped ('+esc(t)+'). Try again or type your answer.')}
+  })()}
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
@@ -2106,9 +2134,10 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Overview','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t){closeFull();if(!VIEWS[t])t='home';cur=t;$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+function go(t,pop){closeFull();if(!VIEWS[t])t='home';const prev=cur;cur=t;$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+addEventListener('popstate',()=>{const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
 go((location.hash||'').slice(1));
 </script>
 
-<script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
+<script>if("serviceWorker" in navigator&&!window.Capacitor&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
 </html>
