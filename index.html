@@ -1708,22 +1708,24 @@ function vRadio(){
     if(w==='{CS}'){tx.value=v.trim()?v.replace(/[\s,]*$/,'')+', '+csText():csText()+', '}
     else{const s=tx.selectionStart??v.length,pre=v.slice(0,s),post=v.slice(s);const ins=(pre&&!/[\s]$/.test(pre)?' ':'')+w+(pre?'':', ');tx.value=pre+ins+post}
     tx.focus({preventScroll:true});const n=tx.value.length;try{tx.setSelectionRange(n,n)}catch(e){}});
-  $('#send').onclick=send;
+  $('#send').onclick=()=>send();
+  tx.addEventListener('input',e=>{if(e.inputType)delete tx.dataset.voice});
   $('#mic').onclick=()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c));
   $('#hint').onclick=()=>{$('#fb').innerHTML=`<div class="fb wa">Include: <ul><li>Your full call sign</li>${step.need.map(n=>`<li>${esc(fill(n[1]))}</li>`).join('')}</ul></div>`};
   $('#model').onclick=()=>{RD.tries++;$('#fb').innerHTML=`<div class="fb wa">Model answer:<span class="model">${esc(spoken(fill(step.model)))}</span></div>`};
   $('#skip').onclick=()=>advance(step,'(skipped)',false,['skipped']);
   function sendVoice(cands){
     let best=null;cands.forEach(c=>{const r=checkTx(step,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});
-    tx.value=best.c;if(!best.r.miss.length){send();return}
+    tx.value=best.c;tx.dataset.voice='1';if(!best.r.miss.length){send(true);return}
     if(RD.tries===0){RD.firstMiss=best.r.miss;RD.firstSaid=best.c}
     const model=spoken(fill(step.model));
     voiceSheet({heard:best.c,model,note:'Missing: '+best.r.miss.join(' · '),
       onAccept:()=>advance(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[]),
       onContinue:()=>advance(step,best.c,false,best.r.miss,[]),
       onAgain:()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c))})}
-  function send(){
+  function send(force){
     const raw=tx.value.trim();if(!raw)return;
+    if(force!==true&&tx.dataset.voice==='1'){sendVoice([raw]);return}
     const led=$('.led.tx');if(led){led.classList.add('on');setTimeout(()=>led.classList.remove('on'),600)}
     const {miss,warn}=checkTx(step,raw);
     if(!miss.length){{const v0=cur,sc0=RD.sc,i0=RD.i;setTimeout(()=>{if(cur===v0&&RD.sc===sc0&&RD.i===i0)advance(step,raw,RD.tries===0,RD.firstMiss||[],warn)},RM?0:350)}}
@@ -1736,7 +1738,11 @@ function vRadio(){
   }
   scrollLog();
 }
-function speechFix(t){return (' '+t+' ').replace(/\b(will|wil|we'll) ?(co|go|coe|ko)\b/gi,'wilco').replace(/\bwill call\b/gi,'wilco')
+const NUMW='(?:zero|one|two|three|tree|four|fower|five|fife|six|seven|eight|nine|niner|\\d+)';
+function numFix(t){let prev;const re1=new RegExp('\\b('+NUMW+')\\s+(?:to|too)\\b(?=\\s+(?:'+NUMW+'|decimal|point)\\b)','gi'),re2=new RegExp('\\b('+NUMW+')\\s+(?:for|fore)\\b(?=\\s+(?:'+NUMW+'|decimal|point)\\b)','gi'),
+  re3=new RegExp('\\b(decimal|point)\\s+(?:to|too)\\b','gi'),re4=new RegExp('\\b(decimal|point)\\s+(?:for|fore)\\b','gi'),re5=new RegExp('\\b('+NUMW+')\\s+(?:to|too)\\s*$','gi'),re6=new RegExp('\\b(?:won)\\b(?=\\s+'+NUMW+'\\b)','gi'),re7=new RegExp('\\b('+NUMW+')\\s+(?:for|fore)\\s*$','gi'),re8=new RegExp('\\b('+NUMW+'|decimal|point)\\s+won\\b','gi');
+  do{prev=t;t=t.replace(re1,'$1 two').replace(re2,'$1 four').replace(re3,'$1 two').replace(re4,'$1 four').replace(re5,'$1 two').replace(re6,'one').replace(re7,'$1 four').replace(re8,'$1 one')}while(t!==prev);return t}
+function speechFix(t){return numFix(' '+t+' ').replace(/\b(will|wil|we'll) ?(co|go|coe|ko)\b/gi,'wilco').replace(/\bwill call\b/gi,'wilco')
   .replace(/\ba ?firm(ed)?\b/gi,'affirm').replace(/\baffirmative\b/gi,'affirm')
   .replace(/\bq\.? ?(and|n) ?h\b|\bqueue ?(and|n) ?h\b|\bq ?nh\b|\bcue ?n ?h\b/gi,'QNH')
   .replace(/\b(nina|nyner|niner|nine er|nine-er)\b/gi,'niner').replace(/\b(fife|fyfe)\b/gi,'fife')
@@ -1751,7 +1757,7 @@ const MIC_MAX_MS=60000;
 /* join recognised pieces; Android Chrome sometimes repeats earlier text in later results */
 function joinSpeech(acc,t){t=(t||'').trim();if(!t)return acc;if(!acc)return t;const A=acc.toLowerCase(),T=t.toLowerCase();
   if(T.startsWith(A))return t;if(A.endsWith(T)||A.includes(T))return acc;return acc+' '+t}
-function micUI(btn){const lab=btn.querySelector('span');if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');return lab}
+function micUI(btn){clearTimeout(btn._wd2);const lab=btn.querySelector('span');if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');return lab}
 /* Tap once to start recording, tap again to stop. Recording never stops by itself (except after 60 s). */
 function startMic(tx,btn,fbEl,done){
   if(NATIVE&&NATIVE.SR){nativeMic(tx,btn,fbEl,done);return}
@@ -1770,7 +1776,7 @@ function startMic(tx,btn,fbEl,done){
       const text=(acc+' '+interim).trim();
       if(!text){if(!errShown)showErr('Nothing was heard. Tap Speak, talk, then tap again to stop.');return}
       const cands=[speechFix(text)];alts.forEach(a=>{const c=speechFix(text.replace(a.top,a.alt));if(c)cands.push(c)});
-      tx.value=cands[0];if(tx.isConnected)done&&done([...new Set(cands)])},700)};
+      tx.value=cands[0];tx.dataset.voice='1';if(tx.isConnected)done&&done([...new Set(cands)])},700)};
   btn._finish=finish;
   const begin=()=>{r=new SR();btn._r=r;r.lang='en-GB';r.interimResults=true;r.continuous=true;r.maxAlternatives=5;
     r.onstart=()=>{if(!started){started=true;lab.textContent='Stop';micBeep(880)}};
@@ -1799,8 +1805,8 @@ function nativeMic(tx,btn,fbEl,done){
   const finalize=()=>{reset();micBeep(620);
     if(fatal)return;if(!acc.trim()){msg('Nothing was heard. Tap Speak, talk, then tap again to stop.');return}
     const cands=[speechFix(acc)];segs.forEach(m=>m.slice(1).forEach(a=>{const c=speechFix(acc.replace(m[0],a));if(c)cands.push(c)}));
-    tx.value=cands[0];if(tx.isConnected)done&&done([...new Set(cands)].slice(0,12))};
-  const stop=async()=>{if(stopping)return;stopping=true;lab.textContent='Checking…';try{await R.stop()}catch(e){}
+    tx.value=cands[0];tx.dataset.voice='1';if(tx.isConnected)done&&done([...new Set(cands)].slice(0,12))};
+  const stop=async()=>{if(stopping)return;stopping=true;lab.textContent='Checking…';try{await Promise.race([Promise.resolve(R.stop()).catch(()=>{}),new Promise(r=>setTimeout(r,1200))])}catch(e){}
     await Promise.race([pending||Promise.resolve(),new Promise(r=>setTimeout(r,1800))]);finalize()};
   btn._finish=stop;
   /* one utterance at a time; when the phone stops after a silence, listen again until the user taps Stop */
@@ -1983,8 +1989,10 @@ function vPhrases(){closeSheet();
   if($('#pagain'))$('#pagain').onclick=()=>{learn(g.i,false);next()};
   $$('.opt[data-k]').forEach(b=>b.onclick=()=>{const j=+b.dataset.k;g.pick=j;learn(g.i,g.opts[j]===g.i);vPhrases();if(m==='hear')sayP(g.i)});
   const pin=$('#pin');
+  if(pin)pin.addEventListener('input',e=>{if(e.inputType)delete pin.dataset.voice});
   if(pin&&!g.done){pin.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#pcheck').click()}}}
-  if($('#pcheck')&&(m==='listen'||m==='speak'))$('#pcheck').onclick=()=>{const v=pin.value.trim();if(!v)return;g.typed=v;g.d=wdiff(words(PCL[g.i].c),words(v));g.ok=g.d.score>=(m==='listen'?.85:.75);g.done=true;learn(g.i,g.ok);vPhrases()};
+  if($('#pcheck')&&(m==='listen'||m==='speak'))$('#pcheck').onclick=e=>{const v=pin.value.trim();if(!v)return;
+    if(m==='speak'&&pin.dataset.voice==='1'&&!(e&&e.isTrusted===false&&pin._auto)){const exp=words(PCL[g.i].c),sc=wdiff(exp,words(v)).score;if(sc<.75){voiceSheet({heard:v,model:PCL[g.i].c,sub:PHR[g.i].r,onAccept:()=>{g.typed=PCL[g.i].c;g.d=wdiff(exp,exp);g.ok=true;g.done=true;learn(g.i,true);vPhrases()},onContinue:()=>{learn(g.i,false);next()},onAgain:()=>{const b=$('#pmic');if(b)b.click()}});return}}g.typed=v;g.d=wdiff(words(PCL[g.i].c),words(v));g.ok=g.d.score>=(m==='listen'?.85:.75);g.done=true;learn(g.i,g.ok);vPhrases()};
   if($('#pshowtxt'))$('#pshowtxt').onclick=()=>{g.typed=pin.value;g.d=wdiff(words(PCL[g.i].c),words(pin.value||''));g.ok=false;g.done=true;learn(g.i,false);vPhrases()};
   if($('#pselfok'))$('#pselfok').onclick=()=>{g.typed='';g.d={out:words(PCL[g.i].c).map(w=>({w,t:'ok'})),score:1};g.ok=true;g.done=true;vPhrases();sayP(g.i)};
   if($('#pmic'))$('#pmic').onclick=()=>startMic(pin,$('#pmic'),$('#pfb'),cands=>{const exp=words(PCL[g.i].c);let best=null;cands.forEach(c=>{const sc=wdiff(exp,words(c)).score;if(!best||sc>best.sc)best={c,sc}});pin.value=best.c;
