@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>ICAO RT Trainer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png" type="image/png">
@@ -32,6 +32,7 @@
   --strip:#1C2D21; --shld:#2E373E;
   --grass:#16241A; --grass2:#1B2B1F; --conc:#29323A; --term:#46525C; --twrwin:#5D8FA6; --twyc:#30393F; --asph:#20262C; --mark:#C9D1D6; --yel:#C9A20E; --parked:#56626B; --chart:#121A16; --terr:#3B3426; --terr2:#4A4130; --sky1:#0C1F33; --sky2:#1A2B3C; --cloud:#3A4A58;
   --scene:#13211A; --sky:#0F1B26; --rwy:#2E373E; --rwym:#C7D0D6; --twy:#3B4851; --apron:#22303A; --tr:#F2A93A; --holdl:#E8C23A;
+  --comb:#1F2F3B; --comf:#E1E9EE;
   --bg:#0D151B; --surface:#14202A; --sunk:#0F1A22; --ink:#E1E9EE; --muted:#8EA1AE; --line:#273845;
   --accent:#E46FAF; --blue:#78B5E6;
   --dep:#1A2E40; --arr:#3A3019; --misc:#2B2540; --wx:#18322A;
@@ -42,13 +43,14 @@
   --strip:#1C2D21; --shld:#2E373E;
   --grass:#16241A; --grass2:#1B2B1F; --conc:#29323A; --term:#46525C; --twrwin:#5D8FA6; --twyc:#30393F; --asph:#20262C; --mark:#C9D1D6; --yel:#C9A20E; --parked:#56626B; --chart:#121A16; --terr:#3B3426; --terr2:#4A4130; --sky1:#0C1F33; --sky2:#1A2B3C; --cloud:#3A4A58;
   --scene:#13211A; --sky:#0F1B26; --rwy:#2E373E; --rwym:#C7D0D6; --twy:#3B4851; --apron:#22303A; --tr:#F2A93A; --holdl:#E8C23A;
+  --comb:#1F2F3B; --comf:#E1E9EE;
   --bg:#0D151B; --surface:#14202A; --sunk:#0F1A22; --ink:#E1E9EE; --muted:#8EA1AE; --line:#273845;
   --accent:#E46FAF; --blue:#78B5E6;
   --dep:#1A2E40; --arr:#3A3019; --misc:#2B2540; --wx:#18322A;
   --good:#5CC38B; --good-bg:#14301F; --bad:#F1806F; --bad-bg:#3A1C19; --warn:#E5B158; --warn-bg:#382B14;
   color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--f-disp);font-weight:700;letter-spacing:.01em;line-height:1.1;margin:0;text-wrap:balance}
 h1{font-size:2.3rem} h2{font-size:1.6rem} h3{font-size:1.2rem}
@@ -125,7 +127,7 @@ textarea{width:100%;resize:vertical;min-height:70px;font-family:var(--f-mono);fo
 .mist ul{padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
 
 /* radio */
-.com{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px 10px 0 0;font-family:var(--f-mono)}
+.com{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;background:var(--comb,#13202A);color:var(--comf,#E8EDF0);padding:10px 14px;border-radius:10px 10px 0 0;font-family:var(--f-mono)}
 .com .f{font-size:1.6rem;font-weight:600;letter-spacing:.04em}
 .com .st{font-family:var(--f-disp);font-size:1.1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
 .com .pg{margin-left:auto;font-size:.8rem;opacity:.75}
@@ -477,6 +479,64 @@ body.noscroll{overflow:hidden}
 .rleft #sfig .hintap{display:block;position:absolute;right:8px;bottom:8px;z-index:2;font:600 .62rem var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface) 85%,transparent);border-radius:6px;padding:2px 6px;opacity:0;transition:opacity .5s;pointer-events:none}
 .rleft #sfig:not(.act) .hintap{opacity:1}
 @media (prefers-reduced-motion:reduce){.rleft .scap div{transition:none}}
+/* theme switch */
+.thm{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;font:600 .85rem var(--f-disp);letter-spacing:.04em}
+.thm span:first-child{font-size:1rem;line-height:1}
+@media (min-width:721px){.top .wrap{flex-wrap:nowrap}.thm{order:0;margin-left:0}.thm .tl{display:none}.thm{padding:6px 9px}}
+/* one-screen flight layout */
+.clog{display:none;margin-left:6px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);background:none;color:inherit;border-radius:6px;font:600 .72rem var(--f-mono);padding:3px 8px;cursor:pointer}
+.fhead{display:flex;align-items:center;gap:10px}.fhead .phases{flex:1;min-width:0}
+.tctl{display:flex;flex-direction:column;gap:8px;padding:10px 14px 14px;border-top:1px solid var(--line)}
+.tctl textarea{min-height:52px}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.logsheet{background:var(--surface);border-top-color:var(--blue)}.logsheet .vs-h b{color:var(--ink)}.logsheet .log{max-height:55vh;border:0;padding:4px 0}
+body.flying main{padding-block:12px 12px}
+body.flying .flight{height:calc(var(--vvh,100dvh) - 96px);min-height:520px;display:flex;flex-direction:column;gap:10px}
+body.flying .rgrid{flex:1;min-height:0;align-items:stretch;grid-template-rows:minmax(0,1fr)}
+body.flying .rleft,body.flying .rright{overflow:hidden;align-self:stretch;min-height:0}
+body.flying .rleft{position:static;display:flex;flex-direction:column;gap:10px;min-height:0}
+body.flying .rleft .logbox{flex:1;min-height:0;display:flex;flex-direction:column}
+body.flying .rleft .logbox .log{flex:1;max-height:none;border-bottom:0}
+body.flying .rright{min-height:0}
+body.flying .rr{height:100%;display:flex;flex-direction:column;min-height:0}
+body.flying .turn{flex:1;min-height:0;overflow-y:auto}
+@media (max-width:720px){
+  body.flying .top,body.flying nav{display:none}
+  body.flying main{padding:0}
+  body.flying #view{padding-inline:8px}
+  body.flying .flight{height:var(--vvh,100dvh);min-height:0;gap:6px;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+  body.flying .fhead .phases{padding:0}
+  body.flying .ph{flex-basis:40px;font-size:.62rem;gap:2px}
+  body.flying .ph .dot{width:11px;height:11px}
+  body.flying .ph::before{top:5px}
+  body.flying .fquit{padding:5px 9px;font-size:.85rem}
+  body.flying .fquit span{display:none}
+  body.flying .rgrid{display:flex;flex-direction:column;gap:6px}
+  body.flying .rleft{position:static;margin:0;padding:0;box-shadow:none;flex:none;background:none}
+  body.flying .rleft .scene{max-height:27dvh}
+  body.flying .rleft.compact .scene{max-height:16dvh}
+  body.flying .rleft.typing .scene{max-height:13dvh}
+  body.flying .rleft .logbox{display:none}
+  body.flying .rright{flex:1;margin:0}
+  body.flying .clog{display:inline-block}
+  body.flying .com{padding:6px 10px;flex-wrap:nowrap;gap:8px;align-items:center;border-radius:10px 10px 0 0}
+  body.flying .com .f{font-size:1.05rem}
+  body.flying .com .st{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+  body.flying .com .leds{display:none}
+  body.flying .com .pg{font-size:.72rem;white-space:nowrap}
+  body.flying .turn{padding:10px;gap:8px}
+  body.flying .sit{font-size:.85rem;padding:7px 10px}
+  body.flying .atcnow{font-size:.92rem}
+  body.flying .task{font-size:.92rem}
+  body.flying .tctl{padding:8px 10px 10px;gap:6px}
+  body.flying .tctl textarea{min-height:44px;font-size:.9rem;padding:6px 8px}
+  body.flying .qk{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  body.flying .qk::-webkit-scrollbar{display:none}
+  body.flying .qk .chip{flex:none;font-size:.78rem;padding:4px 8px}
+  body.flying .tbtns{display:grid;grid-template-columns:1.2fr 1.2fr 1fr 1fr 1fr;gap:6px}
+  body.flying .tbtns .btn{padding:9px 4px;font-size:.85rem;justify-content:center;min-width:0}
+  body.flying .tbtns .mic .vbars{display:none}
+}
 /* voice result sheet */
 .vsheet{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--bad-bg);border-top:3px solid var(--bad);box-shadow:0 -8px 24px rgba(0,0,0,.25);animation:sheetup .22s ease-out;max-height:75vh;overflow-y:auto}
 .vs-in{max-width:980px;margin:0 auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
@@ -559,8 +619,10 @@ nav button{display:inline-flex;align-items:center;gap:6px}
 }
 </style>
 
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <header class="top"><div class="wrap">
   <div class="brand"><b>RT</b>Trainer <small>ICAO · Units 1–8</small></div>
+  <button class="thm" id="thm" type="button" aria-label="Theme"></button>
   <nav id="nav"></nav>
 </div></header>
 <main><div class="wrap" id="view"></div></main>
@@ -583,6 +645,7 @@ let S={ads:[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'},{n
 try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d)S=Object.assign(S,d)}catch(e){}
 try{S.ads.forEach(x=>{if(x.i==='XNFD'&&x.r==='08'&&!x.lay)x.r='08L'})}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+if(!S.autoAtc){S.autoAtc=1;S.voice=true;save()}
 (function fixState(){const A=x=>Array.isArray(x),O=x=>x&&typeof x==='object'&&!A(x);
   if(!A(S.ads)||S.ads.length<2)S.ads=[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'},{n:'Lakeview',i:'XLKV',r:'27'}];
   S.ads=S.ads.filter(a=>O(a)&&a.n&&a.i&&a.r);if(S.ads.length<2)S.ads.push({n:'Riverside',i:'XRSD',r:'18'},{n:'Lakeview',i:'XLKV',r:'27'});
@@ -1502,7 +1565,7 @@ function checkTx(step,raw){
   return {miss,warn};
 }
 function vRadio(){
-  closeFull();closeSheet();
+  closeFull();closeSheet();document.body.classList.remove('flying');
   if(RD.sc&&RD.from==='emergency'&&cur==='radio'){RD.sc=null}
   if(!RD.sc){
     view.innerHTML=`<div class="stack">
@@ -1553,37 +1616,42 @@ function vRadio(){
   const atcTxt=step.atc?showAtc(step.atc):'';
   const ph=(step.sc&&step.sc.p)||0;
   const QW=['{CS}','Wilco','Roger','Affirm','Negative','Unable','Request','Say again','Correction'];
-  view.innerHTML=`<div class="stack"><div class="row" style="justify-content:space-between"><h2>${esc(sc.title)}</h2><button class="btn ghost" id="quit">Leave flight</button></div>
-  ${phaseBar(ph)}
+  document.body.classList.add('flying');
+  const logBtn=`<button class="clog" id="logbtn" type="button">Log${RD.log.length?' '+RD.log.length:''}</button>`;
+  view.innerHTML=`<div class="flight">
+  <div class="fhead">${phaseBar(ph)}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
   <div class="rgrid">
     <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const s=scene(so),cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
         return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
         <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
-        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span></div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure></div>
-    <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc)}
+        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span></div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
+      <div class="radio logbox" id="logd"><div class="lbl" style="padding:10px 14px 0">${esc(sc.title)} · transcript</div><div class="log" id="log">${RD.log.length?logHtml():'<p class="muted" style="font-size:.85rem">Your exchanges with ATC appear here.</p>'}</div></div></div>
+    <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc).replace(/<\/div>$/,logBtn+'</div>')}
     <div class="turn" id="turn">
       ${step.sit?`<div class="sit"><b>Situation</b>${esc(fill(step.sit))}</div>`:''}
       ${step.atc?(S.listen?`<div class="row"><button class="btn" id="play">▶ Play ATC transmission</button><button class="btn ghost" id="reveal">Show text</button></div><div class="atcnow" id="atxt" hidden>${esc(atcTxt)}</div>`
-        :`<div class="atcnow"><span class="who">ATC</span>${esc(atcTxt)}${S.spoken?`<span class="written">${esc(fill(step.atc))}</span>`:''}<button class="btn ghost sm" id="play" aria-label="Listen to ATC">▶ Listen</button></div>`):''}
+        :`<div class="atcnow"><span class="who">ATC</span>${esc(atcTxt)}${S.spoken?`<span class="written">${esc(fill(step.atc))}</span>`:''}<span class="row" style="gap:6px;margin-top:6px"><button class="btn ghost sm" id="play" aria-label="Listen to ATC" style="margin-top:0">▶ Listen</button><button class="btn ghost sm" id="autov" aria-pressed="${!!S.voice}" style="margin-top:0">${S.voice?'🔊 Auto-play on':'🔈 Auto-play off'}</button></span></div>`):''}
       <p class="task"><span class="lbl">Your call</span> ${esc(fill(step.task))}</p>
-      <textarea id="tx" placeholder="Type or dictate… Enter to transmit" aria-label="Your transmission" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
-      <div class="chips qk">${QW.map(w=>`<button class="chip" data-ins="${esc(w)}">${w==='{CS}'?esc(csText()):esc(w)}</button>`).join('')}</div>
-      <div class="row"><button class="btn pri" id="send">Transmit</button><button class="btn mic" id="mic" aria-label="Speak your transmission"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button><button class="btn" id="hint">What to include</button><button class="btn ghost" id="model">Model</button><button class="btn ghost" id="skip">Skip</button></div>
-      <p class="muted" style="font-size:.8rem">Tap <b>Speak</b>, wait for the beep and say your transmission. It is checked when you stop talking. If the microphone mishears a close answer, you are asked to confirm.</p>
       <div id="fb">${RD.fb}</div>
-    </div></div>
-    ${RD.log.length?`<details class="radio logbox" ${S.logOpen!==false?'open':''} id="logd"><summary class="lbl">Transcript (${RD.log.length})</summary><div class="log" id="log">${logHtml()}</div></details>`:''}</div>
+    </div>
+    <div class="tctl">
+      <textarea id="tx" rows="2" placeholder="Type or tap Speak… Enter to transmit" aria-label="Your transmission" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+      <div class="chips qk">${QW.map(w=>`<button class="chip" data-ins="${esc(w)}">${w==='{CS}'?esc(csText()):esc(w)}</button>`).join('')}</div>
+      <div class="tbtns"><button class="btn pri" id="send">Transmit</button><button class="btn mic" id="mic" aria-label="Speak your transmission"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button><button class="btn" id="hint">Hint</button><button class="btn ghost" id="model">Model</button><button class="btn ghost" id="skip">Skip</button></div>
+    </div></div></div>
   </div></div>`;
   $('#quit').onclick=leave;
   {const f=$('#sfig'),o=step.sc||{},key='p-'+o.t+(o.t==='ground'?'-'+(adOf(o)||{}).i:'');const stepId=(RD.sc&&RD.sc.id)+'#'+RD.i;if(!ZS[key]||ZS[key].step!==stepId){ZS[key]=(SCENE_FOCUS&&S.autoFocus!==false)?focusZ(SCENE_FOCUS):{s:1,cx:300,cy:150};ZS[key].step=stepId}RD.focus=SCENE_FOCUS;if(f)bindZoom(f,f.querySelector('svg.scene'),key)}
   {const fg=$('#sfig');const act=(ms=6000)=>{if(!fg)return;fg.classList.add('act');clearTimeout(fg._a);fg._a=setTimeout(()=>{if(!S.infoOpen)fg.classList.remove('act')},ms)};
    act(8000);if(fg){fg.addEventListener('pointerdown',()=>act());fg.addEventListener('mousemove',()=>act());fg.addEventListener('focusin',()=>act())}
    $('#ibx').onclick=e=>{e.stopPropagation();S.infoOpen=!S.infoOpen;save();$('#ipanel').hidden=!S.infoOpen;$('#ibx').setAttribute('aria-expanded',S.infoOpen);act()}}
-  if($('#logd'))$('#logd').addEventListener('toggle',e=>{S.logOpen=e.target.open;save()});
+  if($('#logbtn'))$('#logbtn').onclick=()=>logSheet();
+  fitFlight();
   const mob=matchMedia('(max-width:720px)').matches;
   if(mob){const tq=$('#tx');tq.addEventListener('focus',()=>$('#rleft').classList.add('typing'));tq.addEventListener('blur',()=>setTimeout(()=>{const r=$('#rleft');if(r)r.classList.remove('typing')},150))}
-  if(RD.adv&&mob){RD.adv=false;const rr=$('.rr');if(rr)rr.scrollIntoView({block:'start'})}
+  RD.adv=false;{const t=$('#turn');if(t)t.scrollTop=0}
   if($('#play'))$('#play').onclick=()=>say(spoken(fill(step.atc)));
+  if($('#autov'))$('#autov').onclick=e=>{S.voice=!S.voice;save();const b=e.currentTarget;b.textContent=S.voice?'🔊 Auto-play on':'🔈 Auto-play off';b.setAttribute('aria-pressed',S.voice);if(S.voice)say(spoken(fill(step.atc)));else{try{speechSynthesis.cancel()}catch(_){}try{NATIVE&&NATIVE.TTS&&NATIVE.TTS.stop()}catch(_){}}};
   if($('#reveal'))$('#reveal').onclick=()=>{$('#atxt').hidden=false};
   const tx=$('#tx');
   if(matchMedia('(min-width:721px)').matches)tx.focus({preventScroll:true});
@@ -1631,56 +1699,89 @@ function speechFix(t){return (' '+t+' ').replace(/\b(will|wil|we'll) ?(co|go|coe
   .replace(/\s+/g,' ').trim()}
 let MIC_AC=null;
 function micBeep(f=880){try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const o=MIC_AC.createOscillator(),g=MIC_AC.createGain();o.frequency.value=f;g.gain.value=.06;o.connect(g);g.connect(MIC_AC.destination);o.start();o.stop(MIC_AC.currentTime+.09)}catch(e){}}
+const SILENCE_MS=2000;
+/* join recognised pieces; Android Chrome sometimes repeats earlier text in later results */
+function joinSpeech(acc,t){t=(t||'').trim();if(!t)return acc;if(!acc)return t;const A=acc.toLowerCase(),T=t.toLowerCase();
+  if(T.startsWith(A))return t;if(A.endsWith(T)||A.includes(T))return acc;return acc+' '+t}
+function micUI(btn){const lab=btn.querySelector('span');if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');return lab}
 function startMic(tx,btn,fbEl,done){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition,lab=btn.querySelector('span');
-  const fallback=msg=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${msg}</div>`;tx.focus()};
-  if(btn.classList.contains('rec')){try{btn._r&&btn._r.stop()}catch(e){}return}
-  if(!SR){fallback('Voice input is not available in this browser. Tap the microphone on your phone keyboard and speak, then press Transmit. In Chrome or Edge the Speak button works directly.');return}
-  if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');
   if(NATIVE&&NATIVE.SR){nativeMic(tx,btn,fbEl,done);return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition,lab=micUI(btn);
+  const fallback=msg=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${msg}</div>`};
+  if(btn.classList.contains('rec')){btn._finish&&btn._finish();return}
+  if(!SR){fallback('Voice input is not available in this browser. Tap the microphone on your phone keyboard and speak, then press Transmit. In Chrome or Edge the Speak button works directly.');return}
   try{if(canSpeak()&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel()}catch(e){}
   try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();if(MIC_AC.state==='suspended')MIC_AC.resume()}catch(e){}
-  let res=null,got=false,heard=false,errShown=false,wd=null,cap=null;
-  const reset=()=>{clearTimeout(wd);clearTimeout(cap);btn.classList.remove('rec');lab.textContent='Speak'};
+  let acc='',interim='',alts=[],lastHeard=0,started=false,finishing=false,errShown=false,restarts=0,r=null,tick=null,wd=null,cap=null;
+  const show=()=>{tx.value=speechFix((acc+' '+interim).trim())};
+  const reset=()=>{clearInterval(tick);clearTimeout(wd);clearTimeout(cap);btn.classList.remove('rec');lab.textContent='Speak';btn._finish=null;btn._r=null};
   const showErr=m=>{errShown=true;fallback(m)};
-  try{const r=new SR();btn._r=r;r.lang='en-GB';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
-    btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
-    r.onstart=()=>{lab.textContent='Listening…';micBeep(880);clearTimeout(wd);wd=setTimeout(()=>{if(!heard){try{r.abort()}catch(e){}}},9000)};
-    r.onspeechstart=()=>{heard=true};
-    wd=setTimeout(()=>{if(btn.classList.contains('rec')&&lab.textContent==='Starting…'){try{r.abort()}catch(e){}reset();showErr('The microphone did not start. Allow microphone access for this page (lock icon next to the address → Microphone → Allow) and try again, or use the microphone on your keyboard.')}},5000);
-    cap=setTimeout(()=>{try{r.stop()}catch(e){}},20000);
-    r.onresult=e=>{res=e.results;got=true;heard=true;let s='';for(const x of e.results)s+=x[0].transcript+' ';tx.value=speechFix(s)};
-    r.onerror=e=>{reset();got=false;if(e.error==='aborted'&&errShown)return;
-      showErr(e.error==='not-allowed'||e.error==='service-not-allowed'?'The microphone is blocked for this page. Tap the lock icon next to the web address → Microphone → Allow, then reload. Or use the microphone on your keyboard.':e.error==='no-speech'?'No speech heard. Tap Speak, wait for the beep, then talk.':e.error==='network'?'Voice input needs an internet connection. Check your connection or use the keyboard microphone.':e.error==='aborted'?'Nothing was heard. Tap Speak, wait for the beep, then talk.':e.error==='audio-capture'?'No microphone was found on this device. Use the keyboard microphone or type.':'Voice input stopped ('+e.error+'). Try again or use the keyboard microphone.')};
-    r.onend=()=>{const was=btn.classList.contains('rec');reset();
-      if(!was)return;micBeep(620);
-      if(!got||!tx.value.trim()){if(!errShown)showErr('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
-      const cands=[];const best=[...res].map(x=>x[0].transcript);cands.push(best.join(' '));
-      [...res].forEach((x,i)=>{for(let k=1;k<x.length;k++){const c=best.slice();c[i]=x[k].transcript;cands.push(c.join(' '))}});
-      const uniq=[...new Set(cands.map(speechFix).filter(Boolean))];if(tx.isConnected)done&&done(uniq.length?uniq:[tx.value])};
-    r.start()}catch(e){reset();fallback('Voice input could not start here. Use the microphone on your keyboard instead.')}}
+  const finish=()=>{if(finishing)return;finishing=true;try{r&&r.stop()}catch(e){}
+    setTimeout(()=>{if(!btn.classList.contains('rec'))return;reset();micBeep(620);
+      const text=(acc+' '+interim).trim();
+      if(!text){if(!errShown)showErr('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
+      const cands=[speechFix(text)];alts.forEach(a=>{const c=speechFix(text.replace(a.top,a.alt));if(c)cands.push(c)});
+      tx.value=cands[0];if(tx.isConnected)done&&done([...new Set(cands)])},350)};
+  btn._finish=finish;
+  const begin=()=>{r=new SR();btn._r=r;r.lang='en-GB';r.interimResults=true;r.continuous=true;r.maxAlternatives=5;
+    r.onstart=()=>{if(!started){started=true;lab.textContent='Listening…';micBeep(880)}};
+    r.onresult=e=>{interim='';for(let i=e.resultIndex||0;i<e.results.length;i++){const x=e.results[i],t=x[0].transcript;
+        if(x.isFinal){acc=joinSpeech(acc,t);for(let k=1;k<x.length;k++)alts.push({top:t.trim(),alt:x[k].transcript.trim()})}else interim+=' '+t}
+      interim=interim.trim();lastHeard=Date.now();lab.textContent='Listening… pause 2 s to finish';show()};
+    r.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;
+      if(['not-allowed','service-not-allowed','audio-capture','network'].includes(e.error)){finishing=true;reset();
+        showErr(e.error==='network'?'Voice input needs an internet connection. Check your connection or use the keyboard microphone.':e.error==='audio-capture'?'No microphone was found on this device. Use the keyboard microphone or type.':'The microphone is blocked for this page. Tap the lock icon next to the web address → Microphone → Allow, then reload. Or use the microphone on your keyboard.')}};
+    r.onend=()=>{if(finishing||!btn.classList.contains('rec'))return;
+      /* the browser stopped on its own: keep listening until the user has been quiet for 2 seconds */
+      if(interim){acc=joinSpeech(acc,interim);interim=''}
+      if(restarts++<12){try{begin();return}catch(e){}}finish()};
+    r.start()};
+  btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
+  try{begin()}catch(e){reset();fallback('Voice input could not start here. Use the microphone on your keyboard instead.');return}
+  wd=setTimeout(()=>{if(!started){finishing=true;try{r.abort()}catch(e){}reset();showErr('The microphone did not start. Allow microphone access for this page (lock icon next to the address → Microphone → Allow) and try again, or use the microphone on your keyboard.')}},5000);
+  const t0=Date.now();
+  tick=setInterval(()=>{const now=Date.now();
+    if(lastHeard&&now-lastHeard>=SILENCE_MS)finish();
+    else if(!lastHeard&&now-t0>10000)finish()},200);
+  cap=setTimeout(finish,30000)}
 function nativeMic(tx,btn,fbEl,done){
-  const R=NATIVE.SR,lab=btn.querySelector('span'),msg=m=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${m}</div>`};
-  if(btn.classList.contains('rec')){btn._stop=true;Promise.resolve(R.stop()).catch(()=>{});return}
-  if(!btn.querySelector('.vbars'))btn.insertAdjacentHTML('beforeend','<span class="vbars" aria-hidden="true"><i></i><i></i><i></i></span>');
-  const reset=()=>{clearTimeout(btn._cap);btn.classList.remove('rec');lab.textContent='Speak'};
+  const R=NATIVE.SR,lab=micUI(btn),msg=m=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${m}</div>`};
+  if(btn.classList.contains('rec')){btn._finish&&btn._finish();return}
   try{NATIVE.TTS&&NATIVE.TTS.stop&&Promise.resolve(NATIVE.TTS.stop()).catch(()=>{})}catch(e){}
-  btn._stop=false;btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
+  let acc='',cur=[],lastHeard=0,finishing=false,tick=null,cap=null,handles=[],t0=Date.now(),sessions=0;
+  const reset=()=>{clearInterval(tick);clearTimeout(cap);handles.forEach(h=>{try{h&&h.remove&&h.remove()}catch(e){}});handles=[];btn.classList.remove('rec');lab.textContent='Speak';btn._finish=null};
+  const commit=()=>{if(cur.length){acc=joinSpeech(acc,cur[0])}};
+  const finish=async(stopped)=>{if(finishing)return;finishing=true;if(!stopped){try{await R.stop()}catch(e){}}
+    await new Promise(r=>setTimeout(r,250));const last=cur.slice();commit();reset();micBeep(620);
+    if(!acc.trim()){msg('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
+    const cands=[speechFix(acc),...last.slice(1).map(a=>speechFix(last[0]?acc.replace(last[0],a):joinSpeech(acc,a)))].filter(Boolean);
+    tx.value=cands[0];if(tx.isConnected)done&&done([...new Set(cands)])};
+  btn._finish=()=>finish(false);
+  const session=async()=>{sessions++;cur=[];
+    try{await R.start({language:'en-GB',maxResults:5,partialResults:true,popup:false})}catch(e){
+      if(finishing)return;const t=String(e&&e.message||e);
+      if(/no match|no speech|didn.t understand|timeout|\b[67]\b/i.test(t)){if(acc||lastHeard)finish(true);else{finishing=true;reset();msg('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.')}return}
+      finishing=true;reset();msg(/busy|\b8\b/i.test(t)?'The recognizer is busy. Wait a second and tap Speak again.':/network|server|\b[124]\b/i.test(t)?'Voice input needs an internet connection. Check your connection and try again.':'Voice input stopped ('+esc(t)+'). Try again or type your answer.')}};
+  btn.classList.add('rec');lab.textContent='Starting…';tx.value='';if(fbEl)fbEl.innerHTML='';
   (async()=>{
-    try{let p=await R.checkPermissions().catch(()=>null);
-      if(!p||p.speechRecognition!=='granted'){p=await R.requestPermissions().catch(()=>null);
-        if(!p||p.speechRecognition!=='granted'){reset();msg('Microphone permission is off. Open phone Settings → Apps → RT Trainer → Permissions → Microphone → Allow.');return}}
-      const av=await R.available().catch(()=>({available:false}));
-      if(!av||!av.available){reset();msg('Speech recognition is not available on this phone. Install or update the Google app (it provides voice typing), then try again.');return}
-      lab.textContent='Listening…';micBeep(880);btn._cap=setTimeout(()=>{Promise.resolve(R.stop()).catch(()=>{})},20000);
-      const r=await R.start({language:'en-GB',maxResults:5,partialResults:false,popup:false,prompt:'Say your transmission'});
-      reset();micBeep(620);
-      const m=(r&&r.matches||[]).map(speechFix).filter(Boolean);
-      if(!m.length){msg('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
-      tx.value=m[0];if(tx.isConnected)done&&done([...new Set(m)]);
-    }catch(e){reset();if(btn._stop)return;const t=String(e&&e.message||e);
-      msg(/no match|no speech|didn.t understand|timeout|\b[67]\b/i.test(t)?'Nothing was heard. Tap Speak, wait for the beep, then talk clearly.':/busy|\b8\b/i.test(t)?'The recognizer is busy. Wait a second and tap Speak again.':/network|server|\b[124]\b/i.test(t)?'Voice input needs an internet connection. Check your connection and try again.':'Voice input stopped ('+esc(t)+'). Try again or type your answer.')}
-  })()}
+    let p=await R.checkPermissions().catch(()=>null);
+    if(!p||p.speechRecognition!=='granted'){p=await R.requestPermissions().catch(()=>null);
+      if(!p||p.speechRecognition!=='granted'){reset();msg('Microphone permission is off. Open phone Settings → Apps → RT Trainer → Permissions → Microphone → Allow.');return}}
+    const av=await R.available().catch(()=>({available:false}));
+    if(!av||!av.available){reset();msg('Speech recognition is not available on this phone. Install or update the Google app (it provides voice typing), then try again.');return}
+    try{const h=await R.addListener('partialResults',d=>{const m=(d&&d.matches)||[];if(m.length&&m[0]){cur=m;lastHeard=Date.now();lab.textContent='Listening… pause 2 s to finish';tx.value=speechFix(joinSpeech(acc,m[0]))}});handles.push(h)}catch(e){}
+    /* when Android stops listening by itself, start again until the user has been quiet for 2 seconds */
+    try{const h2=await R.addListener('listeningState',d=>{if(d&&d.status==='stopped'&&!finishing){commit();cur=[];
+        if(lastHeard&&Date.now()-lastHeard>=SILENCE_MS)finish(true);else if(sessions<12)session();else finish(true)}});handles.push(h2)}catch(e){}
+    lab.textContent='Listening…';micBeep(880);
+    tick=setInterval(()=>{const now=Date.now();if(lastHeard&&now-lastHeard>=SILENCE_MS)finish(false);else if(!lastHeard&&now-t0>10000)finish(false)},200);
+    cap=setTimeout(()=>finish(false),30000);
+    session()})()}
+function fitFlight(){try{const vv=window.visualViewport;const h=vv?vv.height:innerHeight;document.documentElement.style.setProperty('--vvh',Math.round(h)+'px');if(document.body.classList.contains('flying')&&matchMedia('(max-width:720px)').matches)window.scrollTo(0,0)}catch(e){}}
+try{(window.visualViewport||window).addEventListener('resize',fitFlight)}catch(e){}
+function logSheet(){closeSheet();const d=document.createElement('div');d.className='vsheet logsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Transcript');
+  d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Transcript</b><button class="btn" type="button" id="logx">Close</button></div><div class="log">${RD.log.length?logHtml():'<p class="muted">No exchanges yet.</p>'}</div></div>`;
+  document.body.appendChild(d);d.querySelector('#logx').onclick=closeSheet;const l=d.querySelector('.log');l.scrollTop=l.scrollHeight}
 function closeSheet(){document.querySelectorAll('.vsheet').forEach(x=>x.remove())}
 function voiceSheet(o){closeSheet();
   const df=wdiff(words(o.model),words(o.heard||''));
@@ -1698,7 +1799,7 @@ function voiceSheet(o){closeSheet();
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
-function scrollLog(){const l=$('#log');if(l)l.scrollTop=l.scrollHeight}
+function scrollLog(){const f=()=>{const l=$('#log');if(l)l.scrollTop=l.scrollHeight};f();requestAnimationFrame(f)}
 function advance(step,raw,first,miss,warn){
   const sc=RD.sc;
   if(step.atc)RD.log.push({w:'atc',t:showAtc(step.atc),st:fill((RD.st||'').split('|')[0])});
@@ -2166,10 +2267,17 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Overview','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t,pop){closeFull();closeSheet();if(!VIEWS[t])t='home';const prev=cur;cur=t;
+function go(t,pop){closeFull();closeSheet();document.body.classList.remove('flying');if(!VIEWS[t])t='home';const prev=cur;cur=t;
   if(t!=='phrases'&&PH.ta&&PH.ta.timer){clearInterval(PH.ta.timer);PH.ta=null}
-  document.querySelectorAll('.mic.rec').forEach(b=>{try{b._r&&b._r.abort()}catch(e){}try{NATIVE&&NATIVE.SR&&b._stop!==undefined&&(b._stop=true,NATIVE.SR.stop())}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+  document.querySelectorAll('.mic.rec').forEach(b=>{try{b._finish&&b._finish()}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 addEventListener('popstate',()=>{if(document.querySelector('.vsheet')){closeSheet();try{history.pushState(null,'','#'+cur)}catch(e){}return}const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
+const THEMES=[['auto','◐','Auto theme (follows the phone)'],['light','☀','Day theme'],['dark','☾','Night theme']];
+function applyTheme(){const t=S.theme||'auto',r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);
+  const b=document.getElementById('thm');if(b){const x=THEMES.find(q=>q[0]===t)||THEMES[0];b.innerHTML=`<span aria-hidden="true">${x[1]}</span><span class="tl">${t==='auto'?'Auto':t==='light'?'Day':'Night'}</span>`;b.title=x[2]+' · tap to change';b.setAttribute('aria-label',x[2]+'. Tap to change')}
+  const dark=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);let m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#0D151B':'#E8EDF0'}
+document.getElementById('thm').onclick=()=>{const i=THEMES.findIndex(q=>q[0]===(S.theme||'auto'));S.theme=THEMES[(i+1)%3][0];save();applyTheme()};
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+applyTheme();
 go((location.hash||'').slice(1));
 </script>
 
