@@ -1261,7 +1261,8 @@ const APL=[
  {i:'LIRF',n:'Rome Fiumicino',r:'16R',rwy:[[[1500,100],162,3900,['16L','34R']],[[300,-900],162,3600,['16C','34C']],[[-1300,-700],162,3900,['16R','34L']],[[-200,2300],72,3300,['07','25']]],apr:[[[-400,600],900,1700,162]]},
  {i:'UUDD',n:'Moscow Domodedovo',r:'32R',rwy:[[[900,900],138,3794,['14L','32R']],[[-900,-900],138,3500,['14R','32L']]],apr:[[[0,0],1600,800,138]]}
 ];
-function buildLibLayout(sp,OFF=230){
+const LIBC={},LIBSVG={};function buildLibLayout(sp,OFF=230){const ck=sp.i+'|'+OFF;if(LIBC[ck])return JSON.parse(LIBC[ck]);const out=buildLibLayout0(sp,OFF);LIBC[ck]=JSON.stringify(out);return out}
+function buildLibLayout0(sp,OFF=230){
   const D=h=>[Math.sin(h*Math.PI/180),Math.cos(h*Math.PI/180)],RG=h=>[Math.cos(h*Math.PI/180),-Math.sin(h*Math.PI/180)];
   const L={rwy:[],twy:[],apr:[],std:[],hp:[],bld:[],twr:null};const LET='ABCDEFGHJKLMNPQRSTUVWXYZ'.split('');let li=0;
   const aprs=sp.apr.map(([c,w,h,rot])=>{const u=D(rot),v=RG(rot),P=(s,t)=>add(add(c,mul(u,s)),mul(v,t));return {c,w,h,u,v,P,poly:[P(-w/2,-h/2),P(w/2,-h/2),P(w/2,h/2),P(-w/2,h/2)]}});
@@ -1302,7 +1303,7 @@ function buildLibLayout(sp,OFF=230){
 }
 function vLibrary(){
   view.innerHTML=`<div class="stack"><div class="row" style="justify-content:space-between;align-items:flex-end"><div><h1>Airport library</h1><p class="muted" style="margin-top:6px;max-width:66ch">Runway layouts of ${APL.length} well-known airports. Runway designators, directions and arrangement follow the real airports; taxiways, stands and terminals are simplified for training. Not for navigation.</p></div><button class="btn" id="lback">Back</button></div>
-   <div class="libgrid">${APL.map((a,k)=>{const L=buildLibLayout(a),has=S.ads.findIndex(x=>x.i===a.i);return `<article class="libcard"><div class="libthumb">${SVG(renderFlat(L,{parked:true}),a.n).replace('class="scene"','class="scene flatmap"')}</div>
+   <div class="libgrid">${APL.map((a,k)=>{const L=buildLibLayout(a),has=S.ads.findIndex(x=>x.i===a.i);return `<article class="libcard"><div class="libthumb">${LIBSVG[a.i]||(LIBSVG[a.i]=SVG(renderFlat(L,{parked:true}),a.n).replace('class="scene"','class="scene flatmap"'))}</div>
      <div class="libinfo"><b>${esc(a.n)}</b><span class="mono muted">${a.i} · ${a.rwy.length} runways</span><span class="mono" style="font-size:.78rem">${a.rwy.map(r=>r[3].filter(x=>x!=='—').join('/')).join(' · ')}</span>
      <div class="row">${has>=0?`<button class="btn" data-ldep="${has}">Depart from here</button><button class="btn ghost" data-ledit="${has}">Edit layout</button>`:`<button class="btn pri" data-ladd="${k}">Add</button>`}</div></div></article>`}).join('')}</div></div>`;
   $('#lback').onclick=()=>go(S.libFrom||'radio');
@@ -1336,7 +1337,8 @@ const zoomCtl=(full=true,foc=false,size=false)=>`<div class="zctl"><span class="
 function bindZoom(root,svg,key,canPan){const Zo=zoomable(svg,key,canPan);if(!Zo)return;
   root.querySelectorAll('[data-z]').forEach(b=>b.onclick=e=>{e.stopPropagation();const z=Zo.z,a=b.dataset.z;
     if(a==='size'){S.compact=!S.compact;save();const rl=$('#rleft');if(rl)rl.classList.toggle('compact',S.compact);b.textContent=S.compact?'▢':'▭';return}if(a==='focus'&&RD.focus){Object.assign(z,focusZ(RD.focus));S.autoFocus=true;save();Zo.apply()}else if(a==='in')Zo.zoomAt(1.5,z.cx,z.cy);else if(a==='out')Zo.zoomAt(1/1.5,z.cx,z.cy);else if(a==='reset'){z.s=1;z.cx=300;z.cy=150;if(RD.focus){S.autoFocus=false;save()}Zo.apply()}
-    else{const on=!root.classList.contains('full');
+    else{const on=!root.classList.contains('full'),fromPop=root._fromPop;root._fromPop=false;
+      if(on){try{history.pushState({full:1},'')}catch(_){}}else if(!fromPop){try{if(history.state&&history.state.full)history.back()}catch(_){}}
       if(on){root._ph=document.createComment('chart');root.parentNode.insertBefore(root._ph,root);document.body.appendChild(root)}else if(root._ph&&root._ph.parentNode){root._ph.parentNode.replaceChild(root,root._ph)}else root.remove();
       root.classList.toggle('full',on);document.body.classList.toggle('noscroll',on);svg.setAttribute('preserveAspectRatio',on?'xMidYMid slice':'xMidYMid meet');b.textContent=on?'✕':'⛶';Zo.apply()}})}
 function closeFull(){document.querySelectorAll('body > .scenebox.full').forEach(x=>x.remove());document.body.classList.remove('noscroll')}
@@ -1593,7 +1595,7 @@ function vRadio(){
     const raw=tx.value.trim();if(!raw)return;
     const led=$('.led.tx');if(led){led.classList.add('on');setTimeout(()=>led.classList.remove('on'),600)}
     const {miss,warn}=checkTx(step,raw);
-    if(!miss.length){setTimeout(()=>advance(step,raw,RD.tries===0,RD.firstMiss||[],warn),RM?0:350)}
+    if(!miss.length){{const v0=cur,sc0=RD.sc,i0=RD.i;setTimeout(()=>{if(cur===v0&&RD.sc===sc0&&RD.i===i0)advance(step,raw,RD.tries===0,RD.firstMiss||[],warn)},RM?0:350)}}
     else{
       if(RD.tries===0){RD.firstMiss=miss;RD.firstSaid=raw}
       RD.tries++;
@@ -1640,7 +1642,7 @@ function startMic(tx,btn,fbEl,done){
       if(!got||!tx.value.trim()){if(!errShown)showErr('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
       const cands=[];const best=[...res].map(x=>x[0].transcript);cands.push(best.join(' '));
       [...res].forEach((x,i)=>{for(let k=1;k<x.length;k++){const c=best.slice();c[i]=x[k].transcript;cands.push(c.join(' '))}});
-      const uniq=[...new Set(cands.map(speechFix).filter(Boolean))];done&&done(uniq.length?uniq:[tx.value])};
+      const uniq=[...new Set(cands.map(speechFix).filter(Boolean))];if(tx.isConnected)done&&done(uniq.length?uniq:[tx.value])};
     r.start()}catch(e){reset();fallback('Voice input could not start here. Use the microphone on your keyboard instead.')}}
 function nativeMic(tx,btn,fbEl,done){
   const R=NATIVE.SR,lab=btn.querySelector('span'),msg=m=>{if(fbEl)fbEl.innerHTML=`<div class="fb wa">${m}</div>`};
@@ -1660,7 +1662,7 @@ function nativeMic(tx,btn,fbEl,done){
       reset();micBeep(620);
       const m=(r&&r.matches||[]).map(speechFix).filter(Boolean);
       if(!m.length){msg('Nothing was heard. Tap Speak, wait for the beep, then talk clearly.');return}
-      tx.value=m[0];done&&done([...new Set(m)]);
+      tx.value=m[0];if(tx.isConnected)done&&done([...new Set(m)]);
     }catch(e){reset();if(btn._stop)return;const t=String(e&&e.message||e);
       msg(/no match|no speech|didn.t understand|timeout|\b[67]\b/i.test(t)?'Nothing was heard. Tap Speak, wait for the beep, then talk clearly.':/busy|\b8\b/i.test(t)?'The recognizer is busy. Wait a second and tap Speak again.':/network|server|\b[124]\b/i.test(t)?'Voice input needs an internet connection. Check your connection and try again.':'Voice input stopped ('+esc(t)+'). Try again or type your answer.')}
   })()}
@@ -1781,7 +1783,7 @@ function vPhrases(){
     else if(T.over)body=`<div class="panel card"><p class="big">${T.right}</p><p class="q">correct in 60 seconds (${T.n} answered)</p>${T.right>=(S.taBest||0)?'<p class="fb ok">New best score.</p>':`<p class="score">Best: ${S.taBest}</p>`}<div><button class="btn pri" id="tstart">Play again</button></div></div>`;
     else body=`<div class="panel stack"><div class="row" style="justify-content:space-between"><span class="big" id="tclock" style="font-size:1.6rem">${Math.max(0,Math.ceil((T.end-Date.now())/1000))}s</span><span class="score">${T.right} correct · ${T.n} answered</span></div>
       <div class="tbar"><div id="tfill" style="width:${Math.max(0,(T.end-Date.now())/600)}%"></div></div><p class="q">${esc(it.r)}</p>
-      <div class="opts">${g.opts.map((k,j)=>`<button class="opt" data-t="${j}">${esc(PHR[k].e)}</button>`).join('')}</div></div>`;
+      <div class="opts">${g.opts.map((k,j)=>`<button class="opt" data-ta="${j}">${esc(PHR[k].e)}</button>`).join('')}</div></div>`;
   }
   view.innerHTML=`<div class="stack"><div class="row" style="justify-content:space-between;align-items:flex-end"><div><h1>Phrases</h1><p class="muted" style="margin-top:6px">${PHR.length} non-routine phrases from your list. Phrases you miss come back more often.</p></div>
       <div class="mast"><span class="lbl">Learned</span><span class="mono">${learned}/${P.length}</span><div class="track"><div class="fill" style="width:${pct}%"></div></div></div></div>
@@ -1823,7 +1825,7 @@ function vPhrases(){
   $$('[data-pl]').forEach(b=>b.onclick=()=>{g.sel=+b.dataset.pl;vPhrases()});
   $$('[data-pr]').forEach(b=>b.onclick=()=>{if(g.sel===null)return;const r=+b.dataset.pr;if(r===g.sel){g.done.push(r);learn(r,true);g.sel=null;vPhrases()}else{g.err++;learn(g.sel,false);b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad')}});
   if($('#tstart'))$('#tstart').onclick=()=>{PH.ta={end:Date.now()+60000,right:0,n:0,running:true};newG();PH.ta.timer=setInterval(()=>{const T=PH.ta;if(!T)return;const left=T.end-Date.now();const c=$('#tclock'),f=$('#tfill');if(left<=0){clearInterval(T.timer);T.running=false;T.over=true;if(T.right>(S.taBest||0)){S.taBest=T.right;save()}if(cur==='phrases'&&PH.mode==='time')vPhrases();return}if(c)c.textContent=Math.ceil(left/1000)+'s';if(f)f.style.width=(left/600)+'%'},250);vPhrases()};
-  $$('[data-t]').forEach(b=>b.onclick=()=>{const T=PH.ta,j=+b.dataset.t,ok=g.opts[j]===g.i;T.n++;if(ok)T.right++;S.pm[g.i]=ok?Math.min(5,(S.pm[g.i]||0)+1):0;stat('phrases',ok,ok?null:PHR[g.i].e);b.classList.add(ok?'right':'wrong');setTimeout(()=>{if(PH.ta&&PH.ta.running){newG();vPhrases()}},ok?180:600)});
+  $$('[data-ta]').forEach(b=>b.onclick=()=>{const T=PH.ta,j=+b.dataset.ta,ok=g.opts[j]===g.i;T.n++;if(ok)T.right++;S.pm[g.i]=ok?Math.min(5,(S.pm[g.i]||0)+1):0;stat('phrases',ok,ok?null:PHR[g.i].e);b.classList.add(ok?'right':'wrong');setTimeout(()=>{if(PH.ta&&PH.ta.running&&cur==='phrases'&&PH.mode==='time'){newG();vPhrases()}},ok?180:600)});
 }
 
 /* ---------- numbers & letters ---------- */
@@ -2134,8 +2136,10 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Overview','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t,pop){closeFull();if(!VIEWS[t])t='home';const prev=cur;cur=t;$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
-addEventListener('popstate',()=>{const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
+function go(t,pop){closeFull();if(!VIEWS[t])t='home';const prev=cur;cur=t;
+  if(t!=='phrases'&&PH.ta&&PH.ta.timer){clearInterval(PH.ta.timer);PH.ta=null}
+  document.querySelectorAll('.mic.rec').forEach(b=>{try{b._r&&b._r.abort()}catch(e){}try{NATIVE&&NATIVE.SR&&b._stop!==undefined&&(b._stop=true,NATIVE.SR.stop())}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+addEventListener('popstate',()=>{const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
 go((location.hash||'').slice(1));
 </script>
 
