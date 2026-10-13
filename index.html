@@ -526,15 +526,7 @@ nav button span{overflow:hidden;text-overflow:ellipsis;max-width:100%;white-spac
 .mn.k-full{border-left:3px solid var(--blue)} .mn.k-dep{border-left:3px solid #4F9D69} .mn.k-arr{border-left:3px solid #C98A1A} .mn.k-enr{border-left:3px solid var(--accent)}
 .mn.done{background:var(--good-bg)} .mn.done b::after{content:" ✓";color:var(--good);font-size:.75rem}
 @media (max-width:720px){.mgridn{grid-template-columns:repeat(5,minmax(0,1fr));max-height:260px}.mpanel h2{font-size:1.3rem}}
-/* typing mirror */
-#kbm{position:fixed;left:8px;right:8px;top:0;z-index:95;display:none;align-items:center;gap:8px;background:#0A131A;color:#F2F6F9;border:1px solid #2A3B48;border-radius:14px;padding:7px 7px 7px 14px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
-#kbm.on{display:flex}
-#kbm.top{margin-top:calc(env(safe-area-inset-top,0px) + 6px)}
-#kbm .kbm-t{flex:1;min-width:0;font:600 1rem var(--f-mono);color:#F2F6F9;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
-#kbm .kbm-t::-webkit-scrollbar{display:none}
-#kbm .kbm-t.ph{color:#8EA1AE;font-weight:400}
-#kbm .kbm-go{flex:none;border:0;border-radius:10px;background:#C2307E;color:#fff;font:700 .9rem var(--f-disp);letter-spacing:.03em;padding:9px 14px;cursor:pointer}
-@media (pointer:fine) and (min-width:721px){#kbm{display:none!important}}
+@media (max-width:720px){body.kbd #nav{display:none!important} body.kbd main{padding-bottom:16px}}
 /* theme switch */
 .thm{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;font:600 .85rem var(--f-disp);letter-spacing:.04em}
 .thm span:first-child{font-size:1rem;line-height:1}
@@ -893,8 +885,9 @@ const TRK='M-9,-5 H9 V5 H-9 Z';
 const ACSL=ACS.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g,(m,x,y)=>(-x)+','+y);
 let UID=0;
 function pl(x,y,rot,cls='ac',s=.8,d=ACP){return `<g transform="translate(${(+x).toFixed(1)} ${(+y).toFixed(1)}) rotate(${(+rot).toFixed(1)}) scale(${s})">${cls==='ac'&&d===ACP?'<circle class="halo" r="22"/>':''}<path d="${d}" class="${cls}"/></g>`}
-function mv(path,end,o={}){const {dur=6,rep='1',cls='ac',s=.8,rot='auto',d=ACP}=o;if(RM)return pl(end[0],end[1],end[2],cls,s,d);
-  return `<g>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${path}"/></g>`}
+let ANIM_OFF=0,STEP_T=null;/* seconds this step has already been on screen: re-drawing the same step continues the motion instead of replaying it */
+function mv(path,end,o={}){const {dur=6,rep='1',cls='ac',s=.8,rot='auto',d=ACP}=o;if(o.hideEnd&&(RM||ANIM_OFF>=dur))return '';if(RM||(rep==='1'&&ANIM_OFF>=dur+.05))return pl(end[0],end[1],end[2],cls,s,d);
+  return `<g${o.hideEnd?` opacity="1"><set attributeName="opacity" to="0" begin="${(dur-ANIM_OFF).toFixed(2)}s"/`:''}>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" begin="${(-ANIM_OFF).toFixed(2)}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${path}"${o.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${o.ease}"`:''}/></g>`}
 const csShort=()=>S.cs.name.trim().split(/\s+/).map(w=>w[0]||'').join('').toUpperCase()+S.cs.num.trim();
 const SVG=(inner,label)=>`<svg class="scene" viewBox="0 0 600 300" role="img" aria-label="${esc(label)}">${inner}</svg>`;
 function tag(x,y,lines,w=96){w=Math.round(Math.max(w*1.15,Math.max(...lines.map(l=>l.length))*7.6+14));x=Math.min(x,592-w);return `<g transform="translate(${x} ${y})"><rect class="tag" width="${w}" height="${lines.length*16+8}" rx="3"/>${lines.map((l,k)=>`<text class="tagt" x="7" y="${17+k*16}">${esc(l)}</text>`).join('')}</g>`}
@@ -925,18 +918,26 @@ function sRoute(o){
   WP.forEach((p,i)=>{g+=(i===0||i===4)?apt(p[0],p[1],true):wpSym(p[0],p[1],i===1);
     g+=`<text class="wl" x="${Math.min(565,Math.max(38,p[0]))}" y="${p[1]+(i%2?-16:28)}" text-anchor="middle">${esc(names[i].toUpperCase())}</text>`;
     if(codes[i])g+=`<text class="sl" x="${Math.min(565,Math.max(38,p[0]))}" y="${p[1]+40}" text-anchor="middle">${esc(codes[i])}</text>`});
-  if(o.cell){g+=`<g><circle class="wx1" cx="372" cy="150" r="40"/><circle class="wx2" cx="378" cy="146" r="27"/><circle class="wx3" cx="382" cy="143" r="14"/><circle class="wx4" cx="384" cy="142" r="5"/></g><text class="warnt" x="420" y="232">TS · CB TOPS FL400</text>`}
-  const a=atWP(2.2),b=atWP(2.9),c=[350,64];
-  if(o.dev){g+=`<path class="awy dev" d="M${a[0]},${a[1]} Q${c[0]},${c[1]} ${b[0]},${b[1]}"/><text class="lvt" x="300" y="92">10 NM LEFT</text>`}
+  /* the storm cell sits ON the track between the two points; the deviation goes round it on the side ATC approved */
+  const a=atWP(2.2),b=atWP(2.9),cm=atWP(2.55),dv=nrm(sub(b,a)),side=o.side==='right'?1:-1,nmD=o.nm||10,nL=[-dv[1]*side*-1,dv[0]*side*-1];
+  const lft=[dv[1],-dv[0]],nrmS=side<0?lft:[-lft[0],-lft[1]],K=118+nmD*2,mid=mul(add(a,b),.5),c=add(mid,mul(nrmS,K)),apex=add(mid,mul(nrmS,K/2));
+  if(o.cell){const q=cm;g+=`<g><circle class="wx1" cx="${q[0].toFixed(0)}" cy="${q[1].toFixed(0)}" r="40"/><circle class="wx2" cx="${(q[0]+6).toFixed(0)}" cy="${(q[1]-4).toFixed(0)}" r="27"/><circle class="wx3" cx="${(q[0]+10).toFixed(0)}" cy="${(q[1]-7).toFixed(0)}" r="14"/><circle class="wx4" cx="${(q[0]+12).toFixed(0)}" cy="${(q[1]-8).toFixed(0)}" r="5"/></g><text class="warnt" x="${(q[0]+(side<0?-20:-150)).toFixed(0)}" y="${(q[1]+(side<0?58:-48)).toFixed(0)}">TS · CB TOPS FL400</text>`}
+  const bz=f=>[(1-f)*(1-f)*a[0]+2*(1-f)*f*c[0]+f*f*b[0],(1-f)*(1-f)*a[1]+2*(1-f)*f*c[1]+f*f*b[1]],bzP=(f0,f1)=>{const o2=[];for(let f=f0;f<f1;f+=.05)o2.push(bz(f));o2.push(bz(f1));return o2};
+  if(o.dev){g+=`<path class="awy dev" d="M${a[0].toFixed(1)},${a[1].toFixed(1)} Q${c[0].toFixed(1)},${c[1].toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}"/><text class="lvt" x="${apex[0].toFixed(0)}" y="${(apex[1]+(side<0?-10:18)).toFixed(0)}" text-anchor="middle">${nmD} NM ${side<0?'LEFT':'RIGHT'}</text>`}
   let x,y,h;
-  if(o.dev&&!o.back){const t=.55;x=(1-t)*(1-t)*a[0]+2*(1-t)*t*c[0]+t*t*b[0];y=(1-t)*(1-t)*a[1]+2*(1-t)*t*c[1]+t*t*b[1];h=-8;
-    g+=mv(`M${a[0]},${a[1]} Q${c[0]},${c[1]} ${b[0]},${b[1]}`,[x,y,h],{dur:7,rep:'indefinite'})}
-  else{const e=atWP(o.pos),s=atWP(Math.max(0,o.pos-.2));[x,y,h]=e;g+=mv(`M${s[0]},${s[1]} L${e[0]},${e[1]}`,e,{dur:3})}
+  if(o.dev&&!o.back){const e=bz(.55),e2=bz(.6);x=e[0];y=e[1];h=angDeg(sub(e2,e));g+=mv(pth(bzP(0,.55)),[x,y,h],{dur:6})}
+  else{/* continue from where the previous en-route picture left the aircraft; never jump backwards, never through the storm */
+    let pp=null,ppDev=false,latest=true;if(GCTX){for(let k=GCTX.i-1;k>=0;k--){const q=GCTX.steps[k].sc;if(!q)continue;if(q.t==='ground')break;if(q.t==='route'){const qp=q.dev&&!q.back?2.2:q.pos;if(latest&&q.dev&&!q.back)ppDev=true;latest=false;pp=pp===null?qp:Math.max(pp,qp)}}}
+    const pos=pp!==null?Math.max(o.pos,pp):o.pos,from=pp!==null?Math.min(pp,pos):Math.max(0,pos-.2);
+    const e=atWP(pos);[x,y,h]=e;
+    if(o.back&&ppDev){const pts=bzP(.55,1);for(let f=2.9;f<pos;f+=.1)pts.push(atWP(f));pts.push(e);g+=mv(pth(pts),e,{dur:6})}
+    else if(pos-from<.02)g+=pl(e[0],e[1],e[2]);
+    else{const pts=[];for(let f=from;f<pos;f+=.1)pts.push(atWP(f));pts.push(e);g+=mv(pth(pts),e,{dur:Math.min(6,2.5+(pos-from)*3)})}}
   const hr=h*Math.PI/180;g+=`<line class="vec" x1="${x}" y1="${y}" x2="${x+Math.cos(hr)*44}" y2="${y+Math.sin(hr)*44}"/>`;
   if(o.traffic){const r=(h+60)*Math.PI/180,tx=x+Math.cos(r)*85,ty=y+Math.sin(r)*85;g+=pl(tx,ty,h-120,'tr',.7)+`<line class="trl" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"/>`+tag(tx+12,ty-6,['TFC 2 O\'CLOCK','+1000 FT · 10 NM'],100)}
   g+=tag(Math.min(490,x+14),Math.max(4,y-50),[csShort(),(o.lvl||'FL320')+'  GS 450'],80);
-  if(o.report)g+=tag(14,14,o.rep||['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
-  if(o.mach)g+=tag(14,14,['SPEED CONTROL','M.78 OR GREATER'],120);
+  if(o.report)g+=tag(62,14,o.rep||['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
+  if(o.mach)g+=tag(62,14,['SPEED CONTROL',(()=>{const st=GCTX&&GCTX.steps[GCTX.i];const m=st&&/mach \.?(\d+) or (greater|less)/i.exec(st.atc||'');return m?'M.'+m[1]+' OR '+m[2].toUpperCase():'M.78 OR GREATER'})()],120);
   if(o.back)g+=banner(300,24,'BACK ON ROUTE','goodt','middle');
   g+=scaleBar(420,288,63,'30 NM')+northArrow(570,30,0);
   return SVG(g,'En-route chart');
@@ -945,42 +946,59 @@ function sRoute(o){
 /* ---- holding chart ---- */
 function sHold(o){
   const v=V(),mx=MSX(),hi=mx&&mx.holdInfo,fx=hi?hi.fix:(mx?mx.wps[4]:'KUVA'),frm=mx?mx.wps[3]:'BEKOT',hfl=hi?hi.fl:110;
+  /* drawn as cleared: inbound track and turn direction from the holding clearance */
+  const it=hi&&hi.it?hi.it:270,lh=!!(hi&&hi.lr==='left'),Y=y=>lh?300-y:y,sw=lh?0:1,ob=((it+180)%360)||360;
   let g=`<rect class="chart" width="600" height="300"/><path class="grat" d="M0,75H600M0,225H600M150,0V300M450,0V300"/>`;
   g+=`<path class="prot" d="M160,75 L470,75 A70,70 0 0 1 470,215 L160,215 A70,70 0 0 1 160,75 Z"/>`;
-  g+=`<path class="rt faint" d="M590,20 L420,180"/><text class="sl" x="530" y="36">FROM ${esc(frm)}</text>`;
-  g+=`<path class="hold" d="M420,180 L200,180 A30,30 0 0 1 200,120 L420,120 A30,30 0 0 1 420,180 Z"/>`;
-  g+=`<path class="harr" d="M330,180 L318,175 L318,185 Z"/><path class="harr" d="M290,120 L302,115 L302,125 Z"/>`;
-  g+=`<path class="wpc" d="M200,173 L206.5,185 L193.5,185 Z"/><text class="wl" x="186" y="205" text-anchor="end">${esc(fx)}</text>`;
-  g+=`<text class="lvt" x="310" y="200" text-anchor="middle">270°  INBOUND</text><text class="sl" x="310" y="112" text-anchor="middle">090°  OUTBOUND · 1 MIN</text><text class="sl" x="150" y="150" text-anchor="middle">R</text>`;
-  g+=mv('M420,180 L200,180 A30,30 0 0 1 200,120 L420,120 A30,30 0 0 1 420,180 Z',[310,180,180],{dur:12,rep:'indefinite'});
+  g+=`<path class="rt faint" d="M590,${Y(20)} L420,${Y(180)}"/><text class="sl" x="530" y="${Y(36)}">FROM ${esc(frm)}</text>`;
+  const HP=`M420,${Y(180)} L200,${Y(180)} A30,30 0 0 ${sw} 200,${Y(120)} L420,${Y(120)} A30,30 0 0 ${sw} 420,${Y(180)} Z`;
+  g+=`<path class="hold" d="${HP}"/>`;
+  g+=`<path class="harr" d="M330,${Y(180)} L318,${Y(175)} L318,${Y(185)} Z"/><path class="harr" d="M290,${Y(120)} L302,${Y(115)} L302,${Y(125)} Z"/>`;
+  g+=`<path class="wpc" d="M200,${Y(180)-7} L206.5,${Y(180)+5} L193.5,${Y(180)+5} Z"/><text class="wl" x="186" y="${Y(180)+25}" text-anchor="end">${esc(fx)}</text>`;
+  g+=`<text class="lvt" x="310" y="${Y(180)+(lh?-10:20)}" text-anchor="middle">${pad(it,3)}°  INBOUND</text><text class="sl" x="310" y="${Y(120)+(lh?20:-8)}" text-anchor="middle">${pad(ob,3)}°  OUTBOUND · 1 MIN</text><text class="sl" x="150" y="150" text-anchor="middle">${lh?'L':'R'}</text>`;
+  g+=mv(HP,[310,Y(180),180],{dur:12,rep:'indefinite'});
   g+=`<g transform="translate(70 70)"><circle class="msa" r="42"/><path class="msa" d="M0,-42 V42 M-42,0 H42"/><text class="sl" x="-21" y="-18" text-anchor="middle">8500</text><text class="sl" x="21" y="-18" text-anchor="middle">11200</text><text class="sl" x="-21" y="26" text-anchor="middle">6100</text><text class="sl" x="21" y="26" text-anchor="middle">7400</text><text class="sl" x="0" y="56" text-anchor="middle">MSA 25 NM</text></g>`;
   g+=tag(450,200,['STACK '+fx,'FL'+(hfl+20)+'  ·','FL'+(hfl+10)+'  ·','FL'+hfl+'  '+csShort()],110);
   g+=tag(14,214,['HOLD '+fx+' · FL'+hfl,'EXPECT APPROACH '+(hi?hi.eat:25)],132)+apt(108,276)+`<text class="wl" x="126" y="280">${esc(v.DST.toUpperCase())}</text>`;
   if(o.fuel)g+=`<g transform="translate(230 16)"><rect class="tag" width="146" height="26" rx="3"/><text class="warnt blink" x="73" y="18" text-anchor="middle">MINIMUM FUEL</text></g>`;
+  g+=northArrow(30,150,90-((it+180)%360));
   return SVG(g,'Holding chart');
 }
 
 /* ---- radar vectors to ILS (plan) ---- */
 function sVector(o){
   const v=V(),rw=o.dep?v.DR:v.AR;
-  let g=`<rect class="chart" width="600" height="300"/>`;
+  const crs=((parseInt(rw)||36)*10)%360||360,sd=o.side!==undefined?o.side:(MSX()&&MSX().vside)||1,fy=y=>sd>0?y:400-y;
+  let g=`<rect class="chart" width="600" height="300"/><g transform="translate(0 ${sd>0?0:-100})">`;
   for(const r of [150,300])g+=`<circle class="ringc" cx="470" cy="200" r="${r}"/><text class="sl" x="${470-r+4}" y="246">${r/30} NM</text>`;
   g+=`<polygon class="cone" points="470,200 220,174 220,226"/><line class="loc" x1="40" y1="200" x2="470" y2="200"/>`;
   for(let k=1;k<=14;k++){const x=470-k*30;g+=`<line class="tick" x1="${x}" y1="${k%5?196:192}" x2="${x}" y2="${k%5?204:208}"/>`}
   g+=`<rect class="asph" x="470" y="192" width="120" height="16"/>`+[0,1,2,3,4].map(k=>`<rect class="mk" x="473" y="${194.5+k*2.4}" width="10" height="1.3"/>`).join('')+`<text class="rnum" x="500" y="204">${esc(rw)}</text>`;
   g+=`<path class="faf" d="M320,193 L324,197 L328,193 L324,201 L328,207 L324,203 L320,207 L322,200 Z"/><text class="sl" x="324" y="224" text-anchor="middle">FAF 5 NM · 1600 FT</text>`;
-  g+=`<text class="sl" x="60" y="190">LOCALIZER ${esc(rw)} · 180°</text>`;
-  const P=['M80,30 L250,130','M250,130 L300,160 Q330,200 370,200','M370,200 L465,200'],E=[[250,130,30],[370,200,0],[465,200,0]];
+  g+=`<text class="sl" x="60" y="${sd>0?216:190}">LOCALIZER ${esc(rw)} · ${pad(crs,3)}°</text>`;
+  /* base leg at 90° to the course, then a 30° intercept onto the localizer (screen right = final approach course) */
+  /* smooth turns: base leg, a rate-one turn onto the 30° intercept heading, then a smooth turn onto the localizer */
+  const P=[`M120,${fy(68)} L120,${fy(114)}`,`M120,${fy(114)} C120,${fy(138)} 131,${fy(150)} 150,${fy(161)} L190,${fy(184)} C204,${fy(192)} 214,200 236,200`,'M236,200 L465,200'],E=[[120,fy(114),sd>0?90:-90],[236,200,0],[465,200,0]];
   for(let i=0;i<o.stage;i++)g+=`<path class="route" d="${P[i]}"/>`;
-  if(o.stage===1)g+=`<text class="lvt" x="300" y="150">INTERCEPT 30°</text>`;
+  g+=`<path class="route" d="${P[o.stage]}" opacity=".45"/>`;/* the cleared trajectory of this step is shown too */
+  if(o.stage===1)g+=`<text class="lvt" x="178" y="${fy(150)}">INTERCEPT 30°</text>`;
   g+=mv(P[o.stage],E[o.stage],{dur:5});
-  g+=tag(58,12,[[o.hdg?'HDG '+o.hdg+' · '+o.alt+' FT':'HDG 210 · 4000 FT',o.hdg?'HDG '+o.hdg+' · CLEARED ILS '+rw:'HDG 200 · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH '+(MSX()?MSX().qnhA:1018)],150);
-  g+=northArrow(570,30,0);
+  g+='</g>';
+  const hb=pad(((crs+90*sd)%360+360)%360||360,3),hi2=pad(((crs+30*sd)%360+360)%360||360,3);
+  g+=tag(58,12,[[(o.hdg?'HDG '+o.hdg:'HDG '+hb)+' · '+(o.alt||4000)+' FT',(o.hdg?'HDG '+o.hdg:'HDG '+hi2)+' · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH '+(MSX()?MSX().qnhA:1018)],150);
+  g+=northArrow(570,30,90-crs);
   return SVG(g,'Radar vectors to ILS');
 }
 
 /* ---- vertical profiles ---- */
 function sky(id){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient></defs><rect width="600" height="300" fill="url(#${id})"/>`}
+/* level state through the flight: where each climb/descent picture starts and ends */
+function profState(steps,i){const isP=x=>x&&x.sc&&x.sc.t==='profile'&&['climb','descent','level','expedite'].includes(x.sc.mode);
+  const prevIdx=k=>{for(let j=k-1;j>=0;j--){const q=steps[j].sc;if(!q)continue;if(q.t==='ground'||(q.t==='profile'&&['final','goaround','lowpass'].includes(q.mode)))return -1;if(isP(steps[j]))return j}return -1};
+  const nextIdx=k=>{for(let j=k+1;j<steps.length;j++){const q=steps[j].sc;if(!q)continue;if(q.t==='ground')return -1;if(isP(steps[j]))return j}return -1};
+  const endOf=(k,depth)=>{const o=steps[k].sc;if(o.mode==='level')return o.a;const s0=startOf(k,depth);const nk=nextIdx(k);if(nk>=0){const n=steps[nk].sc;if(n.mode===o.mode&&n.b===o.b&&n.a!==undefined){if(o.mode==='climb'?n.a>s0&&n.a<o.b:n.a<s0&&n.a>o.b)return n.a;/* the same climb continues on the next step: only part of it here */return Math.round(s0+(o.b-s0)/2)}}return o.b};
+  const startOf=(k,depth)=>{const o=steps[k].sc;if(depth>12)return o.a;const pk=prevIdx(k);if(pk<0)return o.a;const pe=endOf(pk,depth+1);const lo=Math.min(o.a,o.b),hi=Math.max(o.a,o.b);return pe>=lo&&pe<=hi?pe:o.a};
+  const o=steps[i].sc;const pk=prevIdx(i);return {s:startOf(i,0),e:endOf(i,0),prevEnd:pk>=0?endOf(pk,1):null}}
 function sProf(o){
   const v=V(),rw=o.dep?v.DR:v.AR,id='k'+(++UID);
   let g=sky(id);
@@ -996,35 +1014,57 @@ function sProf(o){
     g+=`<path class="mkr" d="M${X(4)-6},266 L${X(4)},252 L${X(4)+6},266 Z"/><text class="sl" x="${X(4)}" y="248" text-anchor="middle">OM</text><path class="mkr" d="M${X(.6)-5},266 L${X(.6)},255 L${X(.6)+5},266 Z"/><text class="sl" x="${X(.6)}" y="250" text-anchor="middle">MM</text>`;
     g+=`<line class="lvl" x1="0" y1="${Y(200)}" x2="440" y2="${Y(200)}"/><text class="sl" x="6" y="${Y(200)-5}">DA 200 FT</text>`;
     const sd={d:ACS,s:.8};
-    if(o.mode==='final'){const land=o.p===6;g+=mv(land?`M${X(5)},${Y(1600)} L440,${Y(50)} Q452,264 470,264 L540,264`:`M${X(5)},${Y(1600)} L${X(.4)},${Y(130)}`,land?[540,264,0]:[X(.4),Y(130),8.5],Object.assign({dur:land?9:8,rep:'indefinite'},sd));
+    if(o.mode==='final'){const cur=GCTX&&GCTX.steps[GCTX.i],prv=GCTX&&GCTX.steps[GCTX.i-1];const land=o.p===6||!!(cur&&/cleared to land/i.test(cur.atc||''));
+      const prvFinal=!!(prv&&prv.sc&&prv.sc.t==='profile'&&prv.sc.mode==='final'),gsY=nm=>Y(50+1550*nm/5),m25=[X(2.5),gsY(2.5)];
+      const nxt=GCTX&&GCTX.steps[GCTX.i+1],gaNext=!!(nxt&&nxt.sc&&nxt.sc.t==='profile'&&nxt.sc.mode==='goaround');
+      if(land&&gaNext){/* the go-around comes next: it is still on short final here */g+=mv(`M${prvFinal?m25[0]+','+m25[1]:X(5)+','+Y(1600)} L${X(1)},${gsY(1)}`,[X(1),gsY(1),8.5],Object.assign({dur:5},sd));g+=tag(240,12,['ILS RWY '+rw,'CLEARED TO LAND'],120);return SVG(g,'Approach profile')}
+      /* on final: down the glide slope to 2.5 NM; cleared to land: continue from there, touch down and roll out */
+      if(!land&&prvFinal)g+=pl(m25[0],m25[1],8.5,'ac',sd.s,sd.d);else
+      g+=mv(land?`M${prvFinal?m25[0]+','+m25[1]:X(5)+','+Y(1600)} L440,${Y(50)} Q452,264 470,264 L540,264`:`M${X(5)},${Y(1600)} L${m25[0]},${m25[1]}`,land?[540,264,0]:[m25[0],m25[1],8.5],Object.assign({dur:land?(prvFinal?7:9):6,ease:land?'.2 0 .6 1':undefined},sd));
       g+=tag(240,12,['ILS RWY '+rw,land?'CLEARED TO LAND':'ESTABLISHED'],120);
       if(o.medical)g+=`<g transform="translate(560 252)"><rect class="amb" x="-12" y="-7" width="24" height="13" rx="2"/><path class="crossr" d="M-2,-5 H2 V-2 H5 V2 H2 V5 H-2 V2 H-5 V-2 H-2 Z"/></g><text class="sl" x="592" y="240" text-anchor="end">AMBULANCE</text>`}
-    else if(o.mode==='lowpass'){g+=`<line class="lvl clr" x1="300" y1="${Y(500)}" x2="600" y2="${Y(500)}"/><text class="lvt" x="595" y="${Y(500)-6}" text-anchor="end">NOT BELOW 500 FT</text>`+mv(`M${X(5)},${Y(1600)} L${X(1.6)},${Y(500)} L540,${Y(500)} L600,${Y(800)}`,[560,Y(500),0],Object.assign({dur:8,rep:'indefinite'},sd));
+    else if(o.mode==='lowpass'){g+=`<line class="lvl clr" x1="300" y1="${Y(500)}" x2="600" y2="${Y(500)}"/><text class="lvt" x="595" y="${Y(500)-6}" text-anchor="end">NOT BELOW 500 FT</text>`+mv(`M${X(5)},${Y(1600)} L${X(1.6)},${Y(500)} L540,${Y(500)} L600,${Y(800)}`,[560,Y(500),0],Object.assign({dur:8},sd));
       g+=`<g transform="translate(520 266)"><rect class="twr" x="-3" y="-34" width="6" height="34"/><path class="twrcab" d="M-9,-34 L9,-34 L7,-44 L-7,-44 Z"/></g><text class="sl" x="532" y="232">TOWER</text>`+banner(300,24,'LOW PASS · GEAR CHECK','goodt','middle')}
-    else if(o.ws){g+=`<g class="dd">${[300,330,360].map(x=>`<path d="M${x},150 V196 M${x-5},189 L${x},197 L${x+5},189"/>`).join('')}</g>`+mv(`M${X(5)},${Y(1600)} L${X(2)},${Y(600)} Q${X(1.7)},${Y(520)} ${X(1.3)},${Y(700)} L600,${Y(2400)}`,[600,Y(2400),-28],Object.assign({dur:8,rep:'indefinite'},sd))+`<text class="warnt blink" x="330" y="140" text-anchor="middle">WINDSHEAR · −20 KT AT 600 FT</text>`+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
-    else{g+=`<rect class="truckr" x="500" y="255" width="18" height="9" rx="1"/><circle class="lr blink" cx="509" cy="253" r="2"/><text class="warnt blink" x="509" y="244" text-anchor="middle">VEHICLE ON RUNWAY</text>`+mv(`M${X(5)},${Y(1600)} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L600,${Y(1500)}`,[600,Y(1500),-30],Object.assign({dur:8,rep:'indefinite'},sd))+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
+    else if(o.ws){g+=`<g class="dd">${[300,330,360].map(x=>`<path d="M${x},150 V196 M${x-5},189 L${x},197 L${x+5},189"/>`).join('')}</g>`+mv(`M${X(5)},${Y(1600)} L${X(2)},${Y(600)} Q${X(1.7)},${Y(520)} ${X(1.3)},${Y(700)} L600,${Y(2400)}`,[600,Y(2400),-28],Object.assign({dur:8},sd))+`<text class="warnt blink" x="330" y="140" text-anchor="middle">WINDSHEAR · −20 KT AT 600 FT</text>`+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
+    else{const why=o.why||'vehicle',prv=GCTX&&GCTX.steps[GCTX.i-1],fromFinal=!!(prv&&prv.sc&&prv.sc.t==='profile'&&prv.sc.mode==='final'),gsY=nm=>Y(50+1550*nm/5);
+      /* the reason is drawn as it was given */
+      if(why==='vehicle')g+=`<rect class="truckr" x="500" y="255" width="18" height="9" rx="1"/><circle class="lr blink" cx="509" cy="253" r="2"/><text class="warnt blink" x="509" y="244" text-anchor="middle">VEHICLE ON RUNWAY</text>`;
+      else if(why==='traffic')g+=pl(505,262,0,'tr',.6,ACS)+`<text class="warnt blink" x="505" y="244" text-anchor="middle">RUNWAY NOT VACATED</text>`;
+      else if(why==='birds')g+=[0,1,2,3,4,5].map(k=>`<path class="turbg" d="M${470+k*14},${250-(k%2)*6} q4,-4 8,0 q4,-4 8,0"/>`).join('')+`<text class="warnt blink" x="510" y="234" text-anchor="middle">BIRDS ON RUNWAY</text>`;
+      const st0=fromFinal?`M${X(1)},${gsY(1)}`:`M${X(5)},${Y(1600)}`;
+      g+=mv(`${st0} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L600,${Y(1500)}`,[600,Y(1500),-30],Object.assign({dur:fromFinal?6:8},sd))+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
     return SVG(g,'Approach profile');
   }
-  const L=uniq([o.a,o.b,o.m].filter(Boolean)),lo=Math.max(0,Math.min(...L)-35),hi=Math.max(...L)+30,Y=f=>262-(f-lo)/(hi-lo)*220;
+  const L=uniq([o.a,o.b,o.m].filter(Boolean));
+  /* one altitude scale for the whole climb or descent phase, so the aircraft keeps its height from picture to picture */
+  let SL=L.slice();if(GCTX){const S2=GCTX.steps,isLv=q=>q&&q.t==='profile'&&['climb','descent','level','expedite','turb','tcas'].includes(q.mode),stop=q=>q&&(q.t==='ground'||(q.t==='profile'&&!isLv(q))||q.t==='vector'||q.t==='hold');
+    for(let k=GCTX.i;k>=0;k--){const q=S2[k].sc;if(stop(q))break;if(isLv(q))SL.push(...[q.a,q.b,q.m].filter(Boolean))}
+    for(let k=GCTX.i+1;k<S2.length;k++){const q=S2[k].sc;if(stop(q))break;if(isLv(q))SL.push(...[q.a,q.b,q.m].filter(Boolean))}}
+  const lo=Math.max(0,Math.min(...SL)-35),hi=Math.max(...SL)+30,Y=f=>262-(f-lo)/(hi-lo)*220;
   if(hi>290){const top=Y(Math.min(hi,410)),bot=Y(Math.max(lo,290));g+=`<rect class="rvsmb" x="46" y="${top}" width="554" height="${bot-top}"/><text class="sl" x="594" y="${top+14}" text-anchor="end">RVSM FL290–FL410</text>`}
-  g+=`<path class="terr" d="M0,300 L0,276 L40,268 L80,279 L130,258 L170,270 L220,252 L260,266 L320,247 L360,262 L420,250 L470,268 L520,256 L560,270 L600,262 L600,300 Z"/>`;
-  g+=cloud(150,Y(lo+12),.9)+cloud(420,Y(lo+20),.7);
+  {/* ground and clouds drift past: the aircraft is flying forward */const bg=`<path class="terr" d="M0,300 L0,276 L40,268 L80,279 L130,258 L170,270 L220,252 L260,266 L320,247 L360,262 L420,250 L470,268 L520,256 L560,270 L600,262 L600,300 Z"/>`+cloud(150,Y(lo+12),.9)+cloud(420,Y(lo+20),.7);
+   g+=`<g>${RM?'':'<animateTransform attributeName="transform" type="translate" from="0 0" to="-600 0" dur="40s" repeatCount="indefinite"/>'}${bg}<g transform="translate(600 0)">${bg}</g></g>`}
   g+=`<rect class="axis" x="0" y="0" width="46" height="300"/>`;
   const step=(hi-lo)>150?50:(hi-lo)>70?20:10;
   for(let f=Math.ceil(lo/step)*step;f<=hi;f+=step)g+=`<line class="tick" x1="40" y1="${Y(f)}" x2="46" y2="${Y(f)}"/><text class="axl" x="37" y="${Y(f)+4}" text-anchor="end">${f}</text>`;
   g+=`<text class="axl" x="6" y="14">FL</text>`;
   L.forEach(l=>{const clr=l===(o.b||o.a);g+=`<line class="lvl ${clr?'clr':''}" x1="46" y1="${Y(l)}" x2="600" y2="${Y(l)}"/>`+(clr?`<g transform="translate(46 ${Y(l)})"><rect class="cfl" x="6" y="-17" width="66" height="14" rx="2"/><text class="cflt" x="39" y="-6" text-anchor="middle">CFL ${l}</text></g>`:`<text class="sl" x="52" y="${Y(l)-5}">FL${l}</text>`)});
   const ya=Y(o.a),yb=o.b?Y(o.b):ya,sd={d:ACS,s:.85};
-  if(o.mode==='climb')g+=mv(`M60,${ya} C220,${ya} 260,${yb} 380,${yb} L580,${yb}`,[575,yb,0],Object.assign({dur:7},sd));
-  if(o.mode==='expedite'){const ym=Y(o.m);g+=`<line class="lvl" x1="46" y1="${ym}" x2="600" y2="${ym}"/><text class="lvt" x="52" y="${ym-5}">EXPEDITE UNTIL FL${o.m}</text>`+mv(`M60,${ya} L200,${ym} L340,${yb} L580,${yb}`,[575,yb,0],Object.assign({dur:7},sd))}
-  if(o.mode==='level')g+=mv(`M60,${ya} L590,${ya}`,[320,ya,0],Object.assign({dur:10,rep:'indefinite'},sd));
-  if(o.mode==='descent')g+=mv(`M60,${ya} L200,${ya} C320,${ya} 360,${yb} 460,${yb} L580,${yb}`,[575,yb,0],Object.assign({dur:7},sd));
-  if(o.mode==='turb'){g+=cb(400,ya+60,ya-70);let d=`M60,${ya}`;for(let x=80;x<=590;x+=20)d+=` L${x},${ya+(x/20%2?-8:8)}`;g+=mv(d,[320,ya,0],Object.assign({dur:10,rep:'indefinite'},sd));
+  /* level changes continue from the previous picture: a climb shown once is not shown again; a "passing" report continues from where it was */
+  const PS=GCTX?profState(GCTX.steps,GCTX.i):null;
+  /* the aircraft stays in the middle of the picture and only changes level; the ground and clouds move past it */
+  const lvMove=(st,en)=>{const x0=300;if(Math.abs(en-st)<.5)return pl(x0,Y(en),0,'ac',sd.s,sd.d);const up=en>st;
+    return mv(`M${x0},${Y(st).toFixed(1)} L${x0},${Y(en).toFixed(1)}`,[x0,Y(en),0],Object.assign({dur:Math.max(3,Math.min(8,Math.abs(en-st)/20+2)),rot:up?'-10':'8',ease:'.4 0 .6 1'},sd))};
+  if(o.mode==='climb'||o.mode==='descent'){const st=PS?PS.s:o.a,en=PS?PS.e:o.b;g+=lvMove(st,en)}
+  if(o.mode==='expedite'){const ym=Y(o.m);g+=`<line class="lvl" x1="46" y1="${ym}" x2="600" y2="${ym}"/><text class="lvt" x="52" y="${ym-5}">EXPEDITE UNTIL FL${o.m}</text>`+mv(`M300,${ya} L300,${ym} L300,${yb}`,[300,yb,0],Object.assign({dur:6,rot:o.b>o.a?'-12':'10'},sd))}
+  if(o.mode==='level')g+=pl(300,ya,0,'ac',sd.s,sd.d);
+
+  if(o.mode==='turb'){g+=cb(400,ya+60,ya-70);let d=`M300,${ya}`;for(let k=1;k<=16;k++)d+=` L300,${ya+(k%2?-7:7)*(1-k/20)}`;d+=` L300,${ya}`;g+=mv(d,[300,ya,0],Object.assign({dur:6,rot:'0'},sd));
     for(const x of [140,250,520])g+=`<path class="turbg" d="M${x},${ya-28} q6,-6 12,0 t12,0 t12,0"/>`;g+=banner(300,24,'SEVERE TURBULENCE · UNABLE RVSM','warnt','middle')}
-  if(o.mode==='tcas'){g+=mv(`M60,${ya} L240,${ya} Q300,${ya} 360,${ya-42} L580,${ya-58}`,[575,ya-58,-4],Object.assign({dur:6},sd))+mv(`M620,${ya+3} L-20,${ya+3}`,[230,ya+3,0],{dur:6,cls:'tr',s:.75,d:ACSL,rot:'0'});
+  if(o.mode==='tcas'){g+=mv(`M300,${ya} L300,${ya-50}`,[300,ya-50,0],Object.assign({dur:4,rot:'-12',ease:'.3 0 .6 1'},sd))+mv(`M620,${ya+3} L-20,${ya+3}`,[230,ya+3,0],{dur:6,cls:'tr',s:.75,d:ACSL,rot:'0'});
     g+=`<g transform="translate(130 14)"><rect class="vsi" x="0" y="0" width="70" height="120" rx="6"/><rect class="vsired" x="8" y="64" width="8" height="48"/><rect class="vsigrn" x="8" y="10" width="8" height="40"/><path class="vsiarr" d="M38,58 L38,22 M30,32 L38,20 L46,32"/><text class="rat" x="35" y="76" text-anchor="middle">CLIMB</text><text class="sl" x="35" y="100" text-anchor="middle">TCAS RA</text></g>`}
   if(o.mode==='clear'){g+=pl(90,ya+3,0,'tr',.6,ACSL)+mv(`M60,${ya-58} L260,${ya-58} Q320,${ya-58} 380,${ya} L580,${ya}`,[575,ya,0],Object.assign({dur:6},sd))+banner(300,24,'CLEAR OF CONFLICT','goodt','middle')}
-  {const fl=o.b||o.a;g+=tag(300,224,[csShort(),o.note||(fl>=290&&fl<=410?'RVSM · FL'+fl:(o.mode==='descent'?'DESCEND FL'+fl:o.mode==='climb'?'CLIMB FL'+fl:'FL'+fl))],110)}
+  {const fl=o.b||o.a;g+=tag(380,40,[csShort(),o.note||(fl>=290&&fl<=410?'RVSM · FL'+fl:(o.mode==='descent'?'DESCEND FL'+fl:o.mode==='climb'?'CLIMB FL'+fl:'FL'+fl))],110)}
   return SVG(g,'Vertical profile');
 }
 
@@ -1139,7 +1179,8 @@ function gEdge(G,i,j,n){if(i===j)return;const w=dist(G.N[i],G.N[j]);G.adj[i].pus
 function gAttach(G,p){let best=null;G.segs.forEach(s=>{const pr=projSeg(p,s.a,s.b);if(!best||pr.d<best.d)best=Object.assign(pr,{s})});if(!best)return -1;
   const qi=gNode(G,best.q);const on=G.N.map((n,i)=>({i,pr:projSeg(n,best.s.a,best.s.b)})).filter(x=>x.pr.d<2&&x.i!==qi);
   const bf=on.filter(x=>x.pr.t<=best.t).sort((a,b)=>b.pr.t-a.pr.t)[0],af=on.filter(x=>x.pr.t>=best.t).sort((a,b)=>a.pr.t-b.pr.t)[0];
-  [bf,af].forEach(x=>{if(x)gEdge(G,qi,x.i,best.s.n)});return qi}
+  if(bf&&af&&bf.i!==af.i){/* the new node splits that edge: drop the direct edge so no path can skip over it */G.adj[bf.i]=G.adj[bf.i].filter(e=>e.j!==af.i);G.adj[af.i]=G.adj[af.i].filter(e=>e.j!==bf.i)}
+  [bf,af].forEach(x=>{if(x&&!G.adj[qi].some(e=>e.j===x.i))gEdge(G,qi,x.i,best.s.n)});return qi}
 function gPath(G,s,e){if(s<0||e<0)return null;const D=G.N.map(()=>Infinity),P=G.N.map(()=>null),done=G.N.map(()=>false);D[s]=0;
   for(;;){let u=-1;for(let i=0;i<D.length;i++)if(!done[i]&&D[i]<Infinity&&(u<0||D[i]<D[u]))u=i;if(u<0||u===e)break;done[u]=true;
     for(const ed of G.adj[u])if(D[u]+ed.w<D[ed.j]){D[ed.j]=D[u]+ed.w;P[ed.j]={u,n:ed.n}}}
@@ -1162,11 +1203,17 @@ function groundPlan(ad){
     const s0=gAttach(G,P.pb),e0=gAttach(G,hp.p),pa=gPath(G,s0,e0);
     if(pa){P.ok=true;P.pts=[P.pb,...pa.pts,hp.p].filter((p,i,a)=>i===0||dist(p,a[i-1])>1);{const n=P.pts.length;if(n>1){const d=nrm(sub(P.pts[n-1],P.pts[n-2])),l=dist(P.pts[n-1],P.pts[n-2]);P.pts[n-1]=sub(hp.p,mul(d,Math.min(9,l*.6)))}}
       const nm=[];pa.names.forEach(n=>{if(n&&nm[nm.length-1]!==n)nm.push(n)});if(nm.length>1&&hp.n&&nm[nm.length-1]===hp.n)nm.pop();P.names=nm}
-    const nx=P.pts[1]||add(P.pb,mul(sd,-10));P.face=hdgOf(P.pb,nx)}
+    const nx=P.pts[1]||add(P.pb,mul(sd,-10));P.face=hdgOf(P.pb,nx);
+    /* arrival: the runway exit you vacate by, and the taxi route from it to your stand */
+    {let X=-1,bt=9;G.N.forEach((n,i)=>{const pr=projSeg(n,A,B);if(pr.d>45||pr.t<.4||pr.t>.97||!G.adj[i].length)return;if(dist(n,hp.p)<20)return;const sc=Math.abs(pr.t-.66)+(pr.d>12?1:0)+pr.d/100;if(sc<bt){bt=sc;X=i}});
+     if(X>=0&&s0>=0){const pa2=gPath(G,X,s0);if(pa2){const xc=projSeg(G.N[X],A,B).q,pts=[G.N[X],...pa2.pts.slice(1),P.pb,st.p].filter((q,i,a)=>i===0||dist(q,a[i-1])>1);
+       const nb=pts[1]||P.pb,v=nrm(sub(nb,G.N[X])),cr=u[0]*v[1]-u[1]*v[0];const nm=[];pa2.names.forEach(n=>{if(n&&nm[nm.length-1]!==n)nm.push(n)});
+       const exN=nm[0]||(hp.n||'');const rest=nm.slice(1);P.ex={X:G.N[X],xc,pts,name:exN,side:cr>0?'right':'left',names:rest,txr:rest.length?rest.map(nameSpk).join(', '):'the apron',txrx:rest.length?rest.map(nameRx).join('.*'):''}}}}}
   if(hp){P.E=projSeg(hp.p,A,B).q;P.E2=add(P.E,mul(u,16))}
   P.std=st?st.n:'4';P.txr=P.names.length?P.names.map(nameSpk).join(', '):'the apron';P.txrx=P.names.length?P.names.map(nameRx).join('.*'):'';
   P.hpn=hp&&hp.n?nameSpk(hp.n):'';P.facing=compass(P.face||0);
-  planCache[key]=P;return P;
+  if(P.ok){let acc=0;for(let k=1;k<P.pts.length&&!P.cross;k++){const a=P.pts[k-1],b=P.pts[k];for(const r2 of L.rwy){if(r2===rw)continue;const x=segX(a,b,r2.a,r2.b);if(x){const d=r2.d.filter(z=>z!=='—');P.cross={rw:r2,d:d[0],at:acc+dist(a,x)};break}}acc+=dist(a,b)}}
+  P.G=G;planCache[key]=P;return P;
 }
 const pth=pts=>'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');
 function lastHdg(pts){const n=pts.length;return n>1?angDeg(sub(pts[n-1],pts[n-2])):0}
@@ -1241,6 +1288,11 @@ function renderMin(L,o){
 }
 /* flat illustrated aerodrome (style of the reference pictures) */
 function rp(pts){return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')}
+/* a parked aircraft is drawn only where it cannot sit on a taxiway or next to a runway */
+function standClear(L,s){const ck=s.p.join(',')+'|'+L.twy.length+'|'+L.rwy.length;if(s._clr&&s._clr.k===ck)return s._clr.v;let ok=true;
+  for(const t of L.twy){for(let k=0;k<t.p.length-1&&ok;k++)if(projSeg(s.p,t.p[k],t.p[k+1]).d<13)ok=false;if(!ok)break}
+  if(ok)for(const rw of L.rwy)if(projSeg(s.p,rw.a,rw.b).d<26){ok=false;break}
+  try{Object.defineProperty(s,'_clr',{value:{k:ck,v:ok},enumerable:false,configurable:true,writable:true})}catch(e){}return ok}
 function renderFlat(L,o){
   const R=9;let pave='',cl='';
   /* fillets at taxiway junctions */
@@ -1258,7 +1310,7 @@ function renderFlat(L,o){
   /* stands: lead-in lines, parked aircraft, numbers */
   L.std.forEach((s,k)=>{const d=dirH(s.h),own=o.own===s.n,b=sub(s.p,mul(d,24)),nose=add(s.p,mul(d,9)),lp=add(s.p,mul(d,14));
     g+=`<path class="fcl" d="M${b[0].toFixed(1)},${b[1].toFixed(1)} L${nose[0].toFixed(1)},${nose[1].toFixed(1)}"/>`;
-    if(o.parked&&!own&&k%2===0)g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5);
+    if(o.parked&&!own&&k%2===0&&s.n!==o.skip&&standClear(L,s))g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5);
     g+=`<text class="fstn ${own?'mine':''}" x="${lp[0].toFixed(1)}" y="${(lp[1]+3).toFixed(1)}" text-anchor="middle">${esc(s.n)}</text>`});
   L.bld.forEach(b=>{const xs=b.p.map(p=>p[0]),ys=b.p.map(p=>p[1]);g+=`<polygon class="fterm" points="${PTS(b.p)}"/><text class="ftlab" x="${(Math.min(...xs)+Math.max(...xs))/2}" y="${(Math.min(...ys)+Math.max(...ys))/2+3}" text-anchor="middle">${esc(b.n||'')}</text>`});
   /* runways */
@@ -1273,66 +1325,263 @@ function renderFlat(L,o){
     if(l>140){g+=ln(P(84,0),P(l-84,0),'fcen')}});
   /* holding points: marking + signs */
   const segs=[];L.twy.forEach(t=>{for(let k=0;k<t.p.length-1;k++)segs.push([t.p[k],t.p[k+1]])});
-  L.hp.forEach(h=>{let best=null;segs.forEach(sg=>{const pr=projSeg(h.p,sg[0],sg[1]);if(!best||pr.d<best.d)best=Object.assign(pr,{s:sg})});
+  const SG=[],ovl=(a,b)=>a[0]<b[2]+2&&b[0]<a[2]+2&&a[1]<b[3]+1&&b[1]<a[3]+1;/* signs never overlap each other */
+  L.hp.slice().sort((a,b)=>(o.hp===b)-(o.hp===a)).forEach(h=>{let best=null;segs.forEach(sg=>{const pr=projSeg(h.p,sg[0],sg[1]);if(!best||pr.d<best.d)best=Object.assign(pr,{s:sg})});
     const u=best?nrm(sub(best.s[1],best.s[0])):[1,0],n=[-u[1],u[0]],act=o.hp===h;
     for(const [k,c] of [[-1.8,'fhp'],[-.6,'fhp'],[.6,'fhp fhpd'],[1.8,'fhp fhpd']]){const q=add(h.p,mul(u,k)),a=add(q,mul(n,-6)),b=add(q,mul(n,6));g+=`<line class="${c}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`}
     const rw=L.rwy.find(r=>r.d.includes(String(h.r).toUpperCase())),side=rw?(((rw.a[0]+rw.b[0])/2-h.p[0])*n[0]+((rw.a[1]+rw.b[1])/2-h.p[1])*n[1]>=0?1:-1):1,sp=add(h.p,mul(n,(act?24:13)*side));
     const lab=act&&rw?rw.d.filter(x=>x!=='—').join('-'):'',nm=h.n||'',w1=lab?lab.length*6+6:0,w2=nm.length*6.5+6,x0=sp[0]-(w1+w2)/2;
+    const rc=[x0,sp[1]-5.5,x0+w1+w2+1,sp[1]+5.5];if((lab||nm)&&!act&&SG.some(q=>ovl(q,rc)))return;if(lab||nm)SG.push(rc);
     if(lab||nm)g+=`<g transform="translate(${x0.toFixed(1)} ${(sp[1]-5.5).toFixed(1)})">${lab?`<rect class="sgnR" width="${w1}" height="11" rx="1.5"/><text class="sgnT" x="3" y="8.5">${esc(lab)}</text>`:''}${nm?`<rect class="sgnK" x="${w1?w1+1:0}" width="${w2}" height="11" rx="1.5"/><text class="sgnY" x="${(w1?w1+1:0)+3}" y="8.5">${esc(nm)}</text>`:''}</g>`});
   const hpN=new Set(L.hp.map(h=>h.n)),onRoute=new Set(o.route||[]);
-  L.twy.forEach(t=>{if(!t.n||t.p.length<2||hpN.has(t.n))return;let bi=0,bl=0;for(let k=0;k<t.p.length-1;k++){const d=dist(t.p[k],t.p[k+1]);if(d>bl){bl=d;bi=k}}if(bl<22)return;const m=mul(add(t.p[bi],t.p[bi+1]),.5);
-    g+=`<g transform="translate(${(m[0]-t.n.length*3.4-3).toFixed(1)} ${(m[1]-5.5).toFixed(1)})"><rect class="sgnK ${onRoute.has(t.n)?'onr':''}" width="${t.n.length*6.8+6}" height="11" rx="1.5"/><text class="sgnY" x="3" y="8.5">${esc(t.n)}</text></g>`});
+  L.twy.filter(t=>t.n&&t.p.length>1&&!hpN.has(t.n)).sort((a,b)=>onRoute.has(b.n)-onRoute.has(a.n)).forEach(t=>{
+    const cand=[];for(let k=0;k<t.p.length-1;k++){const d=dist(t.p[k],t.p[k+1]);if(d>=22)cand.push({k,d})}cand.sort((a,b)=>b.d-a.d);const w=t.n.length*6.8+6;
+    for(const c of cand){for(const f of [.5,.3,.7]){const m=add(t.p[c.k],mul(sub(t.p[c.k+1],t.p[c.k]),f)),x=m[0]-t.n.length*3.4-3,rc=[x,m[1]-5.5,x+w,m[1]+5.5];if(SG.some(q=>ovl(q,rc)))continue;SG.push(rc);
+      g+=`<g transform="translate(${x.toFixed(1)} ${(m[1]-5.5).toFixed(1)})"><rect class="sgnK ${onRoute.has(t.n)?'onr':''}" width="${w}" height="11" rx="1.5"/><text class="sgnY" x="3" y="8.5">${esc(t.n)}</text></g>`;return}}});
   if(L.twr){const [x,y]=L.twr;g+=`<g transform="translate(${x} ${y})"><circle class="fterm" r="5"/><circle class="twrwin" r="2.6"/><text class="ftlab2" x="8" y="3.5">TWR</text></g>`}
   return g;
 }
 let SCENE_FOCUS=null,SCENE_INFO='',SCENE_CAP=null;
 function bbox(pts,m=20){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return {x0:Math.min(...xs)-m,y0:Math.min(...ys)-m,x1:Math.max(...xs)+m,y1:Math.max(...ys)+m}}
-function focusZ(b){const w=Math.max(b.x1-b.x0,(b.y1-b.y0)*2,300),s=Math.max(1,Math.min(2,600/w));return {s,cx:(b.x0+b.x1)/2,cy:(b.y0+b.y1)/2}}
+function focusZ(b){const w=Math.max(b.x1-b.x0,(b.y1-b.y0)*2,300),s=Math.max(1,Math.min(2,600/w));return {s,cx:(b.x0+b.x1)/2,cy:(b.y0+b.y1)/2+(SCENE_CAP&&SCENE_CAP.you?34/s:0)}}/* captions cover the bottom of the picture: keep the action above them */
+/* ---------- ground movement: one taxi route shared by consecutive steps ---------- */
+let GCTX=null;/* {steps,i} of the flight on screen, so each step continues where the previous one stopped */
+function rLine(pts){const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+dist(pts[i-1],pts[i]));const tot=cum[cum.length-1]||1;
+  const at=f=>{const t=Math.max(0,Math.min(1,f))*tot;let i=1;while(i<cum.length-1&&cum[i]<t)i++;const a=pts[i-1],b=pts[i]||a,sl=cum[i]-cum[i-1],k=sl?(t-cum[i-1])/sl:0;return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,angDeg(sub(b,a))]};
+  const part=(f0,f1)=>{const t0=f0*tot,t1=f1*tot,o=[at(f0).slice(0,2)];for(let i=1;i<pts.length-1;i++)if(cum[i]>t0+.5&&cum[i]<t1-.5)o.push(pts[i]);o.push(at(f1).slice(0,2));return o};
+  return {pts,cum,tot,at,part,fOf:i=>cum[i]/tot}}
+function plen(pts){let l=0;for(let i=1;i<pts.length;i++)l+=dist(pts[i-1],pts[i]);return l}
+function trimLen(pts,len){const o=[pts[0]];let L=0;for(let i=1;i<pts.length;i++){const d=dist(pts[i-1],pts[i]);if(d<.01)continue;if(L+d>=len){o.push(add(pts[i-1],mul(nrm(sub(pts[i],pts[i-1])),len-L)));return o}L+=d;o.push(pts[i])}return o}
+function gNear(G,p){let b=-1,bd=4;G.N.forEach((n,i)=>{const d=dist(n,p);if(d<bd){bd=d;b=i}});return b}
+/* follow taxiway centrelines from node `from` towards `to`, going as straight as possible */
+function gWalk(G,from,to,len,bad){const out=[G.N[from],G.N[to]];let L=dist(G.N[from],G.N[to]),prev=from,cur=to,guard=0;
+  while(L<len&&guard++<40){const din=nrm(sub(G.N[cur],G.N[prev]));let best=null,bs=-2;for(const e of G.adj[cur]){if(e.j===prev||e.w<.5||(bad&&(bad(G.N[e.j])||bad(mul(add(G.N[e.j],G.N[cur]),.5)))))continue;const v=nrm(sub(G.N[e.j],G.N[cur]));const c=din[0]*v[0]+din[1]*v[1];if(c>bs){bs=c;best=e}}
+    if(!best||bs<.35)break;out.push(G.N[best.j]);L+=best.w;prev=cur;cur=best.j}
+  return trimLen(out,len)}
+/* first junction on the route (after fraction fmin) where another taxiway joins */
+function findJ(G,R,fmin){for(let i=1;i<R.pts.length-1;i++){if(R.fOf(i)<fmin||R.tot-R.cum[i]<45)continue;/* not right at the holding point */const node=gNear(G,R.pts[i]);if(node<0)continue;
+  const onR=q=>{for(let k=1;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<3)return true;return false};
+  const nbs=G.adj[node].filter(e=>e.w>4&&!onR(G.N[e.j])&&!onR(mul(add(G.N[e.j],G.N[node]),.5))).filter((e,k,a)=>a.findIndex(x=>x.j===e.j)===k).filter(e=>plen(gWalk(G,node,e.j,40))>=25);
+  if(nbs.length)return {i,f:R.fOf(i),node,nbs,p:R.pts[i]}}return null}
+/* traffic path through junction J: comes in on a side taxiway (from the left or right of you) and leaves on the far side */
+function jPath(G,R,J,fromLeft,thenRoute){const p=R.pts[J.i],d=nrm(sub(p,R.pts[J.i-1])),cr=v=>d[0]*v[1]-d[1]*v[0];
+  const nb=J.nbs.map(e=>({e,v:nrm(sub(G.N[e.j],p))})).sort((a,b)=>fromLeft?cr(a.v)-cr(b.v):cr(b.v)-cr(a.v));const ent=nb[0];
+  const inn=gWalk(G,J.node,ent.e.j,75).reverse();let out;
+  if(thenRoute)out=R.pts.slice(J.i);
+  else{const ex=nb.slice(1).sort((a,b)=>(a.v[0]*ent.v[0]+a.v[1]*ent.v[1])-(b.v[0]*ent.v[0]+b.v[1]*ent.v[1]))[0];
+    out=ex&&(ex.v[0]*ent.v[0]+ex.v[1]*ent.v[1])<.2?gWalk(G,J.node,ex.e.j,75):trimLen(R.pts.slice(J.i),75)}
+  return inn.concat(out.slice(1))}
+/* consecutive steps of the same taxi share the route: step k moves from f0 to f1 */
+function gRun(o){if(!GCTX||!GCTX.steps)return null;const S=GCTX.steps,i=GCTX.i,same=x=>x&&x.sc&&x.sc.t==='ground'&&x.sc.ac===o.ac&&!!x.sc.arr===!!o.arr&&!x.sc.start;
+  if(!same(S[i]))return null;let a=i,b=i;while(a>0&&same(S[a-1]))a--;while(b<S.length-1&&same(S[b+1]))b++;return {k:i-a,run:S.slice(a,b+1).map(x=>x.sc)}}
+function gTaxiPlan(P,R,run){const out=[];let f=run[0]&&run[0].fromPad&&!run[0].arr?padF(P,R):0;const n=run.length;const iS=P.cross?run.findIndex(x=>x.hs==='short'):-1,capS=iS>=0?(P.cross.at-26)/R.tot:1;
+  for(let j=0;j<n;j++){const sc=run[j],tk=sc.tt&&sc.tt.k;let f1=j===n-1?1:f+(1-f)/(n-j),J=null;
+    if((tk==='crossing'||tk==='ahead')&&P.G&&!sc.arr){J=findJ(P.G,R,f+30/R.tot);if(J){const stop=J.f-32/R.tot;f1=tk==='crossing'?Math.max(f,stop):Math.max(f,Math.min(f1,stop))}}
+    if(tk==='crossing'&&!J&&j<n-1)f1=f+(f1-f)*.6;
+    if(j<iS)f1=Math.min(f1,f+(capS-f)/(iS-j+1));
+    if(P.cross&&sc.hs==='short')f1=Math.max(f,(P.cross.at-26)/R.tot);/* stop at the runway holding position */
+    if(P.cross&&sc.hs==='cross')f1=Math.max(f,Math.min(1,(P.cross.at+30)/R.tot));/* cross and clear it */
+    out.push({f0:f,f1,J,tk});f=f1}
+  return out}
+/* ---------- traffic stories: other aircraft never just appear or vanish ----------
+   each one keeps going over the next steps: it parks on a free stand, or lines up and takes off */
+function gPathAvoid(G,s,e,ban,edgeOk){if(s<0||e<0)return null;const D=G.N.map(()=>Infinity),Pv=G.N.map(()=>null),done=G.N.map(()=>false);D[s]=0;
+  for(;;){let u=-1;for(let i=0;i<D.length;i++)if(!done[i]&&D[i]<Infinity&&(u<0||D[i]<D[u]))u=i;if(u<0||u===e)break;done[u]=true;
+    for(const ed of G.adj[u]){if(ban.has(ed.j)&&ed.j!==e)continue;if(edgeOk&&!edgeOk(u,ed.j))continue;if(D[u]+ed.w<D[ed.j]){D[ed.j]=D[u]+ed.w;Pv[ed.j]=u}}}
+  if(D[e]===Infinity)return null;const nodes=[e];let c=e;while(Pv[c]!==null){c=Pv[c];nodes.unshift(c)}return nodes.map(i=>G.N[i])}
+function nodesOf(G,pts){const b=new Set();pts.forEach(q=>{const i=gNear(G,q);if(i>=0)b.add(i)});return b}
+function splitAt(pts,len){const a=trimLen(pts,len),e=a[a.length-1];let L=0,k=1;for(;k<pts.length;k++){const d=dist(pts[k-1],pts[k]);if(L+d>=len)break;L+=d}return [a,[e,...pts.slice(k)].filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5)]}
+/* taxi to a free stand (one without a parked aircraft), nose in */
+function gClone(G){return {N:G.N.map(q=>q.slice()),adj:G.adj.map(a=>a.map(e=>Object.assign({},e))),segs:G.segs}}
+/* stand lead-ins are attached on a copy of the graph, so the taxi network used for junctions stays clean */
+function parkPath(P,from,ban,minLen=90,avoid){if(!P.G)return null;const G=P.G2||(P.G2=gClone(P.G));P._ln=P._ln||{};
+  P.L.std.forEach(st=>{if(!(st.n in P._ln))P._ln[st.n]=gAttach(G,sub(st.p,mul(dirH(st.h),24)))});if(from<0)return null;
+  if(avoid){ban=new Set(ban);G.N.forEach((q,i)=>{if(i===from)return;for(const r of (avoid.lines||(avoid.route?[avoid.route]:[])))for(let k=1;k<r.length;k++)if(projSeg(q,r[k-1],r[k]).d<4){ban.add(i);return}
+    if(avoid.pts&&avoid.pts.some(a=>dist(a,q)<(avoid.rad||28)))ban.add(i)})}
+  /* an edge is refused if any part of it runs along the avoided route or near the avoided points */
+  const eok=avoid?(u,j)=>{const a=G.N[u],b=G.N[j];for(const f of [.25,.5,.75]){const q=add(a,mul(sub(b,a),f));for(const r of (avoid.lines||(avoid.route?[avoid.route]:[])))for(let k=1;k<r.length;k++)if(projSeg(q,r[k-1],r[k]).d<4)return false;if(avoid.pts&&avoid.pts.some(x=>dist(x,q)<(avoid.rad||28)))return false}return true}:null;P._ln=P._ln||{};let best=null;
+  P._taken=P._taken||new Set();P.L.std.forEach((st,k)=>{if(k%2===0||st===P.st||P._taken.has(st.n))return;const d=dirH(st.h),lead=sub(st.p,mul(d,24));if(!(st.n in P._ln))P._ln[st.n]=gAttach(G,lead);
+    const pa=gPathAvoid(G,from,P._ln[st.n],ban,eok);if(!pa)return;const pts=pa.concat([lead,st.p]).filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),l=plen(pts);
+    const sc=l<minLen?l+1000:l;if(!best||sc<best.sc)best={sc,pts,st}});
+  if(best)P._taken.add(best.st.n);return best}
+function takeoffPts(P,from){return [from,P.E||P.A,P.E2||P.A,P.B,add(P.B,mul(P.u,520))].filter((q,i,a)=>i===0||dist(q,a[i-1])>.5)}
+const phMv=pts=>({pts,dur:Math.max(4,plen(pts)/26)}),phTo=pts=>({pts,dur:12,ease:'.25 .1 .8 .6',hide:true});
+/* the de-icing pad: a widened spot on your taxi route, about a third of the way to the runway */
+function padF(P,R){return Math.min(.45,Math.max(.2,70/R.tot))}
+function gStories(P,R,plan,arr){P._sty=P._sty||new Map();const key=(arr?'a':'d')+JSON.stringify(plan.map(x=>[x.tk||'',+x.f1.toFixed(4)]));if(P._sty.has(key))return P._sty.get(key);
+  const G=P.G,out=[];
+  plan.forEach((pl,c)=>{const tk=pl.tk;if(!tk||!G)return;
+    if(tk==='behind'){out.push({c,behind:true});return}
+    const J=pl.J;let inn=null;
+    if(J){const p=R.pts[J.i],d=nrm(sub(p,R.pts[J.i-1])),cr=v=>d[0]*v[1]-d[1]*v[0];const nb=J.nbs.map(e=>({e,v:nrm(sub(G.N[e.j],p))})).sort((a,b)=>tk==='crossing'?cr(a.v)-cr(b.v):cr(b.v)-cr(a.v));const nearR=q=>{for(let k=1;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<8)return true;return dist(q,R.pts[0])<30};inn=gWalk(G,J.node,nb[0].e.j,75,nearR).reverse()}
+    if((tk==='crossing'||arr)&&J){const ban=nodesOf(G,R.pts.concat(inn.slice(0,-1)));ban.delete(J.node);const pk=parkPath(P,J.node,ban,90,{lines:[R.pts,inn]});
+      if(pk){const ph=splitAt(inn.concat(pk.pts.slice(1)),plen(inn)+70);out.push({c,phases:[phMv(ph[0]),phMv(ph[1])],park:pk.st});return}}
+    if(arr)return;/* arriving traffic only ever goes to a stand */
+    /* otherwise it is departing: taxi to the holding point, then line up and take off */
+    const full=J?inn.concat(R.pts.slice(J.i+1)):R.part(Math.min(1,pl.f1+45/R.tot),1);if(full.length<2||plen(full)<5)return;
+    const toP=takeoffPts(P,full[full.length-1]),to=phTo(toP);
+    /* little room left before the holding point: it taxis straight onto the runway and departs in one go, well before you get there */
+    const both=pts=>({pts:pts.concat(toP.slice(1)),dur:plen(pts)/26+11,ease:'.2 0 .8 .6',hide:true});
+    const last=c>=plan.length-1;/* you reach the holding point on the very next step: it must be gone by then */
+    if(!J||(1-pl.f1)*R.tot<70||last){out.push({c,phases:[both(full)]});return}
+    if(tk==='crossing'){const ph=splitAt(full,(inn?plen(inn):0)+70);out.push({c,phases:c+1>=plan.length-1?[phMv(ph[0]),both(ph[1])]:[phMv(ph[0]),phMv(ph[1]),to]})}
+    else out.push({c,phases:[phMv(full),to]})});
+  P._sty.set(key,out);return out}
+/* landing traffic: lands, vacates by a rapid exit, taxis to a free stand */
+function landStory(P){if(P._land!==undefined)return P._land;const G=P.G,s0=sub(P.A,mul(P.u,120)),td=add(P.A,mul(P.u,22));let X=-1,bt=9;
+  if(G)G.N.forEach((n,i)=>{const pr=projSeg(n,P.A,P.B);if(pr.d>45||pr.t<.45||pr.t>.97||!G.adj[i].length)return;if(P.hp&&dist(n,P.hp.p)<20)return;const sc=Math.abs(pr.t-.68)+(pr.d>12?1:0)+pr.d/100;if(sc<bt){bt=sc;X=i}});
+  let st;if(X>=0){const xc=projSeg(G.N[X],P.A,P.B).q,pk=parkPath(P,X,new Set(),0,{pts:[P.pts&&P.pts.length?P.pts[P.pts.length-1]:P.hp?P.hp.p:P.A,P.E||P.A],rad:32,lines:[[P.A,P.B]].concat(P.E?[[P.pts&&P.pts.length?P.pts[P.pts.length-1]:P.hp.p,P.E,P.E2]]:[])}),full=[s0,td,xc].concat(pk?pk.pts:[G.N[X]]).filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),ph=splitAt(full,plen([s0,td,xc,G.N[X]])+45);
+    if(pk)st={phases:[{pts:ph[0],dur:11,ease:'0 0 .35 1'}].concat(ph[1].length>1?[phMv(ph[1])]:[]),park:pk.st,stay:null};
+    else{/* no free stand: it still clears the runway completely and waits off it */const Xp=G.N[X];let dO;if(dist(Xp,xc)>3)dO=nrm(sub(Xp,xc));else{let n2=[-P.u[1],P.u[0]];const bc=P.L.bld&&P.L.bld[0]?P.L.bld[0].p.reduce((a,q)=>[a[0]+q[0]/P.L.bld[0].p.length,a[1]+q[1]/P.L.bld[0].p.length],[0,0]):Xp;if((bc[0]-Xp[0])*n2[0]+(bc[1]-Xp[1])*n2[1]<0)n2=mul(n2,-1);dO=n2}
+      const off=add(Xp,mul(dO,34));st={phases:[{pts:[s0,td,xc,Xp,off].filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),dur:11,ease:'0 0 .35 1'}],park:null,stay:off}}}
+  else st={phases:[{pts:[s0,td,sub(P.B,mul(P.u,10)),add(P.B,mul(P.u,60))],dur:11,ease:'0 0 .35 1',hide:true}]};
+  return P._land=st}
+/* ---------- separation check: no other aircraft may ever pass through yours ---------- */
+function bezY(x1,y1,x2,y2,x){let lo=0,hi=1,t=x;for(let k=0;k<24;k++){t=(lo+hi)/2;const cx=3*x1*t*(1-t)**2+3*x2*t*t*(1-t)+t**3;if(cx<x)lo=t;else hi=t}return 3*y1*t*(1-t)**2+3*y2*t*t*(1-t)+t**3}
+function polyAt(pts,f){const L=plen(pts);let t=f*L;for(let k=1;k<pts.length;k++){const d=dist(pts[k-1],pts[k]);if(t<=d||k===pts.length-1){const r=d?Math.min(1,t/d):0;return add(pts[k-1],mul(sub(pts[k],pts[k-1]),r))}t-=d}return pts[0]}
+function moverPos(m,t){if(m.pts.length<2||!m.dur)return m.pts[0];if(m.hide&&t>=m.dur)return null;let f=Math.min(1,t/m.dur);if(m.kp){const u=f;let j=1;while(j<m.kt.length-1&&m.kt[j]<u)j++;const span=m.kt[j]-m.kt[j-1];f=m.kp[j-1]+(m.kp[j]-m.kp[j-1])*(span?(u-m.kt[j-1])/span:1)}if(m.ease){const k=m.ease.split(/[ ,]+/).map(Number);f=bezY(k[0],k[1],k[2],k[3],f)}return polyAt(m.pts,f)}
+function minSep(a,b,T){let mn=1e9;for(let t=0;t<=T;t+=.2){const p=moverPos(a,t),q=moverPos(b,t);if(p&&q){const d=dist(p,q);if(d<mn)mn=d}}return mn}
+function resolveTraffic(g,ac,TRQ,GS,OWNS){
+  let own=OWNS||null;if(!own){const m=ac.match(/class="ac" transform="scale\([^)]*\)"\/><animateMotion dur="([\d.]+)s"[^>]*?path="([^"]+)"([^>]*)/);
+    if(m){own={dur:+m[1],pts:m[2].slice(1).split(' L').map(x=>x.split(',').map(Number))};const ks=/keySplines="([^"]+)"/.exec(m[3]);if(ks)own.ease=ks[1]}
+    else{const s=ac.match(/translate\(([-\d.]+) ([-\d.]+)\)[^>]*>(?:<circle class="halo"[^>]*\/>)?<path d="[^"]*" class="ac"/);if(s)own={pts:[[+s[1],+s[2]]],dur:0}}}
+  const SEP=14,draw=x=>{if(x.pts.length<2||!x.dur)return pl(x.pts[0][0],x.pts[0][1],x.h!==undefined?x.h:0,'tr',GS);const e=x.pts[x.pts.length-1];return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:x.dur,cls:'tr',s:GS,ease:x.ease,hideEnd:x.hide})};
+  /* parked / waiting aircraft are placed first, then moving ones; nobody may pass through you or through another aircraft */
+  const ok=[],out={},order=TRQ.map((q,k)=>k).sort((x,y)=>(TRQ[x].pts.length>1)-(TRQ[y].pts.length>1));
+  const T0=Math.max(own&&own.dur||0,...TRQ.map(q=>q.dur||0),1)+.2;
+  const clear=(m,sp)=>(!own||minSep(m,own,T0)>=sp)&&ok.every(o=>minSep(m,o,T0)>=10);
+  for(const k of order){const q=TRQ[k];const sp=q.sep||SEP;let pick=null;
+    if(clear(q,sp))pick=q;else for(const pt of [q.pts[0],q.pts[q.pts.length-1]]){const w={pts:[pt],h:q.pts.length>1?angDeg(sub(q.pts[1],q.pts[0])):q.h};if(clear(w,sp)){pick=w;break}}
+    if(pick){ok.push(pick);out[k]=draw(pick)}else out[k]=''}
+  return g.replace(/<!--TR(\d+)-->/g,(_,k)=>out[+k]||'')}
+function arrPts(P){return P.ex?splitAt(P.ex.pts,18)[1]:P.pts.slice().reverse()}
+/* the picture of a step that shows exactly the same situation as the step before is not replayed: it stays where it ended */
+function sameAsPrev(steps,i){const a=steps[i]&&steps[i].sc,b=steps[i-1]&&steps[i-1].sc;if(!a||!b||a.t!==b.t||a.t==='hold'||a.t==='route'||(a.t==='profile'&&a.mode==='final'))return false;
+  if(a.t==='ground'&&!['push','landed','roll','rto','remote','deice','stand','pushed'].includes(a.ac))return false;
+  const k=o=>JSON.stringify(o,(key,v)=>key==='ban'||key==='p'?undefined:v);return k(a)===k(b)}
+/* arrival: the aircraft you give way to pushes back from a real occupied stand next to your route, and can leave without using it */
+function pbxPick(P,R,f0,only){if(!P.G)return null;const L=P.L,TP={f0};parkPath(P,-1,new Set());/* makes sure stand lead-ins exist */const G2=P.G2,LN=P._ln||{},hpN=gNear(G2,P.pts[P.pts.length-1]),remain=R.part(TP.f0,1);
+    const nearRem=q=>{for(let k2=1;k2<remain.length;k2++)if(projSeg(q,remain[k2-1],remain[k2]).d<6)return true;return false};
+    const ban=new Set();G2.N.forEach((q,i)=>{if(nearRem(q))ban.add(i)});const eok=(u,j)=>{const A2=G2.N[u],B2=G2.N[j];for(const f of [.25,.5,.75])if(nearRem(add(A2,mul(sub(B2,A2),f))))return false;return true};
+    const dRem=q=>{let m=1e9;for(let k2=1;k2<remain.length;k2++)m=Math.min(m,projSeg(q,remain[k2-1],remain[k2]).d);return m};
+    let best=null;L.std.forEach((st2,k)=>{if(k%2!==0||st2===P.st||!standClear(L,st2)||(only&&st2.n!==only))return;const dv=dirH(st2.h);
+      /* push back along the lead-in line, but stop clear of your taxi route */
+      let pl2=24;while(pl2>=10&&dRem(sub(st2.p,mul(dv,pl2)))<15)pl2-=2;if(pl2<10)return;const lead=sub(st2.p,mul(dv,pl2));
+      let bf=-1,bd=1e9;for(let f=TP.f0;f<=1;f+=.01){const d=dist(R.at(f),lead);if(d<bd){bd=d;bf=f}}if(bd>60)return;
+      const ln=LN[st2.n];let away=null;if(ln!==undefined&&ln>=0&&!ban.has(ln)&&hpN>=0){const b2=new Set(ban);b2.delete(hpN);const pa=gPathAvoid(G2,ln,hpN,b2,eok);if(pa)away=[lead].concat(pa.slice(1))}
+      const wait=bf>TP.f0+40/R.tot&&bf<.97,sc2=(wait?0:5)+bd/60+(away?0:.5);if(!best||sc2<best.sc2)best={st:st2,lead,fC:bf,bd,sc2,wait,away}});
+    return best?Object.assign(best,{fs:best.wait?Math.max(TP.f0,best.fC-34/R.tot):-1}):null}
+function padMark(R2,f){const q=R2.at(f),u=dirH(q[2]+90),n=[-u[1],u[0]],c=[q[0],q[1]],P4=[add(add(c,mul(u,16)),mul(n,12)),add(add(c,mul(u,16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,12))];
+  return `<polygon class="fap" points="${PTS(P4)}" opacity=".9"/><polygon points="${PTS(P4)}" fill="none" class="fhp" stroke-dasharray="3 2"/><text class="ftlab2" x="${(c[0]+n[0]*18).toFixed(1)}" y="${(c[1]+n[1]*18+3).toFixed(1)}" text-anchor="middle">DE-ICE</text>`}
 function sGround(o){
   const ad=adOf(o),P=groundPlan(ad),L=P.L,v=V(),GS=.5,ua=angDeg(P.u),wdTxt=o.arr?v.AW:v.DW1;
   const off=['lineup','roll','rto','remote','landed'].includes(o.ac);
   const st=P.st,pb=P.pb||(st&&st.p)||[300,150];
   const grd=['stand','push','pushed','taxi','hp'].includes(o.ac);
-  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
+  /* taxi plan for this step (route shared with the neighbouring taxi steps) */
+  let TP=null,R=null,PLAN=null,RK=-1;
+  if((o.ac==='taxi'||(o.ac==='taxiin'&&!o.start))&&P.ok&&P.pts.length>1){R=rLine(o.ac==='taxiin'?arrPts(P):P.pts);const run=gRun(o);if(run){PLAN=gTaxiPlan(P,R,run.run);RK=run.k;TP=PLAN[RK]}else TP={f0:0,f1:1,J:null,tk:o.tt&&o.tt.k}}
+  /* arrival "give way to the aircraft pushing back": pick an occupied stand next to your route; it pushes back while you wait, then taxis off */
+  let PBX=null,OWNS=null;const PUSHT=5;
+  if(TP&&R&&o.ac==='taxiin'&&o.tt&&o.tt.k==='ahead'&&P.G)PBX=pbxPick(P,R,TP.f0,o.tt.std||null);
+  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,skip:PBX?PBX.st.n:null,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
   SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/${MSX()?(o.arr?MSX().wind.as:MSX().wind.s):8} KT`;
   {const hpn=P.hp&&P.hp.n?P.hp.n:'',via=P.names.length?' via '+P.names.join(', '):'';
    const Y={stand:`On stand ${P.std}${o.tug?' · tug connected':''}`,push:`Pushing back from stand ${P.std}`,pushed:o.tug?'Pushed back · tug on · engines off':'Engines running · ready to taxi',
-     taxi:`Taxiing to holding point ${hpn}${via}`,hp:`Holding short of RWY ${P.des}${hpn?' at '+hpn:''}`,lineup:`Lining up on RWY ${P.des}`,
-     roll:`Take-off roll · RWY ${P.des}`,rto:`${o.txt?o.txt.charAt(0)+o.txt.slice(1).toLowerCase()+' · ':'Rejected take-off · '}stopped on RWY ${P.des}${o.trucks?' · fire trucks coming':''}`,
-     remote:'Taxiing to a remote stand',landed:`Landed RWY ${P.des} · vacating`,taxiin:o.start?`Runway vacated · call Ground`:`Taxiing to stand ${P.std}${via}`};
-   const ttT=o.tt?({ahead:`${o.tt.t} taxiing ahead of you`,crossing:`${o.tt.t} crossing ahead`,behind:`${o.tt.t} behind you`})[o.tt.k]:'';
+     taxi:o.hs==='short'&&P.cross?`Holding short of RWY ${P.cross.d}`:o.hs==='cross'&&P.cross?`Crossing RWY ${P.cross.d}`:`Taxiing to holding point ${hpn}${via}`,hp:`Holding short of RWY ${P.des}${hpn?' at '+hpn:''}`,lineup:(()=>{const c=GCTX&&GCTX.steps[GCTX.i];return c&&/cleared for (immediate )?take-?off/i.test(c.atc||'')?(o.noRoll?`Starting the take-off roll · RWY ${P.des}`:`Taking off · RWY ${P.des}`):c&&/line up and wait/i.test(c.atc||'')?`Lining up and waiting · RWY ${P.des}`:`Lining up on RWY ${P.des}`})(),
+     roll:`Take-off roll · RWY ${P.des}`,rto:`${/STOPPED/.test(o.txt||'')?'Stopped on RWY '+P.des:(o.txt?o.txt.charAt(0)+o.txt.slice(1).toLowerCase()+' · ':'Rejected take-off · ')+'stopped on RWY '+P.des}${o.trucks?' · fire trucks coming':''}`,
+     remote:'Taxiing to a remote stand',topad:`Taxiing to de-icing pad ${o.pad||''}`,atpad:'De-icing complete · ready to taxi',deice:o.done?`De-icing complete · pad ${o.pad||''}`:`On de-icing pad ${o.pad||''} · brakes set`,landed:`Landed RWY ${P.des} · vacating`,taxiin:o.start?`Runway vacated · call Ground`:`Taxiing to stand ${P.std}${via}`};
+   const ttT=o.tt?({ahead:o.arr?`${o.tt.t} pushing back ahead`:`${o.tt.t} taxiing ahead of you`,crossing:`${o.tt.t} crossing ahead`,behind:`${o.tt.t} behind you`})[o.tt.k]:'';
    SCENE_CAP={you:Y[o.ac]||Y.stand,tr:ttT||(o.traffic==='final'?'Traffic on final · lands first':o.traffic==='landing'?'Traffic landing now':'')}}
   if(!P.ok&&!off)g+=`<text class="warnt" x="300" y="292" text-anchor="middle">NO TAXI ROUTE: EDIT THE LAYOUT</text>`;
   let fp=[];
-  if(o.traffic==='final'||o.traffic==='landing'){const s0=sub(P.A,mul(P.u,110)),e0=o.traffic==='final'?sub(P.A,mul(P.u,10)):add(P.A,mul(P.u,P.len*.6));
-    g+=mv(`M${s0[0]},${s0[1]} L${e0[0]},${e0[1]}`,[e0[0],e0[1],ua],{dur:o.traffic==='final'?8:9,rep:'indefinite',cls:'tr',s:GS});
-    const lp=add(sub(P.A,mul(P.u,85)),mul([-P.u[1],P.u[0]],-16));fp.push(sub(P.A,mul(P.u,70)),lp)}
+  /* landing traffic keeps its story over the following steps */
+  let LANDP=-1;{const S=GCTX&&GCTX.steps,i=GCTX?GCTX.i:0,isG=x=>x&&x.sc&&x.sc.t==='ground'&&!x.sc.arr;
+    if(o.traffic==='final'||o.traffic==='landing'){let c=i;if(S)while(c>0&&isG(S[c-1])&&S[c-1].sc.traffic)c--;LANDP=i-c}
+    else if(S&&!o.arr&&['hp','lineup','roll'].includes(o.ac)){let k=i;while(k>0&&isG(S[k-1])&&!S[k-1].sc.traffic&&['hp','lineup','roll'].includes(S[k-1].sc.ac))k--;
+      if(k>0&&isG(S[k-1])&&S[k-1].sc.traffic){let c=k-1;while(c>0&&isG(S[c-1])&&S[c-1].sc.traffic)c--;LANDP=i-c}}}
   const own=(x,y,r)=>pl(x,y,r,'ac',GS);
-  /* other aircraft on the ground */
-  if(o.tt&&P.pts&&P.pts.length>1){const pts=P.pts,segL=[];let tot=0;for(let i=1;i<pts.length;i++){const d=dist(pts[i-1],pts[i]);segL.push(d);tot+=d}
-    const at=f=>{let t=f*tot;for(let i=0;i<segL.length;i++){if(t<=segL[i]||i===segL.length-1){const a=pts[i],b=pts[i+1],k=segL[i]?Math.min(1,t/segL[i]):0;return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,angDeg(sub(b,a))]}t-=segL[i]}};
-    if(o.tt.k==='ahead'){const p0=at(.55),p1=at(.95);g+=mv(`M${p0[0]},${p0[1]} L${p1[0]},${p1[1]}`,p1,{dur:9,rep:'indefinite',cls:'tr',s:GS});fp.push(p0,p1)}
-    else if(o.tt.k==='crossing'){const c=at(.5),hr=(c[2]+90)*Math.PI/180,a0=[c[0]-Math.cos(hr)*45,c[1]-Math.sin(hr)*45],b0=[c[0]+Math.cos(hr)*45,c[1]+Math.sin(hr)*45];g+=mv(`M${a0[0]},${a0[1]} L${b0[0]},${b0[1]}`,[b0[0],b0[1],c[2]+90],{dur:6,rep:'indefinite',cls:'tr',s:GS});fp.push(a0,b0)}
-    else if(o.tt.k==='behind'){const q=P.pb||pts[0],h=P.face||0,b=add(q,mul(dirH(h),-40));g+=pl(b[0],b[1],h-90,'tr',GS);fp.push(b)}}
+  /* at the holding point: carry on the stories of the taxi steps just before */
+  if(['hp','lineup','roll','rto'].includes(o.ac)&&!o.arr&&P.ok&&P.pts.length>1&&GCTX){const S=GCTX.steps;let i=GCTX.i,m=0;const isHp=x=>x&&x.sc&&x.sc.t==='ground'&&['hp','lineup','roll','rto'].includes(x.sc.ac)&&!x.sc.arr;
+    while(i>0&&isHp(S[i-1])){i--;m++}const prev=S[i-1];if(prev&&prev.sc&&prev.sc.t==='ground'&&prev.sc.ac==='taxi'&&!prev.sc.arr){const sv=GCTX.i;GCTX.i=i-1;const run=gRun(prev.sc);GCTX.i=sv;
+      if(run){R=rLine(P.pts);PLAN=gTaxiPlan(P,R,run.run);RK=run.run.length+m}}}
+  /* traffic is queued, then checked against your own movement before it is drawn */
+  const TRQ=[];
+  const trMove=(pts,dur,near,ex={})=>{if(!pts||pts.length<2)return '';const e=pts[pts.length-1];if(!ex.nofp)fp.push(pts[0],near||e);TRQ.push({pts,dur,ease:ex.ease,hide:!!ex.hideEnd,sep:ex.sep});return `<!--TR${TRQ.length-1}-->`};
+  const trStatic=(q,h)=>{fp.push(q);TRQ.push({pts:[q],h});return `<!--TR${TRQ.length-1}-->`};
+  const parked=st=>{TRQ.push({pts:[st.p],h:st.h-90});return `<!--TR${TRQ.length-1}-->`};
+  if(LANDP>=0){const ls=landStory(P),ph=ls.phases[LANDP];
+    if(ph)g+=trMove(ph.pts,ph.dur,LANDP===0?add(P.A,mul(P.u,40)):null,{ease:ph.ease,hideEnd:ph.hide,nofp:LANDP>0,sep:LANDP===0?9:14});
+    else if(ls.park)g+=parked(ls.park);else if(ls.stay){const q=ls.stay;g+=trStatic(q,0)}
+    if(LANDP===0)fp.push(sub(P.A,mul(P.u,70)))}
+  if(PBX){/* pushback (tail first), short pause, then it taxis away from your route */const st2=PBX.st,b0=-ANIM_OFF;fp.push(st2.p);
+    const grp=(inner,beg,end)=>`<g opacity="${beg>0||ANIM_OFF<beg?0:1}">${beg>0?`<set attributeName="opacity" to="1" begin="${(beg+b0).toFixed(2)}s"/>`:''}${end?`<set attributeName="opacity" to="0" begin="${(end+b0).toFixed(2)}s"/>`:''}${inner}</g>`;
+    const pushEnd=PBX.lead,aw=PBX.away;
+    if(RM||ANIM_OFF>=PUSHT+(aw?plen(aw)/24+1:0)){const q=aw?aw[aw.length-1]:pushEnd,h=aw?lastHdg(aw):st2.h+90;g+=pl(q[0],q[1],aw?h:(st2.h-90),'tr',GS)}
+    else{g+=grp(`<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${PUSHT}s" begin="${b0.toFixed(2)}s" fill="freeze" rotate="auto-reverse" path="M${st2.p[0].toFixed(1)},${st2.p[1].toFixed(1)} L${pushEnd[0].toFixed(1)},${pushEnd[1].toFixed(1)}"/>`,0,aw?PUSHT+1:0);
+      if(aw){const d2=Math.max(4,plen(aw)/24);g+=grp(`<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${d2.toFixed(2)}s" begin="${(PUSHT+1+b0).toFixed(2)}s" fill="freeze" rotate="auto" path="${pth(aw)}"/>`,PUSHT+1,0)}}}
+  /* other aircraft: each one keeps moving logically over the following steps */
+  if(PLAN&&R){const stories=gStories(P,R,PLAN,o.ac==='taxiin');
+    stories.forEach(st=>{const p=RK-st.c;if(p<0)return;
+      if(st.behind){/* it follows you along your route, extended back along the taxiway you came from, so there is always room behind you */
+        const XK='_ext'+R.pts[0].map(Math.round).join('_');if(!P[XK]){let tail=[];const G=P.G,n1=G&&R.pts.length>2?gNear(G,R.pts[1]):-1;if(n1>=0){const fw=nrm(sub(R.pts[2],R.pts[1]));let bk=null,bc=2;G.adj[n1].forEach(e=>{if(e.w<2)return;const v=nrm(sub(G.N[e.j],G.N[n1])),c=v[0]*fw[0]+v[1]*fw[1];if(c<bc){bc=c;bk=e}});const nr=q=>{for(let k=2;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<10)return true;return false};if(bk&&bc<-.3&&!nr(G.N[bk.j]))tail=gWalk(G,n1,bk.j,160,nr).reverse()}
+          const ext=tail.length?tail.concat(R.pts.slice(2)):R.pts.slice(),off=tail.length?plen(tail)-plen(R.pts.slice(0,2)):0;P[XK]={E:rLine(ext),off}}
+        const X=P[XK],E=X.E,dOwn=f=>Math.max(0,f*R.tot+X.off),back=f=>{const d0=dOwn(f),q0=R.at(f);let d=d0-50;while(d>0&&dist(E.at(d/E.tot),q0)<30)d-=3;return Math.max(0,d)/E.tot};
+        if(RK<PLAN.length){const a=back(PLAN[RK].f0),b=back(PLAN[RK].f1),q=E.at(b);g+=b-a>.004?trMove(E.part(a,b),Math.max(2.5,(PLAN[RK].f1-PLAN[RK].f0)*R.tot/22)):trStatic(q,q[2])}
+        else{const q=E.at(back(1));g+=trStatic(q,q[2])}return}
+      if(p<st.phases.length){const ph=st.phases[p];g+=trMove(ph.pts,ph.dur,p===0&&st.c===RK&&PLAN[st.c].J?PLAN[st.c].J.p:(ph.hide?ph.pts[1]:null),{ease:ph.ease,hideEnd:ph.hide})}
+      else if(st.park)g+=parked(st.park)})}
+  else if(o.tt&&o.tt.k==='behind'&&o.ac==='stand'&&P.ok&&P.G&&P.pts.length>2){/* on stand: traffic passes on the taxiway behind you on its way to the runway */
+    const G=P.G,n1=gNear(G,P.pts[1]);if(n1>=0){const fw=nrm(sub(P.pts[2],P.pts[1]));let bk=null,bc=2;G.adj[n1].forEach(e=>{if(e.w<2)return;const v=nrm(sub(G.N[e.j],G.N[n1])),c=v[0]*fw[0]+v[1]*fw[1];if(c<bc){bc=c;bk=e}});
+      const inn=bk&&bc<-.3?gWalk(G,n1,bk.j,90).reverse():[P.pts[1]];let full=inn.concat(P.pts.slice(2));
+      /* never through your own aircraft on the stand: if the taxiway passes too close, show it already past you */
+      {let cut=-1;const dense=[];for(let k=1;k<full.length;k++){const a=full[k-1],b=full[k],n=Math.max(1,Math.ceil(dist(a,b)/3));for(let j=0;j<n;j++)dense.push(add(a,mul(sub(b,a),j/n)))}dense.push(full[full.length-1]);
+       dense.forEach((q,k)=>{if(dist(q,st.p)<16||dist(q,pb)<10)cut=k});if(cut>=0){const L0=plen(dense.slice(0,cut+1))+14;full=splitAt(full,L0)[1]}}
+      if(full.length>1&&plen(full)>10)g+=trMove(full,Math.max(6,plen(full)/30),full[Math.min(1,full.length-1)])}}
+  else if(o.ac==='push'&&GCTX&&P.ok&&P.pts.length>2){const pv=GCTX.steps[GCTX.i-1];if(pv&&pv.sc&&pv.sc.ac==='stand'&&pv.sc.tt&&pv.sc.tt.k==='behind'){const e=P.pts[P.pts.length-1];g+=trMove(takeoffPts(P,e),12,null,{ease:'.4 0 .85 .55',hideEnd:true,nofp:true})}}
+  const ownTaxi=()=>{const {f0,f1}=TP,a=R.at(f0),e=R.at(f1);fp.push(a,e,R.at(Math.min(1,f1+40/R.tot)));
+    let s=`<path class="route" d="${pth(R.part(f0,1))}"/>`;
+    if(f1-f0<.004)return s+own(e[0],e[1],e[2]);
+    if(PBX&&PBX.fs>f0&&PBX.fs<f1){/* give way: stop short, wait for the pushback to finish and clear, then continue */
+      const seg=R.part(f0,f1),L1=(PBX.fs-f0)*R.tot,L3=(f1-PBX.fs)*R.tot,t1=Math.max(1.5,L1/22),tw=Math.max(t1+.5,PUSHT+3),T=tw+Math.max(1.5,L3/22),ks=L1/(L1+L3);
+      OWNS={pts:seg,dur:T,kp:[0,ks,ks,1],kt:[0,t1/T,tw/T,1]};fp.push(PBX.lead);
+      if(RM||ANIM_OFF>=T)return s+own(e[0],e[1],e[2]);
+      return s+`<g><circle class="halo" r="${(22*GS).toFixed(1)}"/><path d="${ACP}" class="ac" transform="scale(${GS})"/><animateMotion dur="${T.toFixed(2)}s" begin="${(-ANIM_OFF).toFixed(2)}s" fill="freeze" rotate="auto" path="${pth(seg)}" calcMode="linear" keyPoints="0;${ks.toFixed(4)};${ks.toFixed(4)};1" keyTimes="0;${(t1/T).toFixed(4)};${(tw/T).toFixed(4)};1"/></g>`}
+    const seg=R.part(f0,f1);return s+mv(pth(seg),[e[0],e[1],lastHdg(seg)],{dur:Math.max(2.5,Math.min(12,(f1-f0)*R.tot/22)),s:GS})};
   const A={
     stand:()=>{fp.push(st.p,pb,add(st.p,mul(dirH(st.h),20)));return own(st.p[0],st.p[1],st.h-90)+(o.tug?(()=>{const t=add(st.p,mul(dirH(st.h),13));return `<rect class="tug" x="${(t[0]-4).toFixed(1)}" y="${(t[1]-3).toFixed(1)}" width="8" height="6" rx="1"/>`})():'')},
     push:()=>{fp.push(st.p,pb,sub(pb,mul(dirH(st.h),18)));return `<path class="route" d="M${st.p[0]},${st.p[1]} L${pb[0]},${pb[1]}"/>`+mv(`M${st.p[0]},${st.p[1]} L${pb[0]},${pb[1]}`,[pb[0],pb[1],(P.face||0)-90],{dur:4,rot:'auto-reverse',s:GS})},
     pushed:()=>{fp.push(pb,st.p,P.pts[1]||pb);return own(pb[0],pb[1],(P.face||0)-90)+(o.tug?(()=>{const t=add(pb,mul(dirH(P.face||0),13));return `<rect class="tug" x="${(t[0]-4).toFixed(1)}" y="${(t[1]-3).toFixed(1)}" width="8" height="6" rx="1"/>`})():'')},
-    taxi:()=>{if(!P.ok){fp.push(pb);return own(pb[0],pb[1],(P.face||0)-90)}fp.push(...P.pts);const e=P.pts[P.pts.length-1];return `<path class="route" d="${pth(P.pts)}"/>`+mv(pth(P.pts),[e[0],e[1],lastHdg(P.pts)],{dur:Math.min(14,4+P.pts.length),s:GS})},
+    taxi:()=>{if(!P.ok||!TP){fp.push(pb);return own(pb[0],pb[1],(P.face||0)-90)}return ownTaxi()},
     hp:()=>{if(!P.hp)return '';const e=P.ok?P.pts[P.pts.length-1]:P.hp.p;fp.push(e,P.E||P.A,P.A);return own(e[0],e[1],P.ok?lastHdg(P.pts):angDeg(sub(P.E||P.A,P.hp.p)))},
-    lineup:()=>{if(!P.hp)return '';const e=P.ok?P.pts[P.pts.length-1]:P.hp.p;fp.push(e,P.E,P.E2,add(P.E,mul(P.u,140)));return `<path class="route" d="${pth([e,P.E,P.E2])}"/>`+mv(pth([e,P.E,P.E2]),[P.E2[0],P.E2[1],ua],{dur:3.5,s:GS})},
+    lineup:()=>{if(!P.hp)return '';const e=P.ok?P.pts[P.pts.length-1]:P.hp.p;const cur=GCTX&&GCTX.steps[GCTX.i],prv=GCTX&&GCTX.steps[GCTX.i-1];
+      const lined=!!(prv&&prv.sc&&prv.sc.t==='ground'&&prv.sc.ac==='lineup'&&!prv.sc.arr),tko=!o.noRoll&&!!(cur&&/cleared for (immediate )?take-?off/i.test(cur.atc||''));const veh=!!(cur&&/vehicle on the runway/i.test(cur.atc||''));
+      const truck=veh?(()=>{const q=add(P.A,mul(P.u,P.len*.55));fp.push(q);return `<g transform="translate(${q[0].toFixed(1)} ${q[1].toFixed(1)}) rotate(${(ua+90).toFixed(1)})"><path d="${TRK}" class="truck" transform="scale(.6)"/></g>`})():'';
+      if(tko){/* take-off clearance: (line up and) roll, rotate and climb away */const pts=(lined?[P.E2]:[e,P.E,P.E2]).concat([P.B,add(P.B,mul(P.u,70))]);const end=pts[pts.length-1];fp.push(lined?P.E2:e,add(P.E2,mul(P.u,120)));
+        return mv(pth(pts),[end[0],end[1],ua],{dur:lined?9:11,s:GS,ease:'.45 0 .9 .6'})}
+      fp.push(e,P.E,P.E2,add(P.E,mul(P.u,140)));if(lined)return truck+own(P.E2[0],P.E2[1],ua);/* already lined up: it waits there */
+      return truck+`<path class="route" d="${pth([e,P.E,P.E2])}"/>`+mv(pth([e,P.E,P.E2]),[P.E2[0],P.E2[1],ua],{dur:3.5,s:GS})},
     roll:()=>{fp.push(P.A,P.B);return mv(pth([P.E2||P.A,P.B]),[P.B[0],P.B[1],ua],{dur:5,s:GS})},
     rto:()=>{const p=add(P.A,mul(P.u,P.len*.48));fp.push(add(p,mul(P.u,-90)),add(p,mul(P.u,90)));const vert=Math.abs(P.u[1])>Math.abs(P.u[0]);let nn=[-P.u[1],P.u[0]];const bc=(L.bld&&L.bld[0]&&L.bld[0].p&&L.bld[0].p.length)?L.bld[0].p.reduce((a,q)=>[a[0]+q[0]/L.bld[0].p.length,a[1]+q[1]/L.bld[0].p.length],[0,0]):[300,260];if((bc[0]-p[0])*nn[0]+(bc[1]-p[1])*nn[1]>0)nn=mul(nn,-1);
       const lp=vert?add(p,mul(nn,22)):[p[0],p[1]+(nn[1]>0?28:-18)],anc=vert?(nn[0]>0?'start':'end'):'middle';fp.push(lp);
-      let s=own(p[0],p[1],ua)+`<text class="warnt blink halo" x="${lp[0].toFixed(0)}" y="${(lp[1]+5).toFixed(0)}" text-anchor="${anc}">${esc(o.txt||'STOPPED ON RUNWAY')}</text>`;
-      if(o.trucks){const t0=L.twr||[560,260];fp.push(t0);s+=mv(`M${t0[0]},${t0[1]} L${p[0]+10},${p[1]+12}`,[p[0]+10,p[1]+12,0],{dur:4,cls:'truck',s:.7,d:TRK})+mv(`M${t0[0]+12},${t0[1]} L${p[0]+28},${p[1]+10}`,[p[0]+28,p[1]+10,0],{dur:4.6,cls:'truck',s:.7,d:TRK})}return s},
-    landed:()=>{const p=add(P.A,mul(P.u,P.len*.72));fp.push(add(p,mul(P.u,-80)),add(p,mul(P.u,60)));return mv(pth([add(P.A,mul(P.u,P.len*.2)),p]),[p[0],p[1],ua],{dur:4,s:GS})},
-    taxiin:()=>{if(!P.ok){fp.push(pb);return own(pb[0],pb[1],(P.face||0)+90)}const pts=P.pts.slice().reverse();if(o.start){const e=pts[0];fp.push(e,P.E||P.A,pts[Math.min(2,pts.length-1)]);return own(e[0],e[1],angDeg(sub(pts[1]||e,e)))}fp.push(...pts,st.p);const e=pts[pts.length-1];return `<path class="route" d="${pth(pts)}"/>`+mv(pth(pts),[e[0],e[1],lastHdg(pts)],{dur:Math.min(14,4+pts.length),s:GS})},
+      let s=(o.roll&&P.E2?mv(pth([P.E2,p]),[p[0],p[1],ua],{dur:6,s:GS,ease:'.3 .5 .5 1'}):own(p[0],p[1],ua))+`<text class="warnt blink halo" x="${lp[0].toFixed(0)}" y="${(lp[1]+5).toFixed(0)}" text-anchor="${anc}">${esc(o.txt||'STOPPED ON RUNWAY')}</text>`;
+      if(o.trucks){/* fire trucks come from the fire station by the tower, along the taxiways, and stop beside the aircraft */const t0=L.twr||[560,260];let path=null;
+        if(P.G){const G=P.G,a=G.N.reduce((b,q,i)=>b<0||dist(q,t0)<dist(G.N[b],t0)?i:b,-1),bN=G.N.reduce((b,q,i)=>b<0||dist(q,p)<dist(G.N[b],p)?i:b,-1),pa=a>=0&&bN>=0?gPath(G,a,bN):null;if(pa)path=[t0].concat(pa.pts)}
+        const side=mul(nn,-14),e1=add(add(p,side),mul(P.u,-10)),e2=add(add(p,side),mul(P.u,12));fp.push(t0);
+        const p1=(path||[t0]).concat([e1]),p2=(path||[t0]).concat([e2]);s+=mv(pth(p1),[e1[0],e1[1],0],{dur:Math.max(4,plen(p1)/45),cls:'truck',s:.7,d:TRK})+mv(pth(p2),[e2[0],e2[1],0],{dur:Math.max(4.6,plen(p2)/45+.6),cls:'truck',s:.7,d:TRK})}return s},
+    landed:()=>{if(P.ex&&P.ok){const a0=add(P.A,mul(P.u,15)),e=arrPts(P)[0],pts=[a0,P.ex.xc,P.ex.X,e].filter((q,i,a)=>i===0||dist(q,a[i-1])>1);fp.push(a0,P.ex.xc,e);return mv(pth(pts),[e[0],e[1],lastHdg(pts)],{dur:7,s:GS,ease:'0 0 .45 1'})}
+      const p=add(P.A,mul(P.u,P.len*.72));fp.push(add(p,mul(P.u,-80)),add(p,mul(P.u,60)));return mv(pth([add(P.A,mul(P.u,P.len*.2)),p]),[p[0],p[1],ua],{dur:4,s:GS})},
+    taxiin:()=>{if(!P.ok){fp.push(pb);return own(pb[0],pb[1],(P.face||0)+90)}const pts=arrPts(P);if(o.start){const e=pts[0];fp.push(e,P.E||P.A,pts[Math.min(2,pts.length-1)]);return own(e[0],e[1],angDeg(sub(pts[1]||e,e)))}if(TP)return ownTaxi();fp.push(...pts,st.p);const e=pts[pts.length-1];return own(e[0],e[1],lastHdg(pts))},
+    topad:()=>{if(!P.ok)return own(pb[0],pb[1],(P.face||0)-90);const R2=rLine(P.pts),fp2=padF(P,R2),seg=R2.part(0,fp2),e=R2.at(fp2);fp.push(seg[0],e);return padMark(R2,fp2)+`<path class="route" d="${pth(seg)}"/>`+mv(pth(seg),[e[0],e[1],lastHdg(seg)],{dur:Math.max(3,fp2*R2.tot/22),s:GS})},
+    atpad:()=>{if(!P.ok)return own(pb[0],pb[1],(P.face||0)-90);const R2=rLine(P.pts),fp2=padF(P,R2),e=R2.at(fp2);fp.push(e,R2.at(Math.min(1,fp2+.15)));return padMark(R2,fp2)+own(e[0],e[1],e[2])},
+    deice:()=>{const R2=P.ok?rLine(P.pts):null,fp2=R2?padF(P,R2):0,q0=R2?R2.at(fp2):[pb[0],pb[1],(P.face||0)-90];const pbq=[q0[0],q0[1]];fp.push(pbq,R2?R2.at(Math.min(1,fp2+.12)):pbq,R2?R2.at(Math.max(0,fp2-.12)):pbq);const h=q0[2]+90,f=dirH(h),n=[-f[1],f[0]];let s=(R2?padMark(R2,fp2):'')+own(pbq[0],pbq[1],q0[2]);const pb=pbq;
+      for(const sd of [-1,1]){const t=add(pb,mul(n,sd*16)),t0=add(t,mul(f,-40));s+=o.done?(()=>{const q=add(t,mul(f,-34));return pl(q[0],q[1],h-90,'truckr',.7,TRK)})():mv(`M${t0[0].toFixed(1)},${t0[1].toFixed(1)} L${t[0].toFixed(1)},${t[1].toFixed(1)}`,[t[0],t[1],h-90],{dur:3.5,cls:'truckr',s:.7,d:TRK,rot:'0'})}
+      return s},
     remote:()=>{const far=L.std.slice().sort((a,b)=>dist(b.p,P.A)-dist(a.p,P.A))[0];const G=buildGraph(L),m=add(P.A,mul(P.u,P.len*.55)),s0=gAttach(G,m),fq=far?sub(far.p,mul(dirH(far.h),24)):m,e0=gAttach(G,fq),pa=gPath(G,s0,e0);
       const pts=pa?[m,...pa.pts,fq]:[m,fq];fp.push(...pts);return `<path class="route" d="${pth(pts)}"/>`+mv(pth(pts),[fq[0],fq[1],lastHdg(pts)],{dur:8,s:GS})+`<text class="wl halo" x="${fq[0].toFixed(0)}" y="${(fq[1]+24).toFixed(0)}" text-anchor="middle">PARK · STAND ${esc(far?far.n:'')}</text>`}
   };
-  let ac='';try{ac=(A[o.ac]||A.stand)()}catch(e){ac=''}
-  g+=ac;SCENE_FOCUS=fp.length?bbox(fp,o.ac==='roll'||o.ac==='rto'?22:30):null;
+  let ac='',acA='';try{ac=(A[o.ac]||A.stand)();const sv=ANIM_OFF;ANIM_OFF=0;const fl=fp.length;acA=(A[o.ac]||A.stand)();fp.length=fl;ANIM_OFF=sv}catch(e){ac=ac||''}
+  g+=ac;g=resolveTraffic(g,acA||ac,TRQ,GS,OWNS);SCENE_FOCUS=fp.length?bbox(fp,o.ac==='roll'||o.ac==='rto'?22:30):null;
   return SVG(g,'Aerodrome chart').replace('class="scene"','class="scene flatmap"');
 }
 
@@ -1534,7 +1783,7 @@ function sceneCap(o){if(!o)return null;if(o.t==='ground')return SCENE_CAP;
   let y='',t='';
   if(o.t==='route'){y=o.back?'Back on route after the weather':o.dev?'Deviating around a thunderstorm':o.cell?'Thunderstorm ahead on your route':o.report?'Over the reporting point · give a position report':o.mach?'Cruise · Mach number control':o.pos<.6?'Departure climb on the SID':'En route on the airway';if(lv)y+=' · '+lv;if(o.traffic)t='Crossing traffic at your level'}
   else if(o.t==='profile'){const a=o.a,b=o.b;y=({climb:`Climbing ${fl(a)} → ${fl(b)}`,expedite:`Expedite climb through ${fl(o.m)} to ${fl(b)}`,level:`Level at ${fl(a)}`,turb:`Severe turbulence at ${fl(a)}`,tcas:`TCAS RA at ${fl(a)} · follow the RA`,clear:`Clear of conflict · returning to ${fl(a)}`,descent:`Descending ${fl(a)} → ${fl(b)}`,final:o.dep?'Final approach on one engine':'Final approach · ILS',goaround:o.ws?'Windshear on final · go-around':'Go-around · climb to 4000 ft',lowpass:'Low pass by the tower for a gear check'})[o.mode]||'Vertical profile';
-    if(o.mode==='tcas')t='Intruder at your level';if(o.mode==='goaround'&&!o.ws)t='Vehicle on the runway';if(o.medical)t='Ambulance waiting'}
+    if(o.mode==='tcas')t='Intruder at your level';if(o.mode==='goaround'&&!o.ws)t=({vehicle:'Vehicle on the runway',traffic:'Preceding traffic on the runway',birds:'Birds on the runway',unit:''})[o.why||'vehicle'];if(o.medical)t='Ambulance waiting'}
   else if(o.t==='hold')y='Holding at '+(MSX()?(MSX().holdInfo?MSX().holdInfo.fix:MSX().wps[4]):'KUVA')+' · expect approach'+(o.fuel?' · fuel is low':'');
   else if(o.t==='vector')y=['Radar vectors to the ILS','Turning to intercept the localizer','Established on the localizer'][o.stage||0];
   else if(o.t==='radar')y=({ident:'ATC radar: your label after IDENT',check:'ATC radar: checking your level',wrong:'ATC radar: wrong level shown',primary:'ATC sees only a primary return',lost:'ATC has lost your radar label',nordo:'Radio failure · squawk 7600',hijack:'Unlawful interference · squawk 7500'})[o.mode]||'ATC radar display';
@@ -1678,16 +1927,27 @@ const U_PILOT=/^(request|we |we'|i |i'm|unable|our |my |leveling|levelling|inten
 const U_ATC=/^(report|be (informed|advised)|for your information|caution|expect|hold|climb|descend|turn|contact|squawk|maintain|proceed|cleared|you |you'|your |emergency services|stop|continue|vacate|line up|taxi|follow|give way|go around|wind \d|runway|rwy|traffic|unknown aircraft|advise|say |check|recleared|join|cross|monitor|reduce|increase|ils|atis|tower|visibility|delay|backtrack|leave|after |behind|suggest|be ready|can you|are you|do you|what|when|how|is |will you|shall i transmit)/i;
 const U_PILOTSEC=['Aircraft technical issues','Passenger-related issues','Emergencies and alerts'];
 const U_GROUPS={gnd:['Runway and taxiway condition','Taxiway and ground movement'],crz:['Weather and environment','Traffic, separation, TCAS','Communication and identification','Passenger-related issues','Aircraft technical issues','Navigation and ATC instructions','Emergencies and alerts'],app:['Approach and landing','Runway operations']};
-const U_POOL={};function uPool(g){if(U_POOL[g])return U_POOL[g];const secs=U_GROUPS[g];return U_POOL[g]=PCL.filter(c=>secs.includes(PHR[c.i].s)).sort((x,y)=>secs.indexOf(PHR[x.i].s)-secs.indexOf(PHR[y.i].s)||x.i-y.i)}
-const uSlots=(kd,g)=>g==='gnd'?(kd==='full'||kd==='dep'?1:0):g==='app'?(kd==='full'||kd==='arr'?1:0):(kd==='enr'?5:kd==='full'?4:0);
-function uStart(n,g){let t=0;for(let m=1;m<n;m++)t+=uSlots(mKind(m),g);return t}
-function unitStep(n,k,g,sc){const pool=uPool(g);if(!pool.length)return null;const c=pool[(uStart(n,g)+k)%pool.length];const e=c.c.replace(/\s*\/.*$/,'').replace(/[.!]+$/,''),ru=PHR[c.i].r,sec=PHR[c.i].s;
+/* each unit phrase is used at the point of the flight it belongs to, so the picture matches what is said */
+const U_RX={rwy:/reject(ed)? take-?off|take ?off (aborted|abandoned)|failed at take-?off/i,
+  arr:/\bvacate\b|turn off|u-turn|after touchdown|on landing\. request a tug|aquaplan|bogged|wheels cooling|idle reverse|landing flare|sequence flashers|stopped taxiing|escape slides/i,
+  app:/final|glide|\bils\b|localizer|go around|going around|missed approach|in sight|circle to land|touch and go|low pass|visual|minima|minimum descent|below your aircraft category|alternate|wind ?shear|crosswind|approach lights|landing lights|sidestep|straight-in|cleared to land|unable to land|wrong rwy|landing on the wrong|slope down|align 5|high speed approach|approach speed|approach clearance|approach course|belly landing|difficulties on landing|\bndb\b|vor approach|hit rwy|land only at your discretion|observe wheels|landing gear seems|on approach|orbit in your present position|avoid holding|steady on the glide|keep you advised/i,
+  gnd:/taxi|\btwy\b|\bstand\b|apron|push ?back|\btug\b|tow bar|start ?up|start-up|door|catering|baggage|passenger missing|ladder|departure|slot|clearance void|take ?off denied|run-up|holding bay|follow-me|parking|chocks|holding point|line up|backtrack|delayed|delay is|generators|live stock|grass mowing|snow|\bice\b|rime|ploughed|sand|water patches|standing water|flooded|braking action|debris|foam carpet|rough in|lighting failure|fog patches|hold short|tora|flock of birds|permission for your flight|usable length|turn out|suggest you hold there|disabled aircraft on rwy|vehicle on rwy|single rwy|parallel departures/i};
+function uPhase(c){const e=c.c;for(const g of ['rwy','arr','app','gnd'])if(U_RX[g].test(e))return g;return 'crz'}
+const U_POOL={};function uPool(g){if(U_POOL[g])return U_POOL[g];return U_POOL[g]=PCL.filter(c=>uPhase(c)===g).sort((x,y)=>x.i-y.i)}
+const uElig=(kd,g,n)=>g==='gnd'?(kd==='full'||kd==='dep'):g==='app'||g==='arr'?(kd==='full'||kd==='arr'):g==='rwy'?(kd==='dep'&&n%20===0):(kd==='full'||kd==='enr');
+const U_NEED={};function uPer(g){if(U_NEED[g])return U_NEED[g];let e=0;for(let m=1;m<=100;m++)if(uElig(mKind(m),g,m))e++;return U_NEED[g]=Math.max(1,Math.ceil(uPool(g).length/Math.max(1,e)))}
+const uSlots=(kd,g,n)=>uElig(kd,g,n)?(g==='crz'?Math.max(uPer(g),kd==='enr'?3:2):uPer(g)):0;
+function uStart(n,g){let t=0;for(let m=1;m<n;m++)t+=uSlots(mKind(m),g,m);return t}
+function unitStep(n,k,g,sc,rw,twy){const pool=uPool(g);if(!pool.length)return null;const c=pool[(uStart(n,g)+k)%pool.length];let e=c.c.replace(/\s*\/.*$/,'').replace(/[.!]+$/,''),ru=PHR[c.i].r;const sec=PHR[c.i].s;
+  /* a phrase naming one runway uses the runway of this flight instead */
+  if(twy){const m=e.match(/\bTWY\s+([A-Z]?\d*[A-Z]?\d*)\b/);if(m&&m[1]&&m[1]!==twy){const rx=new RegExp('\\b'+m[1]+'\\b','g');e=e.replace('TWY '+m[1],'TWY '+twy);ru=String(ru).replace(rx,twy)}}
+  if(rw){const ds=uniq([...e.matchAll(/\b(?:RWY|runway)\s*(\d{2}[LRC]?)\b/gi)].map(m=>m[1].toUpperCase()));if(ds.length===1&&ds[0]!==String(rw).toUpperCase()&&!/\b(left|right)\b.*\b(left|right)\b/i.test(e)){const d0=ds[0],rx=new RegExp('\\b'+d0+'\\b','gi');e=e.replace(rx,rw);ru=String(ru).replace(rx,rw)}}
   if(!e||e.length<4)return null;const hasWe=/\b(we|our|us|i|i'm|my|me)\b/i.test(e)||(/\?$/.test(e)&&/^(what|where|why|when|how|is there|are there)\b/i.test(e)&&!/\b(you|your)\b/i.test(e));const pilot=hasWe||(U_PILOT.test(e)&&!U_ATC.test(e))||(U_PILOTSEC.includes(sec)&&!U_ATC.test(e));
   if(pilot){const toks=uniq(norm(e).trim().split(' ').filter(t=>t&&t!=='zzsep'));const key=toks.filter(t=>/^\d/.test(t)).slice(0,2).concat(toks.filter(t=>t.length>=5&&!U_STOP.has(t)&&!/^\d/.test(t)).slice(0,3));
     if(!key.length)key.push(...toks.filter(t=>t.length>=3).slice(0,2));
     return {sit:'Unit phrase · '+sec+': '+ru,task:'Tell ATC in English.',need:key.map(t=>['\\b'+reEsc(t)+'\\b','"'+t+'"']),model:'{CS}, '+e,sc,unit:c.i}}
   const kw=norm(e).trim().split(' ').filter(t=>t.length>=5&&!U_STOP.has(t)&&t!=='zzsep')[0];
-  return {atc:'{CS}, '+e.charAt(0).toLowerCase()+e.slice(1)+(/[?]$/.test(e)?'':'.'),sit:'Перевод: '+ru,task:'Acknowledge the message (Roger / Wilco, or read back).',need:[['roger|wilco|affirm|negative|unable|copied|understood'+(kw?'|'+reEsc(kw):''),'"Roger" / "Wilco"']],model:'Roger, {CS}',sc,unit:c.i}}
+  return {atc:'{CS}, '+(/^[A-Z][a-z]/.test(e)?e.charAt(0).toLowerCase()+e.slice(1):e)+(/[?]$/.test(e)?'':'.'),sit:'Перевод: '+ru,task:'Acknowledge the message (Roger / Wilco, or read back).',need:[['roger|wilco|affirm|negative|unable|copied|understood'+(kw?'|'+reEsc(kw):''),'"Roger" / "Wilco"']],model:'Roger, {CS}',sc,unit:c.i}}
 function genMission(n){
   const r=mRng(n*7919+13);const ads=S.ads.length>=2?S.ads:[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'}];
   let di=mInt(r,0,ads.length-1),ai=mInt(r,0,ads.length-2);if(ai>=di)ai++;
@@ -1700,14 +1960,14 @@ function genMission(n){
   const sq=String(mInt(r,1,7))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7),sq2=String(mInt(r,1,6))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7);
   const fqG=mPick(r,['121.7','121.9','121.75']),fqT=mPick(r,['118.1','118.3','118.7','119.1','119.45']),fqD=mPick(r,['124.85','125.8','126.4','127.25']),fqC=mPick(r,['128.35','129.1','131.2','132.4','133.65','134.05']),fqC2=mPick(r,['127.5','130.45','132.95','135.2']),fqA=mPick(r,['119.8','120.2','124.3','125.25']),fqTa=mPick(r,['118.25','119.1','119.9','118.9']),fqGa=mPick(r,['121.6','121.85','122.05']);
   const sidD=mInt(r,1,7),sidL=mPick(r,['A','B','C','D','E','K','M','Q','S','T','W']),starD=mInt(r,1,7),starL=mPick(r,['A','B','C','D','E','F','G','H','J','L','N','P','R','S','T']);
-  const initAlt=mPick(r,[4000,5000,6000,7000,8000]),crz=mPick(r,[240,260,280,300,320,340,360,380]),fl1=mPick(r,[110,130,150,170,190].filter(x=>x<crz-50)),desFL=mPick(r,[90,110,130,150].filter(x=>x<crz-60));
+  const initAlt=mPick(r,[4000,5000,6000,7000,8000]);let crz=mPick(r,[240,260,280,300,320,340,360,380]);const fl1=mPick(r,[110,130,150,170,190].filter(x=>x<crz-50)),desFL=mPick(r,[90,110,130,150].filter(x=>x<crz-60));
   const T1=mPick(r,MS_TYPES),T2=mPick(r,MS_TYPES),T3=mPick(r,MS_TYPES);
   const PD=groundPlan(dep),PA=groundPlan(arr);
   const DR=PD.des,AR=PA.des,DRX=rwyRe(DR),ARX=rwyRe(AR),hpn=PD.hp&&PD.hp.n?PD.hp.n:'',HPS=hpn?nameSpk(hpn)+' ':'',HPX=hpn?nameRx(hpn):'';
   const depN=dep.n,arrN=arr.n,depX=nameRe(depN),arrX=nameRe(arrN);
   const ms={n,dep,arr,wps,hold:wps[4],qnhA,sq0:'----',wind:{d:wDep,s:sDep,ad:wArr,as:sArr},awy:['SID','W'+mInt(r,10,99),'W'+mInt(r,10,99),'STAR']};
   const st=(stn,f)=>stn+'|'+f;
-  const steps=[];const S_=(o)=>{steps.push(o);return o};
+  const steps=[];let endMsg=null;const S_=(o)=>{steps.push(o);return o};
   const tags=[];
   const G_=(ac,p,x={})=>Object.assign({t:'ground',ac,p},x);
   let firstSit='';
@@ -1740,27 +2000,27 @@ function genMission(n){
     // de-icing (cold weather)
     if(tmp<=3){const pad_=mInt(r,1,4),fqI=mPick(r,['131.85','130.65','122.35']),tIce=pad(mInt(r,6,22))+pad(mInt(r,0,5)*10+mInt(r,0,9)),fl=mPick(r,['1','2','4']);const flN={'1':'Type 1','2':'Type 2','4':'Type 4'}[fl];
       S_({sit:`Temperature ${tmp}°C, ${mPick(r,['light snow','freezing fog','frost on the wings'])}. The aircraft needs de-icing.`,task:'Request de-icing.',need:[['de ?icing','"request de-icing"']],model:'{CS}, request de-icing',sc:G_('pushed',0)});
-      S_({atc:`{CS}, taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, contact Iceman ${fqI}.`,task:'Read back.',need:[['de ?icing pad '+pad_,'De-icing pad '+pad_],[fqRx(fqI),'Iceman '+fqI]],model:`Taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, ${fqI}, {CS}`,sc:G_('taxi',0)});
-      S_({st:st('Iceman',fqI),sit:`On de-icing pad ${pad_}, brakes set, engines at idle, configuration confirmed.`,task:'Call Iceman: ready for de-icing.',need:[['iceman','"Iceman"'],['pad '+pad_,'Pad '+pad_],['brakes set','"brakes set"'],['ready','"ready for de-icing"']],model:`Iceman, {CS}, on pad ${pad_}, brakes set, ready for de-icing`,sc:G_('taxi',0)});
-      S_({atc:`{CS}, de-icing and anti-icing completed, ${flN} fluid, holdover time started at ${tIce}, equipment clear, contact Ground ${fqG}.`,task:'Read back the anti-icing code.',need:[['type '+fl,flN+' fluid'],['\\b'+tIce+'\\b','Start time '+tIce],[fqRx(fqG),'Ground '+fqG]],model:`${flN} fluid, holdover time ${tIce}, ${fqG}, {CS}`,sc:G_('taxi',0)});
+      S_({atc:`{CS}, taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, contact Iceman ${fqI}.`,task:'Read back.',need:[['de ?icing pad '+pad_,'De-icing pad '+pad_],[fqRx(fqI),'Iceman '+fqI]],model:`Taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, ${fqI}, {CS}`,sc:G_('topad',0,{pad:pad_})});
+      S_({st:st('Iceman',fqI),sit:`On de-icing pad ${pad_}, brakes set, engines at idle, configuration confirmed.`,task:'Call Iceman: ready for de-icing.',need:[['iceman','"Iceman"'],['pad '+pad_,'Pad '+pad_],['brakes set','"brakes set"'],['ready','"ready for de-icing"']],model:`Iceman, {CS}, on pad ${pad_}, brakes set, ready for de-icing`,sc:G_('deice',0,{pad:pad_})});
+      S_({atc:`{CS}, de-icing and anti-icing completed, ${flN} fluid, holdover time started at ${tIce}, equipment clear, contact Ground ${fqG}.`,task:'Read back the anti-icing code.',need:[['type '+fl,flN+' fluid'],['\\b'+tIce+'\\b','Start time '+tIce],[fqRx(fqG),'Ground '+fqG]],model:`${flN} fluid, holdover time ${tIce}, ${fqG}, {CS}`,sc:G_('deice',0,{pad:pad_,done:true})});
       tags.push('de-icing')}
     // taxi
-    S_({sit:tmp<=3?'De-icing complete. You are back on Ground frequency.':'Engines running, tug disconnected, after-start checks complete.',task:'Request taxi.',need:[['request taxi','"request taxi"']],model:'{CS}, request taxi',sc:G_('pushed',0)});
+    S_({sit:tmp<=3?'De-icing complete. You are back on Ground frequency.':'Engines running, tug disconnected, after-start checks complete.',task:'Request taxi.',need:[['request taxi','"request taxi"']],model:'{CS}, request taxi',sc:tmp<=3?G_('atpad',0,{pad:1}):G_('pushed',0)});
     const txr=PD.txr||'the apron',txrx=PD.txrx||'';
     S_({atc:`{CS}, taxi to holding point ${HPS}runway ${DR} via ${txr}, QNH ${qnhD}.`,task:'Read back the taxi clearance.',need:[['taxi','"taxi"'],['holding point'+(HPX?' '+HPX:''),'Holding point '+(hpn||'')],[DRX,'Runway '+DR],...(txrx?[[txrx,'Route: '+txr]]:[]),['qnh '+qnhD,'QNH '+qnhD]],model:`Taxi to holding point ${HPS}runway ${DR} via ${txr}, QNH ${qnhD}, {CS}`,sc:G_('taxi',0)});
     tags.push('taxi');
-    const gv=r();const L=layoutOf(dep);const other=(L.rwy||[]).flatMap(x=>x.d).find(d=>d!==DR&&PD.rw&&!PD.rw.d.includes(d));
+    const gv=r();const other=PD.cross?PD.cross.d:null;/* only a runway the taxi route really crosses */
     if(gv<.22){S_({atc:`{CS}, give way to the ${T1} crossing left to right ahead of you.`,task:'Read back.',need:[['giv(e|ing) way','"Giving way"'],[mTypeRx(T1),'Traffic '+T1]],model:`Giving way to the ${T1}, {CS}`,sc:G_('taxi',0,{tt:{k:'crossing',t:T1}})});
       S_({sit:`The ${T1} has passed.`,atc:'{CS}, continue taxi.',task:'Acknowledge.',need:[['continu|wilco|roger','"Continuing taxi"']],model:'Continuing taxi, {CS}',sc:G_('taxi',0)});tags.push('give way')}
     else if(gv<.42){S_({atc:`{CS}, follow the ${T1} passing from right to left, then taxi to holding point ${HPS}runway ${DR}.`,task:'Read back.',need:[['follow','"Following"'],[mTypeRx(T1),'Traffic '+T1]],model:`Following the ${T1}, {CS}`,sc:G_('taxi',0,{tt:{k:'ahead',t:T1}})});tags.push('follow')}
     else if(gv<.58){S_({atc:`{CS}, hold position, ${mPick(r,['vehicle crossing ahead','towed aircraft crossing ahead','a '+T1+' is pushing back ahead of you'])}.`,task:'Read back (not only "roger").',need:[['holding( position)?','"Holding position"']],model:'Holding position, {CS}',sc:G_('taxi',0,{tt:{k:'crossing',t:T1}})});
       S_({atc:'{CS}, continue taxi.',task:'Acknowledge.',need:[['continu|wilco|roger','"Continuing taxi"']],model:'Continuing taxi, {CS}',sc:G_('taxi',0)});tags.push('hold position')}
-    else if(gv<.7&&other){S_({atc:`{CS}, hold short of runway ${other}.`,task:'Read back.',need:[['holding short','"Holding short"'],[rwyRe(other),'Runway '+other]],model:`Holding short runway ${other}, {CS}`,sc:G_('taxi',0)});
-      S_({atc:`{CS}, cross runway ${other}, report vacated.`,task:'Read back.',need:[['cross(ing)?','"Crossing"'],[rwyRe(other),'Runway '+other],['wilco|report','"Wilco"']],model:`Crossing runway ${other}, wilco, {CS}`,sc:G_('taxi',0)});
+    else if(gv<.7&&other){S_({atc:`{CS}, hold short of runway ${other}.`,task:'Read back.',need:[['holding short','"Holding short"'],[rwyRe(other),'Runway '+other]],model:`Holding short runway ${other}, {CS}`,sc:G_('taxi',0,{hs:'short'})});
+      S_({atc:`{CS}, cross runway ${other}, report vacated.`,task:'Read back.',need:[['cross(ing)?','"Crossing"'],[rwyRe(other),'Runway '+other],['wilco|report','"Wilco"']],model:`Crossing runway ${other}, wilco, {CS}`,sc:G_('taxi',0,{hs:'cross'})});
       S_({sit:`You are clear of runway ${other}.`,task:'Report vacated.',need:[[rwyRe(other),'Runway '+other],['vacated','"vacated"']],model:`{CS}, runway ${other} vacated`,sc:G_('taxi',0)});tags.push('runway crossing')}
     else if(gv<.82){S_({atc:`{CS}, expedite taxi, ${T1} behind you.`,task:'Read back.',need:[['expedit','"Expediting"']],model:'Expediting, {CS}',sc:G_('taxi',0,{tt:{k:'behind',t:T1}})});tags.push('expedite')}
     else{S_({atc:`{CS}, caution, ${mPick(r,['work in progress on the left side of the taxiway','birds reported near the holding point','taxiway lights unserviceable'])}.`,task:'Acknowledge.',need:[['roger|wilco|caution','"Roger"']],model:'Roger, {CS}',sc:G_('taxi',0)});tags.push('caution')}
-    {const u=unitStep(n,0,'gnd',G_('taxi',0));if(u){S_(u);tags.push('unit phrases')}}
+    for(let k=0;k<uSlots(kind,'gnd',n);k++){const u=unitStep(n,k,'gnd',G_('taxi',0),DR);if(u){S_(u);tags.push('unit phrases')}}
     // holding point & tower
     S_({atc:`{CS}, contact ${depN} Tower ${fqT}.`,task:'Read back the frequency.',need:[[fqRx(fqT),'Frequency '+fqT]],model:`${fqT}, {CS}`,sc:G_('hp',0)});
     S_({st:st(depN+' Tower',fqT),sit:`At holding point ${hpn||''} runway ${DR}, checks complete.`,task:'Call Tower, ready for departure.',need:[[depX+' tower',`Station "${depN} Tower"`],['ready','"ready for departure"']],model:`${depN} Tower, {CS}, holding point ${hpn||''} runway ${DR}, ready for departure`,sc:G_('hp',0)});
@@ -1778,6 +2038,12 @@ function genMission(n){
       S_({atc:'{CS}, hold position, cancel take-off, I say again cancel take-off, vehicle on the runway.',task:'Read back.',need:[['holding','"Holding"'],['cancel','"cancelling take-off"']],model:'Holding, cancelling take-off, {CS}',sc:G_('lineup',1)});
       S_({atc:`{CS}, runway clear, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('take-off cancelled')}
     else{S_({atc:`{CS}, ${depN} Tower, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)})}
+    if(uSlots(kind,'rwy',n)){const u=unitStep(n,0,'rwy',G_('rto',1,{txt:'TAKE-OFF REJECTED',roll:true}),DR);if(u){
+      const lt=steps[steps.length-1];lt.sc=G_('lineup',1,{noRoll:true});/* the take-off starts, then is rejected */
+      u.sit=(u.atc?'During the take-off roll you rejected the take-off and stopped on the runway.':'During the take-off roll you reject the take-off. '+u.sit.replace(/^Unit phrase · [^:]*: /,'Unit phrase: '));S_(u);
+      S_({atc:`{CS}, roger, hold position, emergency services are on the way.`,task:'Read back.',need:[['holding','"Holding position"']],model:'Holding position, {CS}',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
+      S_({sit:'The fire crew reports no fire. The aircraft can taxi.',task:'Request to vacate the runway and return to the stand.',need:[['vacat|return','"vacate" / "return to stand"'],['stand','"stand"']],model:'{CS}, request to vacate the runway and return to stand',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
+      tags.push('rejected take-off');endMsg=`{CS}, vacate when able, taxi to stand ${PD.std} via ${PD.txr||'the apron'}, contact Ground ${fqG}.`;return finish()}}
     // departure
     const pass=mPick(r,[1500,2000,2500,3000].filter(x=>x<initAlt));
     S_({st:st(depN+' Departure',fqD),sit:`Airborne. You change to Departure ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with Departure.',need:[[depX+' (departure|radar)',`Station "${depN} Departure"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} Departure, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
@@ -1803,18 +2069,18 @@ function genMission(n){
       steps[steps.length-1].model=steps[steps.length-1].atc.replace('{CS}, ','').replace(/\.$/,'')+', {CS}';});
     ev.push(()=>{const t0=mInt(r,10,50),t1=t0+mInt(r,6,9);S_({atc:`{CS}, report over ${wps[2]}.`,sit:`Over ${wps[2]} at time ${pad(t0)}, FL${crz}. Estimating ${wps[3]} at ${pad(t1%60)}, next ${wps[4]}.`,task:'Make a position report.',need:[[wpRx(wps[2]),'Position '+wps[2]],['\\b0?'+t0+'\\b','Time '+pad(t0)],['flight level '+crz,'FL'+crz],[wpRx(wps[3]),'Estimate point '+wps[3]],['\\b0?'+(t1%60)+'\\b','Estimate '+pad(t1%60)],[wpRx(wps[4]),'Next '+wps[4]]],model:`{CS}, ${wps[2]} ${pad(t0)}, FL${crz}, ${wps[3]} ${pad(t1%60)}, ${wps[4]}`,sc:{t:'route',pos:2,report:true,lvl:'FL'+crz,p:3,rep:['POSITION REPORT',`${wps[2]} ${pad(t0)}  FL${crz}`,`${wps[3]} ${pad(t1%60)}`,'NEXT '+wps[4]]}});tags.push('position report')});
     ev.push(()=>{S_({atc:`{CS}, squawk ${sq2}.`,task:'Read back.',need:[['squawk(ing)? '+sq2,'Squawk '+sq2]],model:`Squawk ${sq2}, {CS}`,sc:{t:'radar',mode:'ident',p:3,sq:sq2,fl:String(crz)}});});
-    ev.push(()=>{const side=mPick(r,['left','right']),nm=mPick(r,[10,15,20]);S_({sit:`A thunderstorm is ahead on your track.`,task:`Request a deviation ${nm} miles ${side} of track due weather.`,need:[['deviat','"Request deviation"'],['\\b'+nm+'\\b','Distance '+nm],[side,'Side: '+side],['weather','"due weather"']],model:`{CS}, request deviation ${nm} miles ${side} of track due weather`,sc:{t:'route',pos:2.2,cell:true,lvl:'FL'+crz,p:3}});
-      S_({atc:`{CS}, deviation up to ${nm} miles ${side} of track approved, report back on track.`,task:'Read back.',need:[['deviat','"Deviating"'],['\\b'+nm+'\\b','Up to '+nm+' miles'],[side,side.charAt(0).toUpperCase()+side.slice(1)],['wilco|report','"Wilco"']],model:`Deviating up to ${nm} miles ${side} of track, wilco, {CS}`,sc:{t:'route',pos:2.2,cell:true,dev:true,lvl:'FL'+crz,p:3}});
-      S_({sit:'You are clear of the weather and back on track.',task:'Report.',need:[['back on (track|route)','"Back on track"']],model:'{CS}, back on track',sc:{t:'route',pos:3.15,cell:true,dev:true,back:true,lvl:'FL'+crz,p:3}});tags.push('weather deviation')});
+    ev.push(()=>{const side=mPick(r,['left','right']),nm=mPick(r,[10,15,20]);S_({sit:`A thunderstorm is ahead on your track.`,task:`Request a deviation ${nm} miles ${side} of track due weather.`,need:[['deviat','"Request deviation"'],['\\b'+nm+'\\b','Distance '+nm],[side,'Side: '+side],['weather','"due weather"']],model:`{CS}, request deviation ${nm} miles ${side} of track due weather`,sc:{t:'route',pos:2.2,cell:true,side,nm,lvl:'FL'+crz,p:3}});
+      S_({atc:`{CS}, deviation up to ${nm} miles ${side} of track approved, report back on track.`,task:'Read back.',need:[['deviat','"Deviating"'],['\\b'+nm+'\\b','Up to '+nm+' miles'],[side,side.charAt(0).toUpperCase()+side.slice(1)],['wilco|report','"Wilco"']],model:`Deviating up to ${nm} miles ${side} of track, wilco, {CS}`,sc:{t:'route',pos:2.2,cell:true,dev:true,side,nm,lvl:'FL'+crz,p:3}});
+      S_({sit:'You are clear of the weather and back on track.',task:'Report.',need:[['back on (track|route)','"Back on track"']],model:'{CS}, back on track',sc:{t:'route',pos:3.15,cell:true,dev:true,back:true,side,nm,lvl:'FL'+crz,p:3}});tags.push('weather deviation')});
     ev.push(()=>{const up=crz+20;S_({sit:`Moderate turbulence at FL${crz}.`,task:`Request FL${up} due turbulence.`,need:[['request','"Request"'],['flight level '+up,'FL'+up],['turbulence','"due turbulence"']],model:`{CS}, request FL${up} due turbulence`,sc:{t:'profile',mode:'turb',a:crz,p:3}});
-      S_({atc:`{CS}, climb FL${up}.`,task:'Read back.',need:[['flight level '+up,'FL'+up]],model:`Climbing FL${up}, {CS}`,sc:{t:'profile',mode:'climb',a:crz,b:up,p:3}});tags.push('turbulence')});
-    ev.push(()=>{const sp=mPick(r,[280,290,300]);S_({atc:`{CS}, reduce speed to ${sp} knots, ${mPick(r,['traffic ahead','for spacing'])}.`,task:'Read back.',need:[['\\b'+sp+'\\b','Speed '+sp+' knots'],['reduc','"Reducing"']],model:`Reducing speed to ${sp} knots, {CS}`,sc:{t:'route',pos:2.4,lvl:'FL'+crz,p:3}});tags.push('speed control')});
+      S_({atc:`{CS}, climb FL${up}.`,task:'Read back.',need:[['flight level '+up,'FL'+up]],model:`Climbing FL${up}, {CS}`,sc:{t:'profile',mode:'climb',a:crz,b:up,p:3}});tags.push('turbulence');crz=up});
+    ev.push(()=>{const sp=mPick(r,[280,290,300]);S_({atc:`{CS}, reduce speed to ${sp} knots, ${mPick(r,['traffic ahead','for spacing'])}.`,task:'Read back.',need:[['\\b'+sp+'\\b','Speed '+sp+' knots'],['reduc','"Reducing"']],model:`Reducing speed to ${sp} knots, {CS}`,sc:{t:'route',pos:1.85,lvl:'FL'+crz,p:3}});tags.push('speed control')});
     if(r()<.25)ev.push(()=>{S_({sit:'A passenger has a heart attack. A doctor on board asks for the nearest airport.',task:`Make an urgency call and request diversion to ${arrN}.`,need:[['pan pan pan pan pan pan','"Pan Pan" three times'],['medical|heart','Nature: medical'],['flight level '+crz,'Level FL'+crz],[arrX,'Diversion to '+arrN]],model:`Pan Pan, Pan Pan, Pan Pan, ${depN} Control, {CS}, medical emergency, passenger with heart attack, FL${crz}, request diversion to ${arrN}`,sc:{t:'profile',mode:'level',a:crz,p:3,ban:'PAN PAN · MEDICAL'}});
-      S_({atc:`{CS}, roger Pan Pan, descend FL${desFL+40}, proceed direct ${arrN}.`,task:'Read back.',need:[['flight level '+(desFL+40),'FL'+(desFL+40)],['direct','"Direct"'],[arrX,arrN]],model:`Descending FL${desFL+40}, direct ${arrN}, {CS}`,sc:{t:'profile',mode:'descent',a:crz,b:desFL+40,p:4}});tags.push('medical')});
-    const pickN=kind==='enr'?5:3;const order=[...ev.keys()].sort(()=>r()-.5).slice(0,pickN);
+      S_({atc:`{CS}, roger Pan Pan, descend FL${desFL+40}, proceed direct ${arrN}.`,task:'Read back.',need:[['flight level '+(desFL+40),'FL'+(desFL+40)],['direct','"Direct"'],[arrX,arrN]],model:`Descending FL${desFL+40}, direct ${arrN}, {CS}`,sc:{t:'profile',mode:'descent',a:crz,b:desFL+40,p:4}});tags.push('medical');crz=desFL+40});
+    const pickN=kind==='enr'?5:3;const EVP=[1.1,1.6,1.35,2,.95,2.2,.9,1.85,3];/* events happen in the order the aircraft reaches them along the route */const order=[...ev.keys()].sort(()=>r()-.5).slice(0,pickN).sort((x,y)=>EVP[x]-EVP[y]);
     S_({sit:`You are now level at FL${crz}.`,task:'Report reaching.',need:[['(reaching|maintaining|level) flight level '+crz,'"Reaching FL'+crz+'"']],model:`{CS}, reaching FL${crz}`,sc:{t:'profile',mode:'level',a:crz,p:3}});
     order.forEach(i=>ev[i]());
-    for(let k=0;k<uSlots(kind,'crz');k++){const u=unitStep(n,k,'crz',{t:'route',pos:2.5,lvl:'FL'+crz,p:3});if(u){S_(u);tags.push('unit phrases')}}
+    for(let k=0;k<uSlots(kind,'crz',n);k++){const u=unitStep(n,k,'crz',{t:'route',pos:2.5,lvl:'FL'+crz,p:3},AR);if(u){S_(u);tags.push('unit phrases')}}
     S_({atc:`{CS}, contact ${arrN} Control ${fqC2}.`,task:'Read back.',need:[[fqRx(fqC2),'Frequency '+fqC2]],model:`${fqC2}, {CS}`,sc:{t:'route',pos:2.6,lvl:'FL'+crz,p:3}});
   }
   /* ---------------- arrival ---------------- */
@@ -1830,40 +2096,54 @@ function genMission(n){
       S_({atc:`{CS}, hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}.`,task:'Read back the holding clearance.',need:[[wpRx(wps[4]),'Fix '+wps[4]],['flight level '+desFL,'FL'+desFL],['\\b0*'+it+'\\b','Inbound '+pad(it,3)],[lr,lr.charAt(0).toUpperCase()+lr.slice(1)+' hand'],['\\b'+eat+'\\b','Expect approach at '+eat]],model:`Hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}, {CS}`,sc:{t:'hold',p:5}});
       if(r()<.5)S_({sit:`While holding, your fuel is getting low. You can accept only a little more delay.`,task:'Advise ATC.',need:[['minimum fuel','"Minimum fuel"']],model:'{CS}, minimum fuel',sc:{t:'hold',fuel:true,p:5}});
       tags.push('holding')}
-    const h1=mInt(r,1,36)*10,lr1=mPick(r,['left','right']);
+    /* radar vectors that make sense for the runway: base leg at 90°, intercept at 30° to the final approach course */
+    const crsA=((parseInt(AR)||36)*10)%360||360,vs=r()<.5?1:-1;ms.vside=vs;const hN=h=>((h%360)+360)%360||360;
+    const h1=hN(crsA+90*vs),lr1=mPick(r,['left','right']);
     S_({atc:`{CS}, ${av<.35?'leave '+wps[4]+', ':''}turn ${lr1} heading ${pad(h1,3)}, descend altitude ${alt1} feet, QNH ${qnhA}.`,task:'Read back.',need:[[lr1+' heading 0*'+h1,lr1.charAt(0).toUpperCase()+lr1.slice(1)+' heading '+pad(h1,3)],['\\b'+alt1+'\\b','Altitude '+alt1+' feet'],['qnh '+qnhA,'QNH '+qnhA]],model:`${lr1.charAt(0).toUpperCase()+lr1.slice(1)} heading ${pad(h1,3)}, descending ${alt1} feet, QNH ${qnhA}, {CS}`,sc:{t:'vector',stage:0,p:5,hdg:pad(h1,3),alt:alt1}});
     if(r()<.5){const sp=mPick(r,[180,200,210,220]);S_({atc:`{CS}, reduce speed to ${sp} knots${r()<.5?' until 4 miles final':''}.`,task:'Read back.',need:[['\\b'+sp+'\\b','Speed '+sp+' knots']],model:`Reducing speed to ${sp} knots, {CS}`,sc:{t:'vector',stage:0,p:5,hdg:pad(h1,3),alt:alt1}});tags.push('speed control')}
-    const h2=mInt(r,1,36)*10,lr2=mPick(r,['left','right']);
+    const h2=hN(crsA+30*vs),lr2=vs>0?'left':'right';
     S_({atc:`{CS}, turn ${lr2} heading ${pad(h2,3)}, descend ${alt2} feet, cleared ILS approach runway ${AR}, report established.`,task:'Read back.',need:[[lr2+' heading 0*'+h2,lr2.charAt(0).toUpperCase()+lr2.slice(1)+' heading '+pad(h2,3)],['\\b'+alt2+'\\b',alt2+' feet'],['cleared( for)? ils( approach)? '+ARX,'Cleared ILS approach runway '+AR],['report(ing)? established|wilco','Will report established']],model:`${lr2.charAt(0).toUpperCase()+lr2.slice(1)} heading ${pad(h2,3)}, descending ${alt2} feet, cleared ILS approach runway ${AR}, wilco, {CS}`,sc:{t:'vector',stage:1,p:5,hdg:pad(h2,3),alt:alt2}});
     S_({sit:'The localizer is captured.',task:'Report.',need:[['established','"Established"']],model:'{CS}, established on the localizer',sc:{t:'vector',stage:2,p:5}});
-    {const u=unitStep(n,0,'app',{t:'vector',stage:2,p:5});if(u){S_(u);tags.push('unit phrases')}}
+    for(let k=0;k<uSlots(kind,'app',n);k++){const u=unitStep(n,k,'app',{t:'vector',stage:2,p:5},AR);if(u){
+      /* a phrase that ends the approach (go-around, missed approach, low pass) is shown as one, and a second approach follows */
+      const en=PHR[u.unit]?PCL.find(c=>c.i===u.unit).c:'';const lp=/low pass|undercarriage|landing gear (down|seems)|observe wheels/i.test(en),ga=!lp&&!/in case of/i.test(en)&&/go around|going around|missed approach|unable to land|landing on the wrong|will not hit rwy/i.test(en);
+      if(lp||ga){u.sc=lp?{t:'profile',mode:'lowpass',p:5}:{t:'profile',mode:'goaround',why:'unit',p:5};S_(u);
+        const h2=pad(((((parseInt(AR)||36)*10+30*(ms.vside||1))%360)+360)%360||360,3);S_({sit:lp?'After the low pass you are vectored for a normal ILS approach.':'After the missed approach you are vectored for a second ILS approach.',atc:'{CS}, turn '+((ms.vside||1)>0?'left':'right')+' heading '+h2+', descend 3000 feet, cleared ILS approach runway '+AR+', report established.',task:'Read back.',need:[['heading','Heading'],['3000','3000 feet'],['cleared ils','"cleared ILS approach"'],[ARX,'Runway '+AR]],model:'Heading, descending 3000 feet, cleared ILS approach runway '+AR+', wilco, {CS}',sc:{t:'vector',stage:1,hdg:h2,alt:3000,p:5}});
+        steps[steps.length-1].model=steps[steps.length-1].atc.replace('{CS}, ','').replace('turn ','').replace(', report established.','')+', wilco, {CS}';
+        S_({sit:'The localizer is captured again.',task:'Report established.',need:[['established','"Established"']],model:'{CS}, established localizer runway '+AR,sc:{t:'vector',stage:2,p:5}})}
+      else S_(u);tags.push('unit phrases')}}
     S_({atc:`{CS}, contact ${arrN} Tower ${fqTa}.`,task:'Read back.',need:[[fqRx(fqTa),'Frequency '+fqTa]],model:`${fqTa}, {CS}`,sc:{t:'vector',stage:2,p:5}});
     S_({st:st(arrN+' Tower',fqTa),sit:'6 miles final on the ILS.',task:'Call Tower.',need:[[arrX+' tower',`Station "${arrN} Tower"`],['established','"Established"'],[ARX,'Runway '+AR]],model:`${arrN} Tower, {CS}, established ILS runway ${AR}`,sc:{t:'profile',mode:'final',p:5}});
     const lw=windStr(wArr,sArr),lv=r();
     if(lv<.25){S_({atc:`{CS}, ${arrN} Tower, continue approach, number 2, traffic ${T2} on 3 miles final.`,task:'Read back.',need:[['continu','"Continue approach"'],['number 2','"Number 2"']],model:'Continue approach, number 2, {CS}',sc:{t:'profile',mode:'final',p:5}});
       S_({atc:`{CS}, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('landing sequence')}
     else if(lv<.38){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
-      S_({atc:`{CS}, go around, I say again go around, ${mPick(r,['vehicle on the runway','preceding traffic not vacated','birds on the runway'])}.`,task:'Comply and reply.',need:[['going around','"Going around"']],model:'Going around, {CS}',sc:{t:'profile',mode:'goaround',p:6}});
-      S_({atc:`{CS}, climb straight ahead ${alt1} feet, contact Approach ${fqA}.`,task:'Read back.',need:[['straight ahead','Straight ahead'],['\\b'+alt1+'\\b',alt1+' feet'],[fqRx(fqA),fqA]],model:`Climbing straight ahead ${alt1} feet, ${fqA}, {CS}`,sc:{t:'profile',mode:'goaround',p:6}});tags.push('go-around');
+      {const why=mPick(r,['vehicle','traffic','birds']);S_({atc:`{CS}, go around, I say again go around, ${({vehicle:'vehicle on the runway',traffic:'preceding traffic not vacated',birds:'birds on the runway'})[why]}.`,task:'Comply and reply.',need:[['going around','"Going around"']],model:'Going around, {CS}',sc:{t:'profile',mode:'goaround',why,p:6}});
+      S_({atc:`{CS}, climb straight ahead ${alt1} feet, contact Approach ${fqA}.`,task:'Read back.',need:[['straight ahead','Straight ahead'],['\\b'+alt1+'\\b',alt1+' feet'],[fqRx(fqA),fqA]],model:`Climbing straight ahead ${alt1} feet, ${fqA}, {CS}`,sc:Object.assign({},steps[steps.length-1].sc)});tags.push('go-around')}
       return finish()}
     else if(lv<.5){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}, caution wake turbulence, preceding landing ${T2}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('wake turbulence')}
     else S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
-    const exT=PA.hp&&PA.hp.n?PA.hp.n:mPick(r,['B2','C3','A4','D1']),exRx=nameRx(exT),lr3=mPick(r,['left','right']);
+    const exT=PA.ex&&PA.ex.name?PA.ex.name:PA.hp&&PA.hp.n?PA.hp.n:mPick(r,['B2','C3','A4','D1']),exRx=nameRx(exT),lr3=PA.ex?PA.ex.side:mPick(r,['left','right']);
     S_({atc:`{CS}, vacate ${lr3} via ${nameSpk(exT)}, contact Ground ${fqGa}.`,task:'Read back.',need:[['vacat','"Vacating"'],[exRx,'Taxiway '+exT],[fqRx(fqGa),'Frequency '+fqGa]],model:`Vacating ${lr3} via ${nameSpk(exT)}, ${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});
+    for(let k=0;k<uSlots(kind,'arr',n);k++){const u=unitStep(n,k,'arr',G_('landed',6,{arr:true}),AR,exT);if(u){S_(u);tags.push('unit phrases')}}
     S_({st:st(arrN+' Ground',fqGa),sit:`Runway ${AR} vacated.`,task:'Call Ground.',need:[[arrX+' ground',`Station "${arrN} Ground"`],['vacated','"Runway vacated"']],model:`${arrN} Ground, {CS}, runway ${AR} vacated`,sc:G_('taxiin',6,{arr:true,start:true})});
-    const sdA=PA.std||'4',txA=PA.txr||'the apron';
-    S_({atc:`{CS}, taxi to stand ${sdA} via ${txA}${r()<.4?', give way to the '+T3+' pushing back from stand '+mInt(r,1,9):''}.`,task:'Read back.',need:[['taxi','"Taxi"'],['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA],...(PA.txrx?[[PA.txrx,'Route: '+txA]]:[])],model:`Taxi to stand ${sdA} via ${txA}, {CS}`,sc:G_('taxiin',6,{arr:true})});
-    if(/give way/.test(steps[steps.length-1].atc)){steps[steps.length-1].need.push(['giv(e|ing) way','"Giving way"'],[mTypeRx(T3),'Traffic '+T3]);steps[steps.length-1].model=`Taxi to stand ${sdA} via ${txA}, giving way to the ${T3}, {CS}`;steps[steps.length-1].sc.tt={k:'ahead',t:T3}}
+    const sdA=PA.std||'4',txA=PA.ex?PA.ex.txr:(PA.txr||'the apron');
+    const gw=r()<.4,pbS=gw&&PA.ok?pbxPick(PA,rLine(arrPts(PA)),0):null;S_({atc:`{CS}, taxi to stand ${sdA} via ${txA}${pbS?', give way to the '+T3+' pushing back from stand '+pbS.st.n:''}.`,task:'Read back.',need:[['taxi','"Taxi"'],['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA],...((PA.ex?PA.ex.txrx:PA.txrx)?[[PA.ex?PA.ex.txrx:PA.txrx,'Route: '+txA]]:[])],model:`Taxi to stand ${sdA} via ${txA}, {CS}`,sc:G_('taxiin',6,{arr:true})});
+    if(/give way/.test(steps[steps.length-1].atc)){steps[steps.length-1].need.push(['giv(e|ing) way','"Giving way"'],[mTypeRx(T3),'Traffic '+T3]);steps[steps.length-1].model=`Taxi to stand ${sdA} via ${txA}, giving way to the ${T3}, {CS}`;steps[steps.length-1].sc.tt={k:'ahead',t:T3,std:pbS?pbS.st.n:null}}
   }
   return finish();
   function finish(){
+    {let pad=false;steps.forEach(st=>{const q=st.sc;if(!q||q.t!=='ground')return;if(q.ac==='topad'||q.ac==='deice'||q.ac==='atpad')pad=true;else if(pad&&(q.ac==='taxi'))q.fromPad=true})}
+    /* level labels follow the levels actually flown */
+    {let cur=null;steps.forEach(st=>{const q=st.sc;if(!q)return;if(q.t==='profile'){if(['climb','descent','expedite'].includes(q.mode))cur=q.b;else if(q.mode==='level'||q.mode==='turb')cur=q.a;else if(['final','goaround','lowpass'].includes(q.mode))cur=null}
+      else if(q.t==='route'&&cur&&/^FL\d+$/.test(q.lvl||'')&&q.lvl!=='FL'+cur)q.lvl='FL'+cur;else if(q.t==='radar'&&cur&&q.fl)q.fl=String(cur);else if(q.t==='ground')cur=null})}
     if(steps.length&&firstSit&&!steps[0].sit.startsWith('Mission'))steps[0].sit=firstSit+' '+steps[0].sit;
     if(!steps[0].st)steps[0].st=st(depN+' Ground',fqG);
     const tl=uniq(tags).slice(0,3);
     const K={full:'Full flight',dep:'Departure',arr:'Arrival',enr:'En route'}[kind];
     return {id:'m'+n,ms,cls:kind==='arr'?'s-arr':kind==='enr'?'s-misc':'s-dep',code:'M'+pad(n,3),title:`Mission ${pad(n,3)} · ${K}`,units:'1–8',
       desc:`${kind==='arr'?arrN:depN}${kind==='full'||kind==='enr'?' → '+arrN:''} · RWY ${kind==='arr'?AR:DR} · ${tl.join(', ')||'standard'}`,
-      end:kind==='dep'?`{CS}, ${depN} Control, identified.`:kind==='enr'?`{CS}, ${arrN} Control, identified.`:`{CS}, welcome to ${arrN}.`,steps}}
+      end:endMsg||(kind==='dep'?`{CS}, ${depN} Control, identified.`:kind==='enr'?`{CS}, ${arrN} Control, identified.`:`{CS}, welcome to ${arrN}.`),steps}}
 }
 const MISSIONS={};function mKey(n){return n+'|'+S.ads.map(a=>a.i+(a.lay?'L':'')).join(',')+'|'+S.dep+'|'+S.dst}
 function mission(n){const k=mKey(n);return MISSIONS[k]||(MISSIONS[k]=genMission(n))}
@@ -1958,7 +2238,7 @@ function vRadio(){
   view.innerHTML=`<div class="flight">
   <div class="fhead">${phaseBar(ph)}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
   <div class="rgrid">
-    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const s=scene(so),cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
+    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
         return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
         <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
         `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span></div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
@@ -2124,27 +2404,20 @@ function logSheet(){closeSheet();const d=document.createElement('div');d.classNa
   d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Transcript</b><button class="btn" type="button" id="logx">Close</button></div><div class="log">${RD.log.length?logHtml():'<p class="muted">No exchanges yet.</p>'}</div></div>`;
   document.body.appendChild(d);d.querySelector('#logx').onclick=closeSheet;const l=d.querySelector('.log');l.scrollTop=l.scrollHeight}
 
-/* typing mirror: shows what you type just above the phone keyboard */
-(function(){let box=null,tgt=null,kbH=0,vkH=0;
+/* keyboard open on a phone: hide the bottom menu and keep the text box in view */
+(function(){let tgt=null,maxH=0,lastW=0;
   const coarse=()=>{try{return matchMedia('(pointer: coarse)').matches||matchMedia('(max-width:720px)').matches}catch(e){return false}};
-  /* keyboard height sources: visual viewport, VirtualKeyboard API (Chrome), Capacitor Keyboard plugin (Android app) */
-  try{if(navigator.virtualKeyboard){navigator.virtualKeyboard.overlaysContent=true;navigator.virtualKeyboard.addEventListener('geometrychange',e=>{vkH=Math.round(e.target.boundingRect.height||0);place()})}}catch(e){}
-  try{const K=window.Capacitor&&(window.Capacitor.Plugins||{}).Keyboard;if(K&&K.addListener){K.addListener('keyboardWillShow',i=>{kbH=Math.round((i&&i.keyboardHeight)||0);place()});K.addListener('keyboardDidShow',i=>{kbH=Math.round((i&&i.keyboardHeight)||0);place()});K.addListener('keyboardWillHide',()=>{kbH=0;place()})}}catch(e){}
-  function ensure(){if(box)return box;box=document.createElement('div');box.id='kbm';box.setAttribute('aria-hidden','true');
-    box.innerHTML='<div class="kbm-t"></div><button type="button" class="kbm-go" tabindex="-1">Send</button>';
-    box.querySelector('.kbm-go').addEventListener('pointerdown',e=>{e.preventDefault();if(!tgt)return;tgt.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))});
-    document.body.appendChild(box);return box}
-  function place(){if(!box||!tgt)return;const vv=window.visualViewport,h=box.offsetHeight||52,H=window.innerHeight;
-    const vvInset=vv?Math.max(0,H-(vv.offsetTop+vv.height)):0;const inset=Math.max(vvInset,vkH,kbH);
-    if(inset>80){box.classList.remove('top');box.style.top=Math.max(0,H-inset-h-6)+'px'}
-    else if(vv&&vv.height<screen.height*.62){box.classList.remove('top');box.style.top=Math.max(0,vv.offsetTop+vv.height-h-6)+'px'}
-    else{/* keyboard size unknown: keep the mirror at the top of the screen, where the keyboard never covers it */box.classList.add('top');box.style.top=(vv?vv.offsetTop:0)+'px'}}
-  function show(){if(!tgt)return;ensure();const t=box.querySelector('.kbm-t');const v=tgt.value;t.textContent=v||tgt.getAttribute('placeholder')||'';t.classList.toggle('ph',!v);
-    box.querySelector('.kbm-go').textContent=tgt.id==='tx'?'Transmit':'Check';box.classList.add('on');t.scrollLeft=t.scrollWidth;place()}
-  document.addEventListener('focusin',e=>{const el=e.target;if(!coarse()||!el||!(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&el.type==='text'))||!el.closest('#view'))return;if(!(el.id==='tx'||el.id==='pin'))return;tgt=el;show();[150,350,700,1200].forEach(ms=>setTimeout(place,ms))});
-  document.addEventListener('focusout',e=>{if(e.target===tgt){setTimeout(()=>{if(document.activeElement!==tgt){tgt=null;if(box)box.classList.remove('on')}},80)}});
-  document.addEventListener('input',e=>{if(e.target===tgt)show()});
-  try{(window.visualViewport||window).addEventListener('resize',place);window.visualViewport&&window.visualViewport.addEventListener('scroll',place);addEventListener('resize',place)}catch(e){}
+  const vh=()=>{const v=window.visualViewport;return v?v.height:innerHeight};
+  const isText=el=>el&&(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&/^(text|search|number|)$/.test(el.type)));
+  const keep=()=>{if(!tgt||!document.body.contains(tgt)||tgt.id==='tx')return;try{tgt.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}};
+  /* the keyboard counts as open only while the screen is really shorter: closing it with the phone's back key also brings the menu back */
+  function upd(){const w=innerWidth;if(Math.abs(w-lastW)>40){maxH=0;lastW=w}const h=vh();if(h>maxH)maxH=h;
+    const open=!!tgt&&coarse()&&isText(document.activeElement)&&h<maxH*.8;const was=document.body.classList.contains('kbd');
+    document.body.classList.toggle('kbd',open);if(open&&!was)[60,300].forEach(t=>setTimeout(keep,t))}
+  document.addEventListener('focusin',e=>{if(!isText(e.target))return;tgt=e.target;[0,150,400,800].forEach(t=>setTimeout(upd,t))});
+  document.addEventListener('focusout',e=>{if(e.target===tgt)setTimeout(()=>{if(!isText(document.activeElement))tgt=null;upd()},120)});
+  try{(window.visualViewport||window).addEventListener('resize',upd);addEventListener('resize',upd)}catch(e){}
+  setTimeout(upd,0);
 })();
 function closeSheet(){document.querySelectorAll('.vsheet').forEach(x=>x.remove())}
 function voiceSheet(o){closeSheet();
