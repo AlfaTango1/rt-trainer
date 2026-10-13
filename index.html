@@ -518,6 +518,22 @@ nav button span{overflow:hidden;text-overflow:ellipsis;max-width:100%;white-spac
   .vs-btns .btn{font-size:.92rem}
   .vs-h .vs-mic{padding:6px 9px;font-size:.85rem}
 }
+/* missions */
+.mgridn{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;max-height:300px;overflow-y:auto;padding:2px}
+.mn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.mn b{font:700 1rem var(--f-mono)} .mn i{font:600 .58rem var(--f-mono);font-style:normal;letter-spacing:.06em;color:var(--muted)}
+.mn:hover{border-color:var(--ink)}
+.mn.k-full{border-left:3px solid var(--blue)} .mn.k-dep{border-left:3px solid #4F9D69} .mn.k-arr{border-left:3px solid #C98A1A} .mn.k-enr{border-left:3px solid var(--accent)}
+.mn.done{background:var(--good-bg)} .mn.done b::after{content:" ✓";color:var(--good);font-size:.75rem}
+@media (max-width:720px){.mgridn{grid-template-columns:repeat(5,minmax(0,1fr));max-height:260px}.mpanel h2{font-size:1.3rem}}
+/* typing mirror */
+#kbm{position:fixed;left:6px;right:6px;top:0;z-index:90;display:none;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:12px;padding:6px 6px 6px 12px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#kbm.on{display:flex}
+#kbm .kbm-t{flex:1;min-width:0;font:600 .95rem var(--f-mono);white-space:nowrap;overflow-x:auto;scrollbar-width:none;direction:ltr}
+#kbm .kbm-t::-webkit-scrollbar{display:none}
+#kbm .kbm-t.ph{opacity:.55;font-weight:400}
+#kbm .kbm-go{flex:none;border:0;border-radius:9px;background:var(--accent);color:#fff;font:700 .85rem var(--f-disp);padding:8px 12px;cursor:pointer}
+@media (pointer:fine) and (min-width:721px){#kbm{display:none!important}}
 /* theme switch */
 .thm{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;font:600 .85rem var(--f-disp);letter-spacing:.04em}
 .thm span:first-child{font-size:1rem;line-height:1}
@@ -708,7 +724,8 @@ const DW=['zero','one','two','tree','fower','fife','six','seven','eight','niner'
 const PHON={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
 const dg=s=>String(s).split('').map(c=>c==='.'?'decimal':(DW[c]!==undefined?DW[c]:c)).join(' ');
 function altW(n){n=+n;if(n%100)return dg(n);const th=Math.floor(n/1000),h=Math.floor(n%1000/100);return [th?dg(th)+' thousand':'',h?dg(h)+' hundred':''].filter(Boolean).join(' ')}
-function spoken(t){return t
+const ACTYPE=[[/\bB(7[0-9]7)\b/g,'Boeing $1'],[/\bB738\b/g,'Boeing 737'],[/\bA(3[0-9]{2})\b/g,'Airbus $1'],[/\bE(1[79]0)\b/g,'Embraer $1'],[/\bCRJ ?(\d{3})\b/g,'CRJ $1'],[/\bATR ?(\d{2})\b/g,'ATR $1'],[/\bQ400\b/g,'Dash 8'],[/\bIl-(\d{2})\b/g,'Ilyushin $1'],[/\bAn-(\d{2})\b/g,'Antonov $1'],[/\bC-130\b/g,'Hercules']];
+function spoken(t){ACTYPE.forEach(([a,b])=>{t=t.replace(a,b)});t=t.replace(/\b(?!FL)([A-Z])-?(\d{1,3})\b/g,(m,l,d)=>(PHON[l]||l)+' '+d);return t
   .replace(/\bFL\s?(\d{2,3})\b/g,(m,n)=>'flight level '+dg(n))
   .replace(/\bMach \.(\d+)/g,(m,n)=>'Mach point '+dg(n))
   .replace(/\b(\d{3,5}) (feet|ft)\b/g,(m,n)=>altW(n)+' feet')
@@ -722,14 +739,32 @@ const NATIVE=(()=>{try{const C=window.Capacitor;if(!C)return null;const nat=C.is
   const get=n=>(C.Plugins&&C.Plugins[n])||(C.nativePromise?new Proxy({},{get:(_,m)=>o=>C.nativePromise(n,String(m),o||{})}):null);
   return {SR:get('SpeechRecognition'),TTS:get('TextToSpeech')}}catch(e){return null}})();
 function canSpeak(){if(NATIVE&&NATIVE.TTS)return true;try{return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance)}catch(e){return false}}
-function loadVoices(){try{const v=speechSynthesis.getVoices();VOICE=v.find(x=>/en[-_]GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
+const MALE_RX=/\b(male|daniel|george|ryan|arthur|oliver|thomas|james|brian|guy|alex|fred|rishi|aaron|harry|william|liam|reed|eddy|gordon|matthew|roger|christopher|eric|davis|tony|jason|andrew|steffan|noah|ralph|lee)\b/i;
+const FEMALE_RX=/(female|zira|susan|hazel|libby|sonia|maisie|karen|samantha|victoria|serena|kate|moira|tessa|fiona|emma|amy|joanna|salli|kimberly|ivy|aria|jenny|michelle|catherine|natasha|clara|nancy|ava|allison|google us english|google uk english female)/i;
+let VOICE_MALE=false;
+function voiceScore(x){let s=0;if(/en[-_]GB/i.test(x.lang))s+=3;else if(/^en[-_](US|AU|IE|CA|IN)/i.test(x.lang))s+=2;else if(/^en/i.test(x.lang))s+=1;else return -99;
+  const n=(x.name||'')+' '+(x.voiceURI||'');if(/google uk english male/i.test(n))s+=8;if(MALE_RX.test(n))s+=6;if(FEMALE_RX.test(n))s-=7;if(/natural|neural|online/i.test(n))s+=2;if(/-x-(gbd|rjs|gbb|iom|iol|tpd)\b/i.test(n))s+=7;if(/-x-(gba|gbc|gbg|iob|iog|sfg|tpc|tpf)\b/i.test(n))s-=3;return s}
+function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));if(!v.length){VOICE=null;return}v.sort((a,b)=>voiceScore(b)-voiceScore(a));VOICE=v[0];const n=VOICE.name+' '+VOICE.voiceURI;VOICE_MALE=(MALE_RX.test(n)||/-x-(gbd|rjs|gbb|iom|iol|tpd)\b/i.test(n))&&!FEMALE_RX.test(n)}catch(e){}}
+/* Android app: pick a male English voice from the phone's speech engine */
+let NVOICE=null,NVOICE_MALE=false,NVOICE_DONE=false;
+async function nativeVoice(){if(NVOICE_DONE||!(NATIVE&&NATIVE.TTS&&NATIVE.TTS.getSupportedVoices))return;NVOICE_DONE=true;
+  try{const r=await NATIVE.TTS.getSupportedVoices();const v=(r&&r.voices)||[];const pref=['gbd','rjs','gbb','iom','iol','tpd','gbc'];let best=-1,bs=-99;
+    v.forEach((x,i)=>{const id=((x.voiceURI||'')+' '+(x.name||'')).toLowerCase();if(!/en[-_]/.test(id)&&!/^en/i.test(x.lang||''))return;let sc=0;if(/en[-_]gb/.test(id)||/en[-_]GB/.test(x.lang||''))sc+=3;
+      const k=pref.findIndex(p=>id.includes('-x-'+p)||id.includes(p+'-'));if(k>=0)sc+=10-k;if(MALE_RX.test(id))sc+=6;if(FEMALE_RX.test(id))sc-=7;if(/network/.test(id))sc+=1;if(sc>bs){bs=sc;best=i}});
+    if(best>=0&&bs>=8){NVOICE=best;NVOICE_MALE=true}else if(best>=0){NVOICE=best}}catch(e){}}
+/* radio squelch: short click and noise before and after an ATC transmission */
+function squelch(len=.09,vol=.05){try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const ac=MIC_AC;if(ac.state==='suspended')ac.resume();
+  const n=Math.floor(ac.sampleRate*len),buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+  const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;const g=ac.createGain();g.gain.value=vol;src.connect(f);f.connect(g);g.connect(ac.destination);src.start()}catch(e){}}
 try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged',loadVoices)}}catch(e){}
 const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
-const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>WORDS.includes(w)?w[0]+w.slice(1).toLowerCase():w);
-function say(text,cb,rate){text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
-  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;T.speak({text,lang:'en-GB',rate:rate||.92,pitch:1,volume:1}).catch(()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
+const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>(WORDS.includes(w)||(w.length===5&&/[AEIOU]/.test(w)&&!/^(RVSM|TCAS|SQUAWK)$/.test(w)))?w[0]+w.slice(1).toLowerCase():w);
+let SAY_ATC=false;
+function sayATC(text,cb){SAY_ATC=true;squelch();setTimeout(()=>{say(text,cb);SAY_ATC=false},120)}
+function say(text,cb,rate){const atcFlag=SAY_ATC;text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
+  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:'en-GB',rate:rate||1,pitch:NVOICE_MALE?.95:.78,volume:1};if(NVOICE!==null)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{if(atcFlag)squelch(.07,.035)},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
   try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
-    const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||.92;
+    const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||1.02;u.pitch=VOICE_MALE?.92:.72;const atc=SAY_ATC;u.onend=()=>{if(atc)squelch(.07,.035)};
     let started=false;u.onstart=()=>{started=true;cb&&cb(true)};u.onerror=()=>{if(!started)cb&&cb(false)};
     const go=()=>{try{speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){}};if(busy)setTimeout(go,80);else go();if(cb)setTimeout(()=>{if(!started)cb(false)},2600)}catch(e){cb&&cb(false)}}
 function testVoice(el){el.textContent='Playing…';say('Air Force one two tree, radio check, read you fife',ok=>{el.textContent=ok?'Voice works. Turn up the volume if you hear nothing.':'No sound started. Your device or this view blocks speech: open the page in Chrome or Safari, and check that silent mode is off.'})}
@@ -875,7 +910,7 @@ const WP=[[50,215],[180,150],[310,178],[440,118],[560,170]];
 const atWP=f=>{const i=Math.max(0,Math.min(3,Math.floor(f))),t=f-i,a=WP[i],b=WP[i+1];return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI]};
 function wpSym(x,y,comp){return comp?`<path class="wpc" d="M${x},${y-7} L${x+6.5},${y+5} L${x-6.5},${y+5} Z"/>`:`<path class="wp" d="M${x},${y-7} L${x+6.5},${y+5} L${x-6.5},${y+5} Z"/>`}
 function sRoute(o){
-  const v=V(),names=[v.DEP,'ZARIN','AKSAY','BEKOT',v.DST],codes=[(S.ads[S.dep]||{}).i,'','','',(S.ads[S.dst]||{}).i],id='h'+(++UID);
+  const v=V(),mx=MSX(),names=mx?[v.DEP,mx.wps[1],mx.wps[2],mx.wps[3],v.DST]:[v.DEP,'ZARIN','AKSAY','BEKOT',v.DST],codes=[(DEPAD()||{}).i,'','','',(DSTAD()||{}).i],id='h'+(++UID);
   let g=`<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="hatch"/></pattern></defs><rect class="chart" width="600" height="300"/>`;
   g+=`<path class="grat" d="M0,60H600M0,140H600M0,220H600M90,0V300M240,0V300M390,0V300M540,0V300"/>`;
   g+=`<text class="gl" x="4" y="56">N41°30'</text><text class="gl" x="4" y="136">N41°00'</text><text class="gl" x="4" y="216">N40°30'</text><text class="gl" x="94" y="296">E064°</text><text class="gl" x="244" y="296">E065°</text><text class="gl" x="394" y="296">E066°</text>`;
@@ -883,7 +918,7 @@ function sRoute(o){
   g+=`<path class="fir" d="M505,0 C495,80 520,160 500,300"/><text class="firl" transform="translate(512 250) rotate(-86)">FIR BOUNDARY</text>`;
   g+=`<g transform="translate(120 255)"><circle class="vorr" r="24"/>${Array.from({length:36},(_,k)=>`<line class="vort" x1="0" y1="-24" x2="0" y2="${k%9?-21:-18}" transform="rotate(${k*10})"/>`).join('')}<path class="vor" d="M-5,-3 L0,-6 L5,-3 L5,3 L0,6 L-5,3 Z"/><text class="sl" x="30" y="4">VOR/DME 113.4</text></g>`;
   g+=`<polyline class="awy ${o.dev?'faint':''}" points="${WP.map(p=>p.join(',')).join(' ')}"/>`;
-  const AW=['SID','W51','W51','STAR'];
+  const AW=mx?mx.awy:['SID','W51','W51','STAR'];
   for(let i=0;i<4;i++){const a=WP[i],b=WP[i+1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,nm=Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])*.42);
     g+=`<g transform="translate(${mx} ${my+(i%2?16:-22)})"><rect class="awb" x="-24" y="-9" width="48" height="14" rx="2"/><text class="awt" x="0" y="2" text-anchor="middle">${AW[i]} ${nm}</text></g>`}
   WP.forEach((p,i)=>{g+=(i===0||i===4)?apt(p[0],p[1],true):wpSym(p[0],p[1],i===1);
@@ -899,7 +934,7 @@ function sRoute(o){
   const hr=h*Math.PI/180;g+=`<line class="vec" x1="${x}" y1="${y}" x2="${x+Math.cos(hr)*44}" y2="${y+Math.sin(hr)*44}"/>`;
   if(o.traffic){const r=(h+60)*Math.PI/180,tx=x+Math.cos(r)*85,ty=y+Math.sin(r)*85;g+=pl(tx,ty,h-120,'tr',.7)+`<line class="trl" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"/>`+tag(tx+12,ty-6,['TFC 2 O\'CLOCK','+1000 FT · 10 NM'],100)}
   g+=tag(Math.min(490,x+14),Math.max(4,y-50),[csShort(),(o.lvl||'FL320')+'  GS 450'],80);
-  if(o.report)g+=tag(14,14,['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
+  if(o.report)g+=tag(14,14,o.rep||['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
   if(o.mach)g+=tag(14,14,['SPEED CONTROL','M.78 OR GREATER'],120);
   if(o.back)g+=banner(300,24,'BACK ON ROUTE','goodt','middle');
   g+=scaleBar(420,288,63,'30 NM')+northArrow(570,30,0);
@@ -908,18 +943,18 @@ function sRoute(o){
 
 /* ---- holding chart ---- */
 function sHold(o){
-  const v=V();
+  const v=V(),mx=MSX(),hi=mx&&mx.holdInfo,fx=hi?hi.fix:(mx?mx.wps[4]:'KUVA'),frm=mx?mx.wps[3]:'BEKOT',hfl=hi?hi.fl:110;
   let g=`<rect class="chart" width="600" height="300"/><path class="grat" d="M0,75H600M0,225H600M150,0V300M450,0V300"/>`;
   g+=`<path class="prot" d="M160,75 L470,75 A70,70 0 0 1 470,215 L160,215 A70,70 0 0 1 160,75 Z"/>`;
-  g+=`<path class="rt faint" d="M590,20 L420,180"/><text class="sl" x="530" y="36">FROM BEKOT</text>`;
+  g+=`<path class="rt faint" d="M590,20 L420,180"/><text class="sl" x="530" y="36">FROM ${esc(frm)}</text>`;
   g+=`<path class="hold" d="M420,180 L200,180 A30,30 0 0 1 200,120 L420,120 A30,30 0 0 1 420,180 Z"/>`;
   g+=`<path class="harr" d="M330,180 L318,175 L318,185 Z"/><path class="harr" d="M290,120 L302,115 L302,125 Z"/>`;
-  g+=`<path class="wpc" d="M200,173 L206.5,185 L193.5,185 Z"/><text class="wl" x="186" y="205" text-anchor="end">KUVA</text>`;
+  g+=`<path class="wpc" d="M200,173 L206.5,185 L193.5,185 Z"/><text class="wl" x="186" y="205" text-anchor="end">${esc(fx)}</text>`;
   g+=`<text class="lvt" x="310" y="200" text-anchor="middle">270°  INBOUND</text><text class="sl" x="310" y="112" text-anchor="middle">090°  OUTBOUND · 1 MIN</text><text class="sl" x="150" y="150" text-anchor="middle">R</text>`;
   g+=mv('M420,180 L200,180 A30,30 0 0 1 200,120 L420,120 A30,30 0 0 1 420,180 Z',[310,180,180],{dur:12,rep:'indefinite'});
   g+=`<g transform="translate(70 70)"><circle class="msa" r="42"/><path class="msa" d="M0,-42 V42 M-42,0 H42"/><text class="sl" x="-21" y="-18" text-anchor="middle">8500</text><text class="sl" x="21" y="-18" text-anchor="middle">11200</text><text class="sl" x="-21" y="26" text-anchor="middle">6100</text><text class="sl" x="21" y="26" text-anchor="middle">7400</text><text class="sl" x="0" y="56" text-anchor="middle">MSA 25 NM</text></g>`;
-  g+=tag(450,200,['STACK KUVA','FL130  ·','FL120  ·','FL110  '+csShort()],110);
-  g+=tag(14,214,['HOLD KUVA · FL110','EXPECT APPROACH 25'],132)+apt(108,276)+`<text class="wl" x="126" y="280">${esc(v.DST.toUpperCase())}</text>`;
+  g+=tag(450,200,['STACK '+fx,'FL'+(hfl+20)+'  ·','FL'+(hfl+10)+'  ·','FL'+hfl+'  '+csShort()],110);
+  g+=tag(14,214,['HOLD '+fx+' · FL'+hfl,'EXPECT APPROACH '+(hi?hi.eat:25)],132)+apt(108,276)+`<text class="wl" x="126" y="280">${esc(v.DST.toUpperCase())}</text>`;
   if(o.fuel)g+=`<g transform="translate(230 16)"><rect class="tag" width="146" height="26" rx="3"/><text class="warnt blink" x="73" y="18" text-anchor="middle">MINIMUM FUEL</text></g>`;
   return SVG(g,'Holding chart');
 }
@@ -938,7 +973,7 @@ function sVector(o){
   for(let i=0;i<o.stage;i++)g+=`<path class="route" d="${P[i]}"/>`;
   if(o.stage===1)g+=`<text class="lvt" x="300" y="150">INTERCEPT 30°</text>`;
   g+=mv(P[o.stage],E[o.stage],{dur:5});
-  g+=tag(58,12,[['HDG 210 · 4000 FT','HDG 200 · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH 1018'],150);
+  g+=tag(58,12,[[o.hdg?'HDG '+o.hdg+' · '+o.alt+' FT':'HDG 210 · 4000 FT',o.hdg?'HDG '+o.hdg+' · CLEARED ILS '+rw:'HDG 200 · CLEARED ILS '+rw,'ESTABLISHED LOC '+rw][o.stage],'QNH '+(MSX()?MSX().qnhA:1018)],150);
   g+=northArrow(570,30,0);
   return SVG(g,'Radar vectors to ILS');
 }
@@ -999,7 +1034,7 @@ function sRadar(o){
   for(let k=0;k<72;k++)g+=`<line class="cmp" x1="300" y1="${150-140}" x2="300" y2="${150-(k%9?136:131)}" transform="rotate(${k*5} 300 150)"/>`;
   g+=`<text class="rgl" x="300" y="8" text-anchor="middle">360</text><text class="rgl" x="446" y="154">090</text><text class="rgl" x="300" y="298" text-anchor="middle">180</text><text class="rgl" x="138" y="154" text-anchor="end">270</text>`;
   g+=`<path class="awr" d="M170,230 L300,150 L470,90 M300,150 L330,290"/>`;
-  for(const [x,y,n] of [[300,150,'AKSAY'],[170,230,'ZARIN'],[470,90,'BEKOT']])g+=`<path class="wpr" d="M${x-4},${y} H${x+4} M${x},${y-4} V${y+4}"/><text class="rgl" x="${x+6}" y="${y+12}">${n}</text>`;
+  for(const [x,y,n] of (MSX()?[[300,150,MSX().wps[2]],[170,230,MSX().wps[1]],[470,90,MSX().wps[3]]]:[[300,150,'AKSAY'],[170,230,'ZARIN'],[470,90,'BEKOT']]))g+=`<path class="wpr" d="M${x-4},${y} H${x+4} M${x},${y-4} V${y+4}"/><text class="rgl" x="${x+6}" y="${y+12}">${n}</text>`;
   g+=`<g class="sweep"><line class="sw" x1="300" y1="150" x2="300" y2="12"/></g>`;
   g+=`<rect class="blip2" x="210" y="98" width="6" height="6"/><line class="ldr" x1="216" y1="98" x2="230" y2="84"/><text class="dbt2" x="232" y="76">XAB451</text><text class="dbt2" x="232" y="90">350 ↓ 460</text>`;
   g+=`<rect class="blip2" x="400" y="200" width="6" height="6"/><line class="ldr" x1="406" y1="200" x2="420" y2="214"/><text class="dbt2" x="422" y="224">XCD27</text><text class="dbt2" x="422" y="238">280 ↑ 410</text>`;
@@ -1083,7 +1118,10 @@ function autoLayout(ad){
   return out;
 }
 function layoutOf(ad){return ad&&ad.lay&&ad.lay.rwy&&ad.lay.rwy.length?ad.lay:autoLayout(ad||{r:'09'})}
-function adOf(o){return (o&&o.arr?S.ads[S.dst]:S.ads[S.dep])||S.ads[0]}
+function DEPAD(){return RD&&RD.sc&&RD.sc.ms?RD.sc.ms.dep:(S.ads[S.dep]||S.ads[0])}
+function DSTAD(){return RD&&RD.sc&&RD.sc.ms?RD.sc.ms.arr:(S.ads[S.dst]||S.ads[1]||S.ads[0])}
+function MSX(){return RD&&RD.sc&&RD.sc.ms||null}
+function adOf(o){return (o&&o.arr?DSTAD():DEPAD())||S.ads[0]}
 
 /* taxi graph */
 function buildGraph(L){
@@ -1251,23 +1289,30 @@ function bbox(pts,m=20){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return {x0
 function focusZ(b){const w=Math.max(b.x1-b.x0,(b.y1-b.y0)*2,300),s=Math.max(1,Math.min(2,600/w));return {s,cx:(b.x0+b.x1)/2,cy:(b.y0+b.y1)/2}}
 function sGround(o){
   const ad=adOf(o),P=groundPlan(ad),L=P.L,v=V(),GS=.5,ua=angDeg(P.u),wdTxt=o.arr?v.AW:v.DW1;
-  const off=['lineup','roll','rto','remote'].includes(o.ac);
+  const off=['lineup','roll','rto','remote','landed'].includes(o.ac);
   const st=P.st,pb=P.pb||(st&&st.p)||[300,150];
   const grd=['stand','push','pushed','taxi','hp'].includes(o.ac);
   let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
-  SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/8 KT`;
+  SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/${MSX()?(o.arr?MSX().wind.as:MSX().wind.s):8} KT`;
   {const hpn=P.hp&&P.hp.n?P.hp.n:'',via=P.names.length?' via '+P.names.join(', '):'';
    const Y={stand:`On stand ${P.std}${o.tug?' · tug connected':''}`,push:`Pushing back from stand ${P.std}`,pushed:o.tug?'Pushed back · tug on · engines off':'Engines running · ready to taxi',
      taxi:`Taxiing to holding point ${hpn}${via}`,hp:`Holding short of RWY ${P.des}${hpn?' at '+hpn:''}`,lineup:`Lining up on RWY ${P.des}`,
      roll:`Take-off roll · RWY ${P.des}`,rto:`${o.txt?o.txt.charAt(0)+o.txt.slice(1).toLowerCase()+' · ':'Rejected take-off · '}stopped on RWY ${P.des}${o.trucks?' · fire trucks coming':''}`,
-     remote:'Taxiing to a remote stand'};
-   SCENE_CAP={you:Y[o.ac]||Y.stand,tr:o.traffic==='final'?'A320 on final · lands first':o.traffic==='landing'?'A320 landing now':''}}
+     remote:'Taxiing to a remote stand',landed:`Landed RWY ${P.des} · vacating`,taxiin:o.start?`Runway vacated · call Ground`:`Taxiing to stand ${P.std}${via}`};
+   const ttT=o.tt?({ahead:`${o.tt.t} taxiing ahead of you`,crossing:`${o.tt.t} crossing ahead`,behind:`${o.tt.t} behind you`})[o.tt.k]:'';
+   SCENE_CAP={you:Y[o.ac]||Y.stand,tr:ttT||(o.traffic==='final'?'Traffic on final · lands first':o.traffic==='landing'?'Traffic landing now':'')}}
   if(!P.ok&&!off)g+=`<text class="warnt" x="300" y="292" text-anchor="middle">NO TAXI ROUTE: EDIT THE LAYOUT</text>`;
   let fp=[];
   if(o.traffic==='final'||o.traffic==='landing'){const s0=sub(P.A,mul(P.u,110)),e0=o.traffic==='final'?sub(P.A,mul(P.u,10)):add(P.A,mul(P.u,P.len*.6));
     g+=mv(`M${s0[0]},${s0[1]} L${e0[0]},${e0[1]}`,[e0[0],e0[1],ua],{dur:o.traffic==='final'?8:9,rep:'indefinite',cls:'tr',s:GS});
     const lp=add(sub(P.A,mul(P.u,85)),mul([-P.u[1],P.u[0]],-16));fp.push(sub(P.A,mul(P.u,70)),lp)}
   const own=(x,y,r)=>pl(x,y,r,'ac',GS);
+  /* other aircraft on the ground */
+  if(o.tt&&P.pts&&P.pts.length>1){const pts=P.pts,segL=[];let tot=0;for(let i=1;i<pts.length;i++){const d=dist(pts[i-1],pts[i]);segL.push(d);tot+=d}
+    const at=f=>{let t=f*tot;for(let i=0;i<segL.length;i++){if(t<=segL[i]||i===segL.length-1){const a=pts[i],b=pts[i+1],k=segL[i]?Math.min(1,t/segL[i]):0;return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,angDeg(sub(b,a))]}t-=segL[i]}};
+    if(o.tt.k==='ahead'){const p0=at(.55),p1=at(.95);g+=mv(`M${p0[0]},${p0[1]} L${p1[0]},${p1[1]}`,p1,{dur:9,rep:'indefinite',cls:'tr',s:GS});fp.push(p0,p1)}
+    else if(o.tt.k==='crossing'){const c=at(.5),hr=(c[2]+90)*Math.PI/180,a0=[c[0]-Math.cos(hr)*45,c[1]-Math.sin(hr)*45],b0=[c[0]+Math.cos(hr)*45,c[1]+Math.sin(hr)*45];g+=mv(`M${a0[0]},${a0[1]} L${b0[0]},${b0[1]}`,[b0[0],b0[1],c[2]+90],{dur:6,rep:'indefinite',cls:'tr',s:GS});fp.push(a0,b0)}
+    else if(o.tt.k==='behind'){const q=P.pb||pts[0],h=P.face||0,b=add(q,mul(dirH(h),-40));g+=pl(b[0],b[1],h-90,'tr',GS);fp.push(b)}}
   const A={
     stand:()=>{fp.push(st.p,pb,add(st.p,mul(dirH(st.h),20)));return own(st.p[0],st.p[1],st.h-90)+(o.tug?(()=>{const t=add(st.p,mul(dirH(st.h),13));return `<rect class="tug" x="${(t[0]-4).toFixed(1)}" y="${(t[1]-3).toFixed(1)}" width="8" height="6" rx="1"/>`})():'')},
     push:()=>{fp.push(st.p,pb,sub(pb,mul(dirH(st.h),18)));return `<path class="route" d="M${st.p[0]},${st.p[1]} L${pb[0]},${pb[1]}"/>`+mv(`M${st.p[0]},${st.p[1]} L${pb[0]},${pb[1]}`,[pb[0],pb[1],(P.face||0)-90],{dur:4,rot:'auto-reverse',s:GS})},
@@ -1280,6 +1325,8 @@ function sGround(o){
       const lp=vert?add(p,mul(nn,22)):[p[0],p[1]+(nn[1]>0?28:-18)],anc=vert?(nn[0]>0?'start':'end'):'middle';fp.push(lp);
       let s=own(p[0],p[1],ua)+`<text class="warnt blink halo" x="${lp[0].toFixed(0)}" y="${(lp[1]+5).toFixed(0)}" text-anchor="${anc}">${esc(o.txt||'STOPPED ON RUNWAY')}</text>`;
       if(o.trucks){const t0=L.twr||[560,260];fp.push(t0);s+=mv(`M${t0[0]},${t0[1]} L${p[0]+10},${p[1]+12}`,[p[0]+10,p[1]+12,0],{dur:4,cls:'truck',s:.7,d:TRK})+mv(`M${t0[0]+12},${t0[1]} L${p[0]+28},${p[1]+10}`,[p[0]+28,p[1]+10,0],{dur:4.6,cls:'truck',s:.7,d:TRK})}return s},
+    landed:()=>{const p=add(P.A,mul(P.u,P.len*.72));fp.push(add(p,mul(P.u,-80)),add(p,mul(P.u,60)));return mv(pth([add(P.A,mul(P.u,P.len*.2)),p]),[p[0],p[1],ua],{dur:4,s:GS})},
+    taxiin:()=>{if(!P.ok){fp.push(pb);return own(pb[0],pb[1],(P.face||0)+90)}const pts=P.pts.slice().reverse();if(o.start){const e=pts[0];fp.push(e,P.E||P.A,pts[Math.min(2,pts.length-1)]);return own(e[0],e[1],angDeg(sub(pts[1]||e,e)))}fp.push(...pts,st.p);const e=pts[pts.length-1];return `<path class="route" d="${pth(pts)}"/>`+mv(pth(pts),[e[0],e[1],lastHdg(pts)],{dur:Math.min(14,4+pts.length),s:GS})},
     remote:()=>{const far=L.std.slice().sort((a,b)=>dist(b.p,P.A)-dist(a.p,P.A))[0];const G=buildGraph(L),m=add(P.A,mul(P.u,P.len*.55)),s0=gAttach(G,m),fq=far?sub(far.p,mul(dirH(far.h),24)):m,e0=gAttach(G,fq),pa=gPath(G,s0,e0);
       const pts=pa?[m,...pa.pts,fq]:[m,fq];fp.push(...pts);return `<path class="route" d="${pth(pts)}"/>`+mv(pth(pts),[fq[0],fq[1],lastHdg(pts)],{dur:8,s:GS})+`<text class="wl halo" x="${fq[0].toFixed(0)}" y="${(fq[1]+24).toFixed(0)}" text-anchor="middle">PARK · STAND ${esc(far?far.n:'')}</text>`}
   };
@@ -1475,7 +1522,7 @@ function bindZoom(root,svg,key,canPan){const Zo=zoomable(svg,key,canPan);if(!Zo)
 function closeFull(){document.querySelectorAll('body > .scenebox.full').forEach(x=>x.remove());document.body.classList.remove('noscroll')}
 
 const SCAP={ground:'Aerodrome chart',route:'En-route chart',hold:'Holding chart',vector:'Radar vectors',profile:'Vertical profile',radar:'ATC radar display',mayday:'Distress chart'};
-function flightData(sc,i,step){const st=fill(RD.st||'|').split('|');let sq=sc.id==='dep'?'----':'3472';
+function flightData(sc,i,step){const st=fill(RD.st||'|').split('|');let sq=sc.ms?(sc.ms.sq0||'----'):sc.id==='dep'?'----':'3472';
   for(let k=0;k<i;k++){const m=(sc.steps[k].atc||'').match(/squawk (\d{4})/i);if(m)sq=m[1]}
   for(let k=0;k<=i;k++){const m=(sc.steps[k].sit||'').match(/\b(7[5-7]00)\b/);if(m)sq=m[1]}
   const o=step.sc||{};if(o.sq)sq=o.sq;let alt='—';
@@ -1487,7 +1534,7 @@ function sceneCap(o){if(!o)return null;if(o.t==='ground')return SCENE_CAP;
   if(o.t==='route'){y=o.back?'Back on route after the weather':o.dev?'Deviating around a thunderstorm':o.cell?'Thunderstorm ahead on your route':o.report?'Over the reporting point · give a position report':o.mach?'Cruise · Mach number control':o.pos<.6?'Departure climb on the SID':'En route on the airway';if(lv)y+=' · '+lv;if(o.traffic)t='Crossing traffic at your level'}
   else if(o.t==='profile'){const a=o.a,b=o.b;y=({climb:`Climbing ${fl(a)} → ${fl(b)}`,expedite:`Expedite climb through ${fl(o.m)} to ${fl(b)}`,level:`Level at ${fl(a)}`,turb:`Severe turbulence at ${fl(a)}`,tcas:`TCAS RA at ${fl(a)} · follow the RA`,clear:`Clear of conflict · returning to ${fl(a)}`,descent:`Descending ${fl(a)} → ${fl(b)}`,final:o.dep?'Final approach on one engine':'Final approach · ILS',goaround:o.ws?'Windshear on final · go-around':'Go-around · climb to 4000 ft',lowpass:'Low pass by the tower for a gear check'})[o.mode]||'Vertical profile';
     if(o.mode==='tcas')t='Intruder at your level';if(o.mode==='goaround'&&!o.ws)t='Vehicle on the runway';if(o.medical)t='Ambulance waiting'}
-  else if(o.t==='hold')y='Holding at KUVA · expect approach'+(o.fuel?' · fuel is low':'');
+  else if(o.t==='hold')y='Holding at '+(MSX()?(MSX().holdInfo?MSX().holdInfo.fix:MSX().wps[4]):'KUVA')+' · expect approach'+(o.fuel?' · fuel is low':'');
   else if(o.t==='vector')y=['Radar vectors to the ILS','Turning to intercept the localizer','Established on the localizer'][o.stage||0];
   else if(o.t==='radar')y=({ident:'ATC radar: your label after IDENT',check:'ATC radar: checking your level',wrong:'ATC radar: wrong level shown',primary:'ATC sees only a primary return',lost:'ATC has lost your radar label',nordo:'Radio failure · squawk 7600',hijack:'Unlawful interference · squawk 7500'})[o.mode]||'ATC radar display';
   else if(o.t==='mayday'){y=o.tags?o.tags[0].replace(/ · /,': ').toLowerCase().replace(/^./,c=>c.toUpperCase()):['Emergency declared','Turning back to the aerodrome','Returning · situation under control'][o.stage||0]}
@@ -1592,14 +1639,244 @@ function vEmerg(){
   $('#erand').onclick=()=>start(pick(EMG).id);
 }
 
+/* ---------- 100 generated missions ---------- */
+/* Situations follow ICAO Doc 4444 ch. 12 / Doc 9432 phraseology (start-up, pushback, taxi with give way / follow /
+   hold position / runway crossing, line-up and conditional line-up, immediate take-off, take-off cancellation,
+   wake turbulence, SID/STAR, direct-to, speed and level control, traffic information, holding, vectors, ILS,
+   landing sequence, go-around, vacating and taxi-in). */
+const MISSION_N=100;
+function mRng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const MS_SYL1=['BA','DO','KE','LU','MI','NA','RO','SA','TI','VE','ZE','GO','PA','KU','LI','MO','NU','RE','SU','TO','DA','FE','GA','HO','JU','KA','LO','MA','NO','PE','RA','SE','TA','VO','ZA','BE','DI','KI','LA','ME'];
+const MS_SYL2=['LIK','RAN','DOS','MEX','NOR','TAL','VIN','SUR','KOL','BIT','RAX','MUN','DEL','GAN','TOV','LEX','POR','SIN','KAR','NEB','LOT','RIX','DAN','SOP','TEK','VAL','BOR','NIK','MAS','GUL'];
+function mPick(r,a){return a[Math.floor(r()*a.length)]}
+function mInt(r,a,b){return a+Math.floor(r()*(b-a+1))}
+function mWpName(r,used){for(let k=0;k<50;k++){const w=mPick(r,MS_SYL1)+mPick(r,MS_SYL2);if(!used.has(w)&&!WORDS.includes(w)){used.add(w);return w}}return 'NOVAR'}
+const MS_TYPES=['A320','A321','B737','B738','B777','A330','B787','E190','CRJ900','A350','B757','Il-76','An-26','C-130','ATR72','Q400'];
+const MS_TYPESAY={'B737':'Boeing 737','B738':'Boeing 737','B777':'Boeing 777','B787':'Boeing 787','B757':'Boeing 757','E190':'Embraer 190','CRJ900':'CRJ 900','ATR72':'ATR 72','Q400':'Dash 8','C-130':'Hercules','Il-76':'Ilyushin 76','An-26':'Antonov 26'};
+function mTypeRx(t){const d=t.replace(/[^0-9]/g,''),a=t.replace(/[^A-Za-z]/g,'').toLowerCase();const alts=[];if(d)alts.push(d);if(a.length>=2)alts.push(a);if(/^A\d/.test(t))alts.push('airbus');if(/^B\d/.test(t))alts.push('boeing');if(MS_TYPESAY[t])alts.push(MS_TYPESAY[t].toLowerCase().replace(/[^a-z]/g,'').slice(0,5));alts.push('traffic','aircraft');return '('+uniq(alts).map(reEsc).join('|')+')'}
+const MS_ATIS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const phonRx=L=>'('+(PHON[L]||L).toLowerCase().replace('alfa','(alfa|alpha)').replace('juliett','juliett?').replace('x-ray','x ?ray')+')';
+const wpRx=w=>'\\b('+w.toLowerCase()+'|'+w.slice(0,3).toLowerCase()+'\\w*)';
+const procRx=(w,d,L)=>wpRx(w)+'\\s*'+d+'\\s*('+L.toLowerCase()+'|'+(PHON[L]||L).toLowerCase().replace('alfa','(alfa|alpha)').replace('juliett','juliett?')+')\\b';
+const hdgRx=h=>'heading 0*'+(+h);
+const fqRx=f=>reEsc(String(f));
+const MS_FQ=['118.1','118.3','118.7','119.1','119.45','120.2','121.7','121.9','122.8','124.3','124.85','125.8','126.4','127.5','128.35','129.1','131.2','132.4','133.65','134.05'];
+function mRwyFor(ad,windDir,r){
+  const ds=rwysOf(ad).filter(d=>/^\d{2}[LRC]?$/.test(d));if(!ds.length)return ad.r;
+  const diff=d=>{const h=(parseInt(d)||36)*10;let x=Math.abs(((windDir-h)%360+540)%360-180);return x};
+  const best=Math.min(...ds.map(diff));const c=ds.filter(d=>diff(d)<=best+1);return mPick(r,c)}
+function mAdClone(ad,r,windDir){
+  const L=layoutOf(ad);const rw=mRwyFor(ad,windDir,r);
+  const stands=(L.std||[]).map(s=>s.n).filter(Boolean);
+  let best=null;for(const sn of (stands.length?[...stands].sort(()=>r()-.5):['4'])){const c=Object.assign({},ad,{r:rw,std:sn});try{const P=groundPlan(c);if(P.ok){best=c;break}if(!best)best=c}catch(e){}}
+  return best||Object.assign({},ad,{r:rw})}
+function windStr(dir,spd){return pad(dir,3)+' degrees '+spd+' knots'}
+
+const U_STOP=new Set('the and with from your have that this will been were they their there what when which while would could should into onto over under after before about above below than then them also only just very more most some such each other being does doing done make made take taken give given please report'.split(' '));
+const U_PILOT=/^(request|we |we'|i |i'm|unable|our |my |leveling|levelling|intend|engine|smoke|fire |bird|passenger|cabin|lost |losing|suspect|returning|descending|climbing|confirm|say again|shall|mayday|pan|negative|affirm|wilco|ready|established|going around|on final|approaching|flap|gear|hydraulic|electrical|speed indicator|fuel|one engine|both engines|landing gear|windshield|windscreen|there is|there's|a passenger|the passenger|crew|captain|copilot|co-pilot|nose|left engine|right engine|number)/i;
+const U_ATC=/^(report|be (informed|advised)|for your information|caution|expect|hold|climb|descend|turn|contact|squawk|maintain|proceed|cleared|you |you'|your |emergency services|stop|continue|vacate|line up|taxi|follow|give way|go around|wind \d|runway|rwy|traffic|unknown aircraft|advise|say |check|recleared|join|cross|monitor|reduce|increase|ils|atis|tower|visibility|delay|backtrack|leave|after |behind|suggest|be ready|can you|are you|do you|what|when|how|is |will you|shall i transmit)/i;
+const U_PILOTSEC=['Aircraft technical issues','Passenger-related issues','Emergencies and alerts'];
+const U_GROUPS={gnd:['Runway and taxiway condition','Taxiway and ground movement'],crz:['Weather and environment','Traffic, separation, TCAS','Communication and identification','Passenger-related issues','Aircraft technical issues','Navigation and ATC instructions','Emergencies and alerts'],app:['Approach and landing','Runway operations']};
+const U_POOL={};function uPool(g){if(U_POOL[g])return U_POOL[g];const secs=U_GROUPS[g];return U_POOL[g]=PCL.filter(c=>secs.includes(PHR[c.i].s)).sort((x,y)=>secs.indexOf(PHR[x.i].s)-secs.indexOf(PHR[y.i].s)||x.i-y.i)}
+const uSlots=(kd,g)=>g==='gnd'?(kd==='full'||kd==='dep'?1:0):g==='app'?(kd==='full'||kd==='arr'?1:0):(kd==='enr'?5:kd==='full'?4:0);
+function uStart(n,g){let t=0;for(let m=1;m<n;m++)t+=uSlots(mKind(m),g);return t}
+function unitStep(n,k,g,sc){const pool=uPool(g);if(!pool.length)return null;const c=pool[(uStart(n,g)+k)%pool.length];const e=c.c.replace(/\s*\/.*$/,'').replace(/[.!]+$/,''),ru=PHR[c.i].r,sec=PHR[c.i].s;
+  if(!e||e.length<4)return null;const hasWe=/\b(we|our|us|i|i'm|my|me)\b/i.test(e)||(/\?$/.test(e)&&/^(what|where|why|when|how|is there|are there)\b/i.test(e)&&!/\b(you|your)\b/i.test(e));const pilot=hasWe||(U_PILOT.test(e)&&!U_ATC.test(e))||(U_PILOTSEC.includes(sec)&&!U_ATC.test(e));
+  if(pilot){const toks=uniq(norm(e).trim().split(' ').filter(t=>t&&t!=='zzsep'));const key=toks.filter(t=>/^\d/.test(t)).slice(0,2).concat(toks.filter(t=>t.length>=5&&!U_STOP.has(t)&&!/^\d/.test(t)).slice(0,3));
+    if(!key.length)key.push(...toks.filter(t=>t.length>=3).slice(0,2));
+    return {sit:'Unit phrase · '+sec+': '+ru,task:'Tell ATC in English.',need:key.map(t=>['\\b'+reEsc(t)+'\\b','"'+t+'"']),model:'{CS}, '+e,sc,unit:c.i}}
+  const kw=norm(e).trim().split(' ').filter(t=>t.length>=5&&!U_STOP.has(t)&&t!=='zzsep')[0];
+  return {atc:'{CS}, '+e.charAt(0).toLowerCase()+e.slice(1)+(/[?]$/.test(e)?'':'.'),sit:'Перевод: '+ru,task:'Acknowledge the message (Roger / Wilco, or read back).',need:[['roger|wilco|affirm|negative|unable|copied|understood'+(kw?'|'+reEsc(kw):''),'"Roger" / "Wilco"']],model:'Roger, {CS}',sc,unit:c.i}}
+function genMission(n){
+  const r=mRng(n*7919+13);const ads=S.ads.length>=2?S.ads:[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'}];
+  let di=mInt(r,0,ads.length-1),ai=mInt(r,0,ads.length-2);if(ai>=di)ai++;
+  if(n<=20){di=S.dep<ads.length?S.dep:0;ai=S.dst<ads.length&&S.dst!==di?S.dst:(di?0:1)}
+  const wDep=mInt(r,1,36)*10,wArr=mInt(r,1,36)*10,sDep=mInt(r,3,16),sArr=mInt(r,3,18);
+  const dep=mAdClone(ads[di],r,wDep),arr=mAdClone(ads[ai],r,wArr);
+  const used=new Set();const wps=[mWpName(r,used),mWpName(r,used),mWpName(r,used),mWpName(r,used),mWpName(r,used)];
+  const kind=n%5===0?'dep':n%5===3?'arr':n%7===4?'enr':'full';
+  const atis=mPick(r,MS_ATIS),atisW=PHON[atis],qnhD=mInt(r,996,1032),qnhA=mInt(r,996,1032),tmp=mInt(r,-8,34),dew=tmp-mInt(r,1,12);
+  const sq=String(mInt(r,1,7))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7),sq2=String(mInt(r,1,6))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7);
+  const fqG=mPick(r,['121.7','121.9','121.75']),fqT=mPick(r,['118.1','118.3','118.7','119.1','119.45']),fqD=mPick(r,['124.85','125.8','126.4','127.25']),fqC=mPick(r,['128.35','129.1','131.2','132.4','133.65','134.05']),fqC2=mPick(r,['127.5','130.45','132.95','135.2']),fqA=mPick(r,['119.8','120.2','124.3','125.25']),fqTa=mPick(r,['118.25','119.1','119.9','118.9']),fqGa=mPick(r,['121.6','121.85','122.05']);
+  const sidD=mInt(r,1,7),sidL=mPick(r,['A','B','C','D','E','K','M','Q','S','T','W']),starD=mInt(r,1,7),starL=mPick(r,['A','B','C','D','E','F','G','H','J','L','N','P','R','S','T']);
+  const initAlt=mPick(r,[4000,5000,6000,7000,8000]),crz=mPick(r,[240,260,280,300,320,340,360,380]),fl1=mPick(r,[110,130,150,170,190].filter(x=>x<crz-50)),desFL=mPick(r,[90,110,130,150].filter(x=>x<crz-60));
+  const T1=mPick(r,MS_TYPES),T2=mPick(r,MS_TYPES),T3=mPick(r,MS_TYPES);
+  const PD=groundPlan(dep),PA=groundPlan(arr);
+  const DR=PD.des,AR=PA.des,DRX=rwyRe(DR),ARX=rwyRe(AR),hpn=PD.hp&&PD.hp.n?PD.hp.n:'',HPS=hpn?nameSpk(hpn)+' ':'',HPX=hpn?nameRx(hpn):'';
+  const depN=dep.n,arrN=arr.n,depX=nameRe(depN),arrX=nameRe(arrN);
+  const ms={n,dep,arr,wps,hold:wps[4],qnhA,sq0:'----',wind:{d:wDep,s:sDep,ad:wArr,as:sArr},awy:['SID','W'+mInt(r,10,99),'W'+mInt(r,10,99),'STAR']};
+  const st=(stn,f)=>stn+'|'+f;
+  const steps=[];const S_=(o)=>{steps.push(o);return o};
+  const tags=[];
+  const G_=(ac,p,x={})=>Object.assign({t:'ground',ac,p},x);
+  let firstSit='';
+  /* ---------------- departure ---------------- */
+  if(kind==='full'||kind==='dep'){
+    ms.sq0='----';
+    firstSit=`Mission ${n}: ${depN} → ${arrN}. You are on stand ${dep.std||PD.std}. Runway ${DR} in use, wind ${pad(wDep,3)}/${sDep}.`;
+    if(r()<.5){S_({st:st(depN+' Ground',fqG),sit:firstSit+' Check your radio.',task:`Make a radio check on ${fqG}.`,need:[[depX+' ground',`Station "${depN} Ground"`],['radio check','"radio check"'],[fqRx(fqG),'Frequency '+fqG]],model:`${depN} Ground, {CS}, radio check ${fqG}`,sc:G_('stand',0)});
+      S_({atc:`{CS}, ${depN} Ground, read you ${mPick(r,[5,5,4])}.`,task:`You have ATIS information ${atisW}. Request your ATC clearance to ${arrN}, give your stand.`,need:[['stand '+reEsc(norm(String(PD.std)).trim()),'Stand '+PD.std],['information '+phonRx(atis),'Information '+atisW],['clearance','"ATC clearance"'],[arrX,'Destination '+arrN]],model:`{CS}, stand ${PD.std}, information ${atisW}, request ATC clearance to ${arrN}`,sc:G_('stand',0)})}
+    else S_({st:st(depN+' Ground',fqG),sit:firstSit+` ATIS information ${atisW} received, QNH ${qnhD}.`,task:`Request your ATC clearance to ${arrN}. Give stand and ATIS.`,need:[[depX+' ground',`Station "${depN} Ground"`],['stand '+reEsc(norm(String(PD.std)).trim()),'Stand '+PD.std],['information '+phonRx(atis),'Information '+atisW],['clearance','"ATC clearance"'],[arrX,'Destination '+arrN]],model:`${depN} Ground, {CS}, stand ${PD.std}, information ${atisW}, request ATC clearance to ${arrN}`,sc:G_('stand',0)});
+    const sidName=`${wps[0]} ${sidD}${sidL}`;
+    if(r()<.5){S_({atc:`{CS}, cleared to ${arrN} via ${sidName} departure, flight planned route, climb to altitude ${initAlt} feet initially, squawk ${sq}.`,task:'Read back the clearance.',need:[[arrX,'Clearance limit '+arrN],[procRx(wps[0],sidD,sidL),'Departure '+sidName],['flight planned route','"flight planned route"'],[String(initAlt),initAlt+' feet'],[String(sq),'Squawk '+sq]],model:`Cleared to ${arrN} via ${sidName} departure, flight planned route, ${initAlt} feet, squawk ${sq}, {CS}`,sc:G_('stand',0)})}
+    else S_({atc:`{CS}, cleared to ${arrN}, ${sidName} departure, climb via SID to altitude ${initAlt} feet, squawk ${sq}, departure frequency ${fqD}.`,task:'Read back the clearance.',need:[[arrX,'Clearance limit '+arrN],[procRx(wps[0],sidD,sidL),'Departure '+sidName],['climb(ing)? via sid','"climb via SID"'],[String(initAlt),initAlt+' feet'],[String(sq),'Squawk '+sq],[fqRx(fqD),'Departure '+fqD]],model:`Cleared to ${arrN}, ${sidName} departure, climb via SID to ${initAlt} feet, squawk ${sq}, ${fqD}, {CS}`,sc:G_('stand',0)});
+    ms.sq0='----';
+    // pushback
+    const pv=r();
+    if(pv<.25){S_({atc:'{CS}, readback correct.',sit:'Doors closed, the tug is connected.',task:'Request pushback. Give your stand.',need:[['request push ?back','"request pushback"'],['stand '+reEsc(norm(String(PD.std)).trim()),'Stand '+PD.std]],model:`{CS}, stand ${PD.std}, request pushback`,sc:G_('stand',0,{tug:true})});
+      const dl=mPick(r,[3,5,10]);S_({atc:`{CS}, stand by, expect ${dl} minutes delay due traffic taxiing behind you.`,task:'Acknowledge the delay.',need:[['roger|wilco|stand(ing)? ?by|'+dl+' minutes','"Roger" / "Standing by"']],model:'Roger, standing by, {CS}',sc:G_('stand',0,{tug:true,tt:{k:'behind',t:T1}})});
+      S_({atc:`{CS}, pushback approved, facing ${PD.facing}.`,task:'Read back.',need:[['push ?back approved','"Pushback approved"'],['facing '+PD.facing,'Facing '+PD.facing]],model:`Pushback approved, facing ${PD.facing}, {CS}`,sc:G_('push',0)})}
+    else{S_({atc:'{CS}, readback correct.',sit:'Doors closed, the tug is connected.',task:'Request pushback. Give your stand.',need:[['request push ?back','"request pushback"'],['stand '+reEsc(norm(String(PD.std)).trim()),'Stand '+PD.std]],model:`{CS}, stand ${PD.std}, request pushback`,sc:G_('stand',0,{tug:true})});
+      if(pv<.4)S_({atc:'{CS}, pushback at own discretion.',task:'Read back.',need:[['push ?back','"Pushback"'],['own discretion','"at own discretion"']],model:'Pushback at own discretion, {CS}',sc:G_('push',0)});
+      else S_({atc:`{CS}, pushback approved, facing ${PD.facing}.`,task:'Read back.',need:[['push ?back approved','"Pushback approved"'],['facing '+PD.facing,'Facing '+PD.facing]],model:`Pushback approved, facing ${PD.facing}, {CS}`,sc:G_('push',0)})}
+    // start-up
+    const sv=r();
+    S_({sit:`Pushback complete, facing ${PD.facing}.`,task:'Request start-up.',need:[['start ?up','"start-up"']],model:'{CS}, request start-up',sc:G_('pushed',0,{tug:true})});
+    if(sv<.2){const tm=mInt(r,10,55);S_({atc:`{CS}, expect start-up at ${tm}.`,task:'Acknowledge.',need:[['\\b'+tm+'\\b|roger|wilco','Time '+tm+' / "Roger"']],model:`Expect start-up at ${tm}, {CS}`,sc:G_('pushed',0,{tug:true})});
+      S_({atc:'{CS}, start-up approved.',task:'Read back.',need:[['start ?up approved','"Start-up approved"']],model:'Start-up approved, {CS}',sc:G_('pushed',0,{tug:true})})}
+    else if(sv<.35)S_({atc:'{CS}, start-up at own discretion.',task:'Read back.',need:[['start ?up','"Start-up"'],['own discretion','"at own discretion"']],model:'Start-up at own discretion, {CS}',sc:G_('pushed',0,{tug:true})});
+    else S_({atc:'{CS}, start-up approved.',task:'Read back.',need:[['start ?up approved','"Start-up approved"']],model:'Start-up approved, {CS}',sc:G_('pushed',0,{tug:true})});
+    // de-icing (cold weather)
+    if(tmp<=3){const pad_=mInt(r,1,4),fqI=mPick(r,['131.85','130.65','122.35']),tIce=pad(mInt(r,6,22))+pad(mInt(r,0,5)*10+mInt(r,0,9)),fl=mPick(r,['1','2','4']);const flN={'1':'Type 1','2':'Type 2','4':'Type 4'}[fl];
+      S_({sit:`Temperature ${tmp}°C, ${mPick(r,['light snow','freezing fog','frost on the wings'])}. The aircraft needs de-icing.`,task:'Request de-icing.',need:[['de ?icing','"request de-icing"']],model:'{CS}, request de-icing',sc:G_('pushed',0)});
+      S_({atc:`{CS}, taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, contact Iceman ${fqI}.`,task:'Read back.',need:[['de ?icing pad '+pad_,'De-icing pad '+pad_],[fqRx(fqI),'Iceman '+fqI]],model:`Taxi to de-icing pad ${pad_} via ${PD.txr||'the apron'}, ${fqI}, {CS}`,sc:G_('taxi',0)});
+      S_({st:st('Iceman',fqI),sit:`On de-icing pad ${pad_}, brakes set, engines at idle, configuration confirmed.`,task:'Call Iceman: ready for de-icing.',need:[['iceman','"Iceman"'],['pad '+pad_,'Pad '+pad_],['brakes set','"brakes set"'],['ready','"ready for de-icing"']],model:`Iceman, {CS}, on pad ${pad_}, brakes set, ready for de-icing`,sc:G_('taxi',0)});
+      S_({atc:`{CS}, de-icing and anti-icing completed, ${flN} fluid, holdover time started at ${tIce}, equipment clear, contact Ground ${fqG}.`,task:'Read back the anti-icing code.',need:[['type '+fl,flN+' fluid'],['\\b'+tIce+'\\b','Start time '+tIce],[fqRx(fqG),'Ground '+fqG]],model:`${flN} fluid, holdover time ${tIce}, ${fqG}, {CS}`,sc:G_('taxi',0)});
+      tags.push('de-icing')}
+    // taxi
+    S_({sit:tmp<=3?'De-icing complete. You are back on Ground frequency.':'Engines running, tug disconnected, after-start checks complete.',task:'Request taxi.',need:[['request taxi','"request taxi"']],model:'{CS}, request taxi',sc:G_('pushed',0)});
+    const txr=PD.txr||'the apron',txrx=PD.txrx||'';
+    S_({atc:`{CS}, taxi to holding point ${HPS}runway ${DR} via ${txr}, QNH ${qnhD}.`,task:'Read back the taxi clearance.',need:[['taxi','"taxi"'],['holding point'+(HPX?' '+HPX:''),'Holding point '+(hpn||'')],[DRX,'Runway '+DR],...(txrx?[[txrx,'Route: '+txr]]:[]),['qnh '+qnhD,'QNH '+qnhD]],model:`Taxi to holding point ${HPS}runway ${DR} via ${txr}, QNH ${qnhD}, {CS}`,sc:G_('taxi',0)});
+    tags.push('taxi');
+    const gv=r();const L=layoutOf(dep);const other=(L.rwy||[]).flatMap(x=>x.d).find(d=>d!==DR&&PD.rw&&!PD.rw.d.includes(d));
+    if(gv<.22){S_({atc:`{CS}, give way to the ${T1} crossing left to right ahead of you.`,task:'Read back.',need:[['giv(e|ing) way','"Giving way"'],[mTypeRx(T1),'Traffic '+T1]],model:`Giving way to the ${T1}, {CS}`,sc:G_('taxi',0,{tt:{k:'crossing',t:T1}})});
+      S_({sit:`The ${T1} has passed.`,atc:'{CS}, continue taxi.',task:'Acknowledge.',need:[['continu|wilco|roger','"Continuing taxi"']],model:'Continuing taxi, {CS}',sc:G_('taxi',0)});tags.push('give way')}
+    else if(gv<.42){S_({atc:`{CS}, follow the ${T1} passing from right to left, then taxi to holding point ${HPS}runway ${DR}.`,task:'Read back.',need:[['follow','"Following"'],[mTypeRx(T1),'Traffic '+T1]],model:`Following the ${T1}, {CS}`,sc:G_('taxi',0,{tt:{k:'ahead',t:T1}})});tags.push('follow')}
+    else if(gv<.58){S_({atc:`{CS}, hold position, ${mPick(r,['vehicle crossing ahead','towed aircraft crossing ahead','a '+T1+' is pushing back ahead of you'])}.`,task:'Read back (not only "roger").',need:[['holding( position)?','"Holding position"']],model:'Holding position, {CS}',sc:G_('taxi',0,{tt:{k:'crossing',t:T1}})});
+      S_({atc:'{CS}, continue taxi.',task:'Acknowledge.',need:[['continu|wilco|roger','"Continuing taxi"']],model:'Continuing taxi, {CS}',sc:G_('taxi',0)});tags.push('hold position')}
+    else if(gv<.7&&other){S_({atc:`{CS}, hold short of runway ${other}.`,task:'Read back.',need:[['holding short','"Holding short"'],[rwyRe(other),'Runway '+other]],model:`Holding short runway ${other}, {CS}`,sc:G_('taxi',0)});
+      S_({atc:`{CS}, cross runway ${other}, report vacated.`,task:'Read back.',need:[['cross(ing)?','"Crossing"'],[rwyRe(other),'Runway '+other],['wilco|report','"Wilco"']],model:`Crossing runway ${other}, wilco, {CS}`,sc:G_('taxi',0)});
+      S_({sit:`You are clear of runway ${other}.`,task:'Report vacated.',need:[[rwyRe(other),'Runway '+other],['vacated','"vacated"']],model:`{CS}, runway ${other} vacated`,sc:G_('taxi',0)});tags.push('runway crossing')}
+    else if(gv<.82){S_({atc:`{CS}, expedite taxi, ${T1} behind you.`,task:'Read back.',need:[['expedit','"Expediting"']],model:'Expediting, {CS}',sc:G_('taxi',0,{tt:{k:'behind',t:T1}})});tags.push('expedite')}
+    else{S_({atc:`{CS}, caution, ${mPick(r,['work in progress on the left side of the taxiway','birds reported near the holding point','taxiway lights unserviceable'])}.`,task:'Acknowledge.',need:[['roger|wilco|caution','"Roger"']],model:'Roger, {CS}',sc:G_('taxi',0)});tags.push('caution')}
+    {const u=unitStep(n,0,'gnd',G_('taxi',0));if(u){S_(u);tags.push('unit phrases')}}
+    // holding point & tower
+    S_({atc:`{CS}, contact ${depN} Tower ${fqT}.`,task:'Read back the frequency.',need:[[fqRx(fqT),'Frequency '+fqT]],model:`${fqT}, {CS}`,sc:G_('hp',0)});
+    S_({st:st(depN+' Tower',fqT),sit:`At holding point ${hpn||''} runway ${DR}, checks complete.`,task:'Call Tower, ready for departure.',need:[[depX+' tower',`Station "${depN} Tower"`],['ready','"ready for departure"']],model:`${depN} Tower, {CS}, holding point ${hpn||''} runway ${DR}, ready for departure`,sc:G_('hp',0)});
+    const tv=r();const tw=windStr(wDep,sDep);
+    if(tv<.25){S_({atc:`{CS}, ${depN} Tower, behind the landing ${T2} on short final, line up runway ${DR} behind.`,task:'Read back the conditional clearance.',need:[['^\\s*behind','Start with "Behind…"'],[mTypeRx(T2),'Traffic '+T2],['(line|lining) up','"lining up"'],['behind.*(line|lining) up.*behind','"behind" again at the end']],model:`Behind the landing ${T2}, lining up runway ${DR} behind, {CS}`,sc:G_('hp',1,{traffic:'final'})});
+      S_({atc:`{CS}, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('conditional line-up')}
+    else if(tv<.45){S_({atc:`{CS}, ${depN} Tower, line up and wait runway ${DR}.`,task:'Read back.',need:[['(line|lining) up and wait','"Lining up and waiting"'],[DRX,'Runway '+DR]],model:`Lining up and waiting runway ${DR}, {CS}`,sc:G_('lineup',1)});
+      S_({atc:`{CS}, runway ${DR}, cleared for take-off, wind ${tw}, caution wake turbulence from departing ${T2}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('wake turbulence')}
+    else if(tv<.62){S_({atc:`{CS}, ${depN} Tower, are you ready for immediate departure?`,task:'Answer: yes.',need:[['affirm|ready','"Affirm" / "Ready"']],model:'Affirm, ready for immediate departure, {CS}',sc:G_('hp',1,{traffic:'final'})});
+      S_({atc:`{CS}, runway ${DR}, cleared for immediate take-off, wind ${tw}, traffic ${T2} on 4 miles final.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for immediate take ?off','"cleared for immediate take-off"']],model:`Runway ${DR}, cleared for immediate take-off, {CS}`,sc:G_('lineup',1,{traffic:'final'})});tags.push('immediate take-off')}
+    else if(tv<.74){S_({atc:`{CS}, ${depN} Tower, hold position, landing traffic ${T2} on 3 miles final.`,task:'Read back.',need:[['holding( position)?','"Holding position"']],model:'Holding position, {CS}',sc:G_('hp',1,{traffic:'final'})});
+      S_({atc:`{CS}, line up runway ${DR}.`,task:'Read back.',need:[['(line|lining) up','"Lining up"'],[DRX,'Runway '+DR]],model:`Lining up runway ${DR}, {CS}`,sc:G_('lineup',1)});
+      S_({atc:`{CS}, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)})}
+    else if(tv<.82){S_({atc:`{CS}, ${depN} Tower, line up and wait runway ${DR}.`,task:'Read back.',need:[['(line|lining) up and wait','"Lining up and waiting"'],[DRX,'Runway '+DR]],model:`Lining up and waiting runway ${DR}, {CS}`,sc:G_('lineup',1)});
+      S_({atc:'{CS}, hold position, cancel take-off, I say again cancel take-off, vehicle on the runway.',task:'Read back.',need:[['holding','"Holding"'],['cancel','"cancelling take-off"']],model:'Holding, cancelling take-off, {CS}',sc:G_('lineup',1)});
+      S_({atc:`{CS}, runway clear, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('take-off cancelled')}
+    else{S_({atc:`{CS}, ${depN} Tower, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)})}
+    // departure
+    const pass=mPick(r,[1500,2000,2500,3000].filter(x=>x<initAlt));
+    S_({st:st(depN+' Departure',fqD),sit:`Airborne. You change to Departure ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with Departure.',need:[[depX+' (departure|radar)',`Station "${depN} Departure"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} Departure, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
+    const dv=r();
+    if(dv<.35)S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, proceed direct ${wps[1]}.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['direct','"direct"'],[wpRx(wps[1]),'Point '+wps[1]]],model:`Climbing FL${fl1}, direct ${wps[1]}, {CS}`,sc:{t:'route',pos:.6,lvl:'FL'+fl1+' ↑',p:2}});
+    else if(dv<.7){const h=mInt(r,1,36)*10,lr=mPick(r,['left','right']);S_({atc:`{CS}, ${depN} Departure, identified, turn ${lr} heading ${pad(h,3)}, climb FL${fl1}.`,task:'Read back.',need:[[lr+' heading 0*'+h,lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+pad(h,3)],['flight level '+fl1,'FL'+fl1]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${pad(h,3)}, climbing FL${fl1}, {CS}`,sc:{t:'route',pos:.55,lvl:'FL'+fl1+' ↑',p:2}})}
+    else S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, no speed restriction.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['no speed restriction','"No speed restriction"']],model:`Climbing FL${fl1}, no speed restriction, {CS}`,sc:{t:'profile',mode:'climb',a:Math.round(initAlt/100),b:fl1,p:2}});
+    if(kind==='dep'){S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}})}
+    else S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}});
+  }
+  /* ---------------- en route ---------------- */
+  if(kind==='full'||kind==='enr'){
+    const a0=kind==='enr'?mPick(r,[crz-40,crz-60].filter(x=>x>150)):fl1-mPick(r,[20,30,40]);
+    if(kind==='enr'){ms.sq0=sq;firstSit=`Mission ${n}: en route ${depN} → ${arrN} via ${wps[1]}, ${wps[2]}, ${wps[3]}. Squawk ${sq}.`}
+    S_({st:st(depN+' Control',fqC),sit:(kind==='enr'?firstSit+' ':'')+`Climbing through FL${a0} to FL${kind==='enr'?crz:fl1}.`+(kind==='enr'?'':' You have changed to Control.'),task:'Make first contact.',need:[[depX+' control',`Station "${depN} Control"`],['flight level '+a0,'Passing FL'+a0],['flight level '+(kind==='enr'?crz:fl1),'Cleared level FL'+(kind==='enr'?crz:fl1)]],model:`${depN} Control, {CS}, passing FL${a0}, climbing FL${kind==='enr'?crz:fl1}`,sc:{t:'profile',mode:'climb',a:a0,b:kind==='enr'?crz:fl1,p:2,note:'PASSING FL'+a0}});
+    S_({atc:`{CS}, ${depN} Control, identified, climb FL${crz}, report reaching.`,task:'Read back.',need:[['flight level '+crz,'FL'+crz],['wilco|report','"Wilco"']],model:`Climbing FL${crz}, wilco, {CS}`,sc:{t:'profile',mode:'climb',a:kind==='enr'?a0:fl1,b:crz,p:2}});
+    const ev=[];
+    ev.push(()=>{const c=r()<.5?'2':'10',dir=mPick(r,['opposite direction','crossing left to right','same direction, overtaking']),ab=mPick(r,['1000 feet above','1000 feet below']);
+      S_({atc:`{CS}, traffic ${c} o'clock, ${mInt(r,5,15)} miles, ${dir}, ${ab}, ${T3}.`,task:'You cannot see it yet. Reply.',need:[['negative contact|looking out','"Looking out" / "Negative contact"']],model:'Looking out, {CS}',sc:{t:'route',pos:1.1,traffic:true,lvl:'FL'+crz,p:3}});
+      S_({sit:`Now you can see the ${T3}.`,task:'Report the traffic in sight.',need:[['in sight','"Traffic in sight"']],model:'{CS}, traffic in sight',sc:{t:'route',pos:1.2,traffic:true,lvl:'FL'+crz,p:3}});tags.push('traffic')});
+    ev.push(()=>{S_({atc:`{CS}, proceed direct ${wps[3]}.`,task:'Read back.',need:[['direct','"Direct"'],[wpRx(wps[3]),'Point '+wps[3]]],model:`Direct ${wps[3]}, {CS}`,sc:{t:'route',pos:1.6,lvl:'FL'+crz,p:3}});tags.push('direct-to')});
+    ev.push(()=>{const m=mPick(r,['76','78','80','82']);S_({atc:`{CS}, maintain Mach .${m} or ${mPick(r,['greater','less'])}.`,task:'Read back.',need:[['mach 0?\\.'+m,'Mach .'+m],['or (greater|less)','"or greater/less"']],model:`Maintain Mach .${m} or ${'greater'}, {CS}`,sc:{t:'route',pos:1.35,mach:true,lvl:'FL'+crz,p:3}});
+      steps[steps.length-1].model=steps[steps.length-1].atc.replace('{CS}, ','').replace(/\.$/,'')+', {CS}';});
+    ev.push(()=>{const t0=mInt(r,10,50),t1=t0+mInt(r,6,9);S_({atc:`{CS}, report over ${wps[2]}.`,sit:`Over ${wps[2]} at time ${pad(t0)}, FL${crz}. Estimating ${wps[3]} at ${pad(t1%60)}, next ${wps[4]}.`,task:'Make a position report.',need:[[wpRx(wps[2]),'Position '+wps[2]],['\\b0?'+t0+'\\b','Time '+pad(t0)],['flight level '+crz,'FL'+crz],[wpRx(wps[3]),'Estimate point '+wps[3]],['\\b0?'+(t1%60)+'\\b','Estimate '+pad(t1%60)],[wpRx(wps[4]),'Next '+wps[4]]],model:`{CS}, ${wps[2]} ${pad(t0)}, FL${crz}, ${wps[3]} ${pad(t1%60)}, ${wps[4]}`,sc:{t:'route',pos:2,report:true,lvl:'FL'+crz,p:3,rep:['POSITION REPORT',`${wps[2]} ${pad(t0)}  FL${crz}`,`${wps[3]} ${pad(t1%60)}`,'NEXT '+wps[4]]}});tags.push('position report')});
+    ev.push(()=>{S_({atc:`{CS}, squawk ${sq2}.`,task:'Read back.',need:[['squawk(ing)? '+sq2,'Squawk '+sq2]],model:`Squawk ${sq2}, {CS}`,sc:{t:'radar',mode:'ident',p:3,sq:sq2,fl:String(crz)}});});
+    ev.push(()=>{const side=mPick(r,['left','right']),nm=mPick(r,[10,15,20]);S_({sit:`A thunderstorm is ahead on your track.`,task:`Request a deviation ${nm} miles ${side} of track due weather.`,need:[['deviat','"Request deviation"'],['\\b'+nm+'\\b','Distance '+nm],[side,'Side: '+side],['weather','"due weather"']],model:`{CS}, request deviation ${nm} miles ${side} of track due weather`,sc:{t:'route',pos:2.2,cell:true,lvl:'FL'+crz,p:3}});
+      S_({atc:`{CS}, deviation up to ${nm} miles ${side} of track approved, report back on track.`,task:'Read back.',need:[['deviat','"Deviating"'],['\\b'+nm+'\\b','Up to '+nm+' miles'],[side,side.charAt(0).toUpperCase()+side.slice(1)],['wilco|report','"Wilco"']],model:`Deviating up to ${nm} miles ${side} of track, wilco, {CS}`,sc:{t:'route',pos:2.2,cell:true,dev:true,lvl:'FL'+crz,p:3}});
+      S_({sit:'You are clear of the weather and back on track.',task:'Report.',need:[['back on (track|route)','"Back on track"']],model:'{CS}, back on track',sc:{t:'route',pos:3.15,cell:true,dev:true,back:true,lvl:'FL'+crz,p:3}});tags.push('weather deviation')});
+    ev.push(()=>{const up=crz+20;S_({sit:`Moderate turbulence at FL${crz}.`,task:`Request FL${up} due turbulence.`,need:[['request','"Request"'],['flight level '+up,'FL'+up],['turbulence','"due turbulence"']],model:`{CS}, request FL${up} due turbulence`,sc:{t:'profile',mode:'turb',a:crz,p:3}});
+      S_({atc:`{CS}, climb FL${up}.`,task:'Read back.',need:[['flight level '+up,'FL'+up]],model:`Climbing FL${up}, {CS}`,sc:{t:'profile',mode:'climb',a:crz,b:up,p:3}});tags.push('turbulence')});
+    ev.push(()=>{const sp=mPick(r,[280,290,300]);S_({atc:`{CS}, reduce speed to ${sp} knots, ${mPick(r,['traffic ahead','for spacing'])}.`,task:'Read back.',need:[['\\b'+sp+'\\b','Speed '+sp+' knots'],['reduc','"Reducing"']],model:`Reducing speed to ${sp} knots, {CS}`,sc:{t:'route',pos:2.4,lvl:'FL'+crz,p:3}});tags.push('speed control')});
+    if(r()<.25)ev.push(()=>{S_({sit:'A passenger has a heart attack. A doctor on board asks for the nearest airport.',task:`Make an urgency call and request diversion to ${arrN}.`,need:[['pan pan pan pan pan pan','"Pan Pan" three times'],['medical|heart','Nature: medical'],['flight level '+crz,'Level FL'+crz],[arrX,'Diversion to '+arrN]],model:`Pan Pan, Pan Pan, Pan Pan, ${depN} Control, {CS}, medical emergency, passenger with heart attack, FL${crz}, request diversion to ${arrN}`,sc:{t:'profile',mode:'level',a:crz,p:3,ban:'PAN PAN · MEDICAL'}});
+      S_({atc:`{CS}, roger Pan Pan, descend FL${desFL+40}, proceed direct ${arrN}.`,task:'Read back.',need:[['flight level '+(desFL+40),'FL'+(desFL+40)],['direct','"Direct"'],[arrX,arrN]],model:`Descending FL${desFL+40}, direct ${arrN}, {CS}`,sc:{t:'profile',mode:'descent',a:crz,b:desFL+40,p:4}});tags.push('medical')});
+    const pickN=kind==='enr'?5:3;const order=[...ev.keys()].sort(()=>r()-.5).slice(0,pickN);
+    S_({sit:`You are now level at FL${crz}.`,task:'Report reaching.',need:[['(reaching|maintaining|level) flight level '+crz,'"Reaching FL'+crz+'"']],model:`{CS}, reaching FL${crz}`,sc:{t:'profile',mode:'level',a:crz,p:3}});
+    order.forEach(i=>ev[i]());
+    for(let k=0;k<uSlots(kind,'crz');k++){const u=unitStep(n,k,'crz',{t:'route',pos:2.5,lvl:'FL'+crz,p:3});if(u){S_(u);tags.push('unit phrases')}}
+    S_({atc:`{CS}, contact ${arrN} Control ${fqC2}.`,task:'Read back.',need:[[fqRx(fqC2),'Frequency '+fqC2]],model:`${fqC2}, {CS}`,sc:{t:'route',pos:2.6,lvl:'FL'+crz,p:3}});
+  }
+  /* ---------------- arrival ---------------- */
+  if(kind==='full'||kind==='arr'){
+    const starName=`${wps[3]} ${starD}${starL}`;const fromFL=kind==='arr'?mPick(r,[200,220,240]):crz;
+    if(kind==='arr'){ms.sq0=sq;firstSit=`Mission ${n}: arriving at ${arrN}. Runway ${AR} in use, wind ${pad(wArr,3)}/${sArr}. ATIS information ${atisW}, QNH ${qnhA}.`}
+    S_({st:st(arrN+' Control',fqC2),sit:(kind==='arr'?firstSit+' ':'')+`Level FL${fromFL}, approaching ${wps[3]}.`,task:`Make first contact with ${arrN} Control.`,need:[[arrX+' control',`Station "${arrN} Control"`],['flight level '+fromFL,'FL'+fromFL]],model:`${arrN} Control, {CS}, FL${fromFL}`,sc:{t:'route',pos:2.7,lvl:'FL'+fromFL,p:3}});
+    S_({atc:`{CS}, ${arrN} Control, identified, descend FL${desFL}, ${starName} arrival, runway ${AR}.`,task:'Read back.',need:[['flight level '+desFL,'FL'+desFL],[procRx(wps[3],starD,starL),'Arrival '+starName],[ARX,'Runway '+AR]],model:`Descending FL${desFL}, ${starName} arrival, runway ${AR}, {CS}`,sc:{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4}});
+    S_({atc:`{CS}, contact ${arrN} Approach ${fqA}.`,task:'Read back.',need:[[fqRx(fqA),'Frequency '+fqA]],model:`${fqA}, {CS}`,sc:{t:'route',pos:3.2,lvl:'FL'+desFL+' ↓',p:4}});
+    S_({st:st(arrN+' Approach',fqA),sit:`Descending to FL${desFL}. You have ATIS information ${atisW}.`,task:'Make first contact with Approach.',need:[[arrX+' approach',`Station "${arrN} Approach"`],['flight level '+desFL,'FL'+desFL],['information '+phonRx(atis),'Information '+atisW]],model:`${arrN} Approach, {CS}, descending FL${desFL}, information ${atisW}`,sc:{t:'route',pos:3.4,lvl:'FL'+desFL+' ↓',p:4}});
+    const av=r();const alt1=mPick(r,[4000,5000,6000]),alt2=mPick(r,[2500,3000,3500].filter(x=>x<alt1));
+    if(av<.35){const it=mInt(r,1,36)*10,lr=mPick(r,['right','left']),eat=mInt(r,10,55);ms.holdInfo={fix:wps[4],fl:desFL,it,lr,eat};
+      S_({atc:`{CS}, hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}.`,task:'Read back the holding clearance.',need:[[wpRx(wps[4]),'Fix '+wps[4]],['flight level '+desFL,'FL'+desFL],['\\b0*'+it+'\\b','Inbound '+pad(it,3)],[lr,lr.charAt(0).toUpperCase()+lr.slice(1)+' hand'],['\\b'+eat+'\\b','Expect approach at '+eat]],model:`Hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}, {CS}`,sc:{t:'hold',p:5}});
+      if(r()<.5)S_({sit:`While holding, your fuel is getting low. You can accept only a little more delay.`,task:'Advise ATC.',need:[['minimum fuel','"Minimum fuel"']],model:'{CS}, minimum fuel',sc:{t:'hold',fuel:true,p:5}});
+      tags.push('holding')}
+    const h1=mInt(r,1,36)*10,lr1=mPick(r,['left','right']);
+    S_({atc:`{CS}, ${av<.35?'leave '+wps[4]+', ':''}turn ${lr1} heading ${pad(h1,3)}, descend altitude ${alt1} feet, QNH ${qnhA}.`,task:'Read back.',need:[[lr1+' heading 0*'+h1,lr1.charAt(0).toUpperCase()+lr1.slice(1)+' heading '+pad(h1,3)],['\\b'+alt1+'\\b','Altitude '+alt1+' feet'],['qnh '+qnhA,'QNH '+qnhA]],model:`${lr1.charAt(0).toUpperCase()+lr1.slice(1)} heading ${pad(h1,3)}, descending ${alt1} feet, QNH ${qnhA}, {CS}`,sc:{t:'vector',stage:0,p:5,hdg:pad(h1,3),alt:alt1}});
+    if(r()<.5){const sp=mPick(r,[180,200,210,220]);S_({atc:`{CS}, reduce speed to ${sp} knots${r()<.5?' until 4 miles final':''}.`,task:'Read back.',need:[['\\b'+sp+'\\b','Speed '+sp+' knots']],model:`Reducing speed to ${sp} knots, {CS}`,sc:{t:'vector',stage:0,p:5,hdg:pad(h1,3),alt:alt1}});tags.push('speed control')}
+    const h2=mInt(r,1,36)*10,lr2=mPick(r,['left','right']);
+    S_({atc:`{CS}, turn ${lr2} heading ${pad(h2,3)}, descend ${alt2} feet, cleared ILS approach runway ${AR}, report established.`,task:'Read back.',need:[[lr2+' heading 0*'+h2,lr2.charAt(0).toUpperCase()+lr2.slice(1)+' heading '+pad(h2,3)],['\\b'+alt2+'\\b',alt2+' feet'],['cleared( for)? ils( approach)? '+ARX,'Cleared ILS approach runway '+AR],['report(ing)? established|wilco','Will report established']],model:`${lr2.charAt(0).toUpperCase()+lr2.slice(1)} heading ${pad(h2,3)}, descending ${alt2} feet, cleared ILS approach runway ${AR}, wilco, {CS}`,sc:{t:'vector',stage:1,p:5,hdg:pad(h2,3),alt:alt2}});
+    S_({sit:'The localizer is captured.',task:'Report.',need:[['established','"Established"']],model:'{CS}, established on the localizer',sc:{t:'vector',stage:2,p:5}});
+    {const u=unitStep(n,0,'app',{t:'vector',stage:2,p:5});if(u){S_(u);tags.push('unit phrases')}}
+    S_({atc:`{CS}, contact ${arrN} Tower ${fqTa}.`,task:'Read back.',need:[[fqRx(fqTa),'Frequency '+fqTa]],model:`${fqTa}, {CS}`,sc:{t:'vector',stage:2,p:5}});
+    S_({st:st(arrN+' Tower',fqTa),sit:'6 miles final on the ILS.',task:'Call Tower.',need:[[arrX+' tower',`Station "${arrN} Tower"`],['established','"Established"'],[ARX,'Runway '+AR]],model:`${arrN} Tower, {CS}, established ILS runway ${AR}`,sc:{t:'profile',mode:'final',p:5}});
+    const lw=windStr(wArr,sArr),lv=r();
+    if(lv<.25){S_({atc:`{CS}, ${arrN} Tower, continue approach, number 2, traffic ${T2} on 3 miles final.`,task:'Read back.',need:[['continu','"Continue approach"'],['number 2','"Number 2"']],model:'Continue approach, number 2, {CS}',sc:{t:'profile',mode:'final',p:5}});
+      S_({atc:`{CS}, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('landing sequence')}
+    else if(lv<.38){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
+      S_({atc:`{CS}, go around, I say again go around, ${mPick(r,['vehicle on the runway','preceding traffic not vacated','birds on the runway'])}.`,task:'Comply and reply.',need:[['going around','"Going around"']],model:'Going around, {CS}',sc:{t:'profile',mode:'goaround',p:6}});
+      S_({atc:`{CS}, climb straight ahead ${alt1} feet, contact Approach ${fqA}.`,task:'Read back.',need:[['straight ahead','Straight ahead'],['\\b'+alt1+'\\b',alt1+' feet'],[fqRx(fqA),fqA]],model:`Climbing straight ahead ${alt1} feet, ${fqA}, {CS}`,sc:{t:'profile',mode:'goaround',p:6}});tags.push('go-around');
+      return finish()}
+    else if(lv<.5){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}, caution wake turbulence, preceding landing ${T2}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('wake turbulence')}
+    else S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
+    const exT=PA.hp&&PA.hp.n?PA.hp.n:mPick(r,['B2','C3','A4','D1']),exRx=nameRx(exT),lr3=mPick(r,['left','right']);
+    S_({atc:`{CS}, vacate ${lr3} via ${nameSpk(exT)}, contact Ground ${fqGa}.`,task:'Read back.',need:[['vacat','"Vacating"'],[exRx,'Taxiway '+exT],[fqRx(fqGa),'Frequency '+fqGa]],model:`Vacating ${lr3} via ${nameSpk(exT)}, ${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});
+    S_({st:st(arrN+' Ground',fqGa),sit:`Runway ${AR} vacated.`,task:'Call Ground.',need:[[arrX+' ground',`Station "${arrN} Ground"`],['vacated','"Runway vacated"']],model:`${arrN} Ground, {CS}, runway ${AR} vacated`,sc:G_('taxiin',6,{arr:true,start:true})});
+    const sdA=PA.std||'4',txA=PA.txr||'the apron';
+    S_({atc:`{CS}, taxi to stand ${sdA} via ${txA}${r()<.4?', give way to the '+T3+' pushing back from stand '+mInt(r,1,9):''}.`,task:'Read back.',need:[['taxi','"Taxi"'],['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA],...(PA.txrx?[[PA.txrx,'Route: '+txA]]:[])],model:`Taxi to stand ${sdA} via ${txA}, {CS}`,sc:G_('taxiin',6,{arr:true})});
+    if(/give way/.test(steps[steps.length-1].atc)){steps[steps.length-1].need.push(['giv(e|ing) way','"Giving way"'],[mTypeRx(T3),'Traffic '+T3]);steps[steps.length-1].model=`Taxi to stand ${sdA} via ${txA}, giving way to the ${T3}, {CS}`;steps[steps.length-1].sc.tt={k:'ahead',t:T3}}
+  }
+  return finish();
+  function finish(){
+    if(steps.length&&firstSit&&!steps[0].sit.startsWith('Mission'))steps[0].sit=firstSit+' '+steps[0].sit;
+    if(!steps[0].st)steps[0].st=st(depN+' Ground',fqG);
+    const tl=uniq(tags).slice(0,3);
+    const K={full:'Full flight',dep:'Departure',arr:'Arrival',enr:'En route'}[kind];
+    return {id:'m'+n,ms,cls:kind==='arr'?'s-arr':kind==='enr'?'s-misc':'s-dep',code:'M'+pad(n,3),title:`Mission ${pad(n,3)} · ${K}`,units:'1–8',
+      desc:`${kind==='arr'?arrN:depN}${kind==='full'||kind==='enr'?' → '+arrN:''} · RWY ${kind==='arr'?AR:DR} · ${tl.join(', ')||'standard'}`,
+      end:kind==='dep'?`{CS}, ${depN} Control, identified.`:kind==='enr'?`{CS}, ${arrN} Control, identified.`:`{CS}, welcome to ${arrN}.`,steps}}
+}
+const MISSIONS={};function mKey(n){return n+'|'+S.ads.map(a=>a.i+(a.lay?'L':'')).join(',')+'|'+S.dep+'|'+S.dst}
+function mission(n){const k=mKey(n);return MISSIONS[k]||(MISSIONS[k]=genMission(n))}
+const mKind=n=>n%5===0?'dep':n%5===3?'arr':n%7===4?'enr':'full';
+function resetMissions(){for(const k in MISSIONS)delete MISSIONS[k]}
+
 let RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};
 const csText=()=>S.cs.name.trim()+' '+S.cs.num.trim();
-function V(){const d=S.ads[S.dep]||S.ads[0],a=S.ads[S.dst]||S.ads[1]||d,h=r=>(parseInt(r)||36)*10,w=x=>pad(((x+719)%360)+1,3);let P={};try{P=groundPlan(d)}catch(e){}return{CS:csText(),DEP:d.n,DST:a.n,DR:d.r,AR:a.r,DW1:w(h(d.r)-20),DW2:w(h(d.r)-10),AW:w(h(a.r)+10),STD:P.std||'4',TXR:P.txr||'the apron',FACE:P.facing||'west',HPS:P.hpn?P.hpn+' ':''}}
+function V(){const d=DEPAD(),a=DSTAD()||d,h=r=>(parseInt(r)||36)*10,w=x=>pad(((x+719)%360)+1,3);let P={};try{P=groundPlan(d)}catch(e){}return{CS:csText(),DEP:d.n,DST:a.n,DR:d.r,AR:a.r,DW1:MSX()?pad(MSX().wind.d,3):w(h(d.r)-20),DW2:MSX()?pad(MSX().wind.d,3):w(h(d.r)-10),AW:MSX()?pad(MSX().wind.ad,3):w(h(a.r)+10),STD:P.std||'4',TXR:P.txr||'the apron',FACE:P.facing||'west',HPS:P.hpn?P.hpn+' ':''}}
 const fill=t=>{const v=V();return t.replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m)};
 const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const nameRe=n=>reEsc(norm(n).trim()).replace(/\s+/g,'\\s+');
 function rwyRe(r){const m=String(r).toUpperCase().match(/^(\d{1,2})([LRC])?$/);if(!m)return 'runway';const n=+m[1];return 'runway '+(n<10?'0?'+n:n)+(m[2]?' '+{L:'left',R:'right',C:'centre'}[m[2]]:'')+'\\b'}
-function fillRe(p){const d=S.ads[S.dep]||S.ads[0],a=S.ads[S.dst]||S.ads[1]||d;let P={};try{P=groundPlan(d)}catch(e){}p=p.replace(/\{HPX\}/g,P.hp&&P.hp.n?nameRx(P.hp.n):'').replace(/\{TXRX\}/g,P.txrx||'').replace(/\{STDX\}/g,reEsc(norm(String(P.std||'4')).trim())).replace(/\{FACEX\}/g,P.facing||'west');return p.replace(/\{DRX\}/g,rwyRe(d.r)).replace(/\{ARX\}/g,rwyRe(a.r)).replace(/\{DEPN\}/g,nameRe(d.n)).replace(/\{DSTN\}/g,nameRe(a.n))}
+function fillRe(p){const d=DEPAD(),a=DSTAD()||d;let P={};try{P=groundPlan(d)}catch(e){}p=p.replace(/\{HPX\}/g,P.hp&&P.hp.n?nameRx(P.hp.n):'').replace(/\{TXRX\}/g,P.txrx||'').replace(/\{STDX\}/g,reEsc(norm(String(P.std||'4')).trim())).replace(/\{FACEX\}/g,P.facing||'west');return p.replace(/\{DRX\}/g,rwyRe(d.r)).replace(/\{ARX\}/g,rwyRe(a.r)).replace(/\{DEPN\}/g,nameRe(d.n)).replace(/\{DSTN\}/g,nameRe(a.n))}
 const showAtc=t=>S.spoken?spoken(fill(t)):fill(t);
 function csRe(){return new RegExp(norm(csText()).trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')+'\\b')}
 function checkTx(step,raw){
@@ -1618,6 +1895,13 @@ function vRadio(){
   if(!RD.sc){
     view.innerHTML=`<div class="stack">
       <div><h1>Radio practice</h1><p class="muted" style="margin-top:6px;max-width:62ch">Type your transmission as you would say it. Digits or ICAO words both work (<span class="mono">118.1</span> or <span class="mono">one one eight decimal one</span>). Each readback is checked for every required item and for your full call sign.</p></div>
+      <div class="panel mpanel stack" style="gap:12px">
+        <div class="row" style="justify-content:space-between;align-items:flex-start"><div><span class="lbl">${MISSION_N} missions</span><h2 style="margin-top:2px">Every flight is different</h2>
+          <p class="muted" style="font-size:.9rem;margin-top:4px;max-width:60ch">Stand, runway in use, wind, ATIS, QNH, squawk, SID and STAR, waypoints, traffic on the ground and in the air, and the situations change from mission to mission.</p></div>
+          <button class="btn pri" id="mrand">🎲 Random mission</button></div>
+        <div class="seg" role="group" aria-label="Mission type">${[['all','All'],['full','Full flight'],['dep','Departure'],['enr','En route'],['arr','Arrival']].map(([k,l])=>`<button data-mf="${k}" aria-pressed="${(S.mf||'all')===k}">${l}</button>`).join('')}</div>
+        <div class="mgridn">${Array.from({length:MISSION_N},(_,i)=>i+1).filter(n=>(S.mf||'all')==='all'||mKind(n)===S.mf).map(n=>`<button class="mn k-${mKind(n)} ${S.stats['radio-m'+n]!==undefined?'done':''}" data-mn="${n}" title="Mission ${n} · ${({full:'Full flight',dep:'Departure',enr:'En route',arr:'Arrival'})[mKind(n)]}"><b>${n}</b><i>${({full:'FULL',dep:'DEP',enr:'ENR',arr:'ARR'})[mKind(n)]}</i></button>`).join('')}</div>
+      </div>
       <div class="panel settings">
         <span class="lbl">Call sign</span>
         <input type="text" id="csn" value="${esc(S.cs.name)}" aria-label="Call sign name">
@@ -1630,6 +1914,7 @@ function vRadio(){
         <button class="btn" id="vtest">Test voice</button><span id="vstat" class="muted" style="font-size:.88rem">${canSpeak()?'':'This view has no speech engine. Open the page in Chrome or Safari.'}</span>
       </div>
       ${adPanel()}
+      <h3 style="margin-top:4px">Training flights</h3>
       <div class="strips">${SCN.map((s,i)=>`<button class="strip ${s.cls}" data-sc="${i}">
         <div class="cs">${s.code}<span>Units ${s.units}</span></div>
         <div class="bd"><h3>${esc(s.title)}</h3><p>${esc(s.desc)}</p><p class="mono" style="font-size:.78rem">${esc(fill(s.id==='emg'?'{DEP}':'{DEP} → {DST}'))}</p></div>
@@ -1645,6 +1930,9 @@ function vRadio(){
     $('#vtest').onclick=()=>testVoice($('#vstat'));
     bindAd(vRadio);
     $$('[data-sc]').forEach(b=>b.onclick=()=>{RD={sc:SCN[+b.dataset.sc],i:0,log:[],tries:0,res:[],fb:'',done:false,st:SCN[+b.dataset.sc].steps[0].st};vRadio();speakStep()});
+    $$('[data-mn]').forEach(b=>b.onclick=()=>startMission(+b.dataset.mn));
+    $$('[data-mf]').forEach(b=>b.onclick=()=>{S.mf=b.dataset.mf;save();vRadio()});
+    $('#mrand').onclick=()=>{const pool=Array.from({length:MISSION_N},(_,i)=>i+1).filter(n=>(S.mf||'all')==='all'||mKind(n)===S.mf);const fresh=pool.filter(n=>S.stats['radio-m'+n]===undefined);startMission(pick(fresh.length?fresh:pool))};
     return;
   }
   const sc=RD.sc;
@@ -1654,9 +1942,9 @@ function vRadio(){
       <div class="turn"><div class="atcnow">${esc(showAtc(sc.end))}</div></div></div>
       <div class="panel stack"><div><span class="lbl">Flight complete</span><h2>${ok} of ${sc.steps.length} transmissions correct first time (${pct}%)</h2></div>
       ${RD.res.filter(r=>!r.first).length?`<div class="dtab"><table><tbody>${RD.res.filter(r=>!r.first).map(r=>`<tr><td>${esc(r.task)}</td><td><span class="muted">You said:</span> ${esc(r.said)}<br><span class="muted">Missing:</span> ${esc(r.miss.join('; '))}<br><span class="muted">Model:</span> <span class="mono">${esc(spoken(fill(r.model)))}</span></td></tr>`).join('')}</tbody></table></div>`:'<p>Every transmission was complete on the first try.</p>'}
-      <div class="row"><button class="btn pri" id="again">Fly it again</button><button class="btn" id="back">${RD.from==='emergency'?'Choose another emergency':'Choose another flight'}</button></div></div></div>`;
+      <div class="row"><button class="btn pri" id="again">Fly it again</button><button class="btn" id="back">${RD.from==='emergency'?'Choose another emergency':'Choose another flight'}</button>${sc.ms?`<button class="btn pri" id="mnext">Next mission →</button>`:''}</div></div></div>`;
     $('#again').onclick=()=>{RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,from:RD.from};vRadio();speakStep()};
-    $('#back').onclick=leave;
+    $('#back').onclick=leave;if($('#mnext'))$('#mnext').onclick=()=>startMission(sc.ms.n%MISSION_N+1);
     scrollLog();return;
   }
   const step=sc.steps[RD.i];
@@ -1698,8 +1986,8 @@ function vRadio(){
   const mob=matchMedia('(max-width:720px)').matches;
   if(mob){const tq=$('#tx');tq.addEventListener('focus',()=>$('#rleft').classList.add('typing'));tq.addEventListener('blur',()=>setTimeout(()=>{const r=$('#rleft');if(r)r.classList.remove('typing')},150))}
   RD.adv=false;{const t=$('#turn');if(t)t.scrollTop=0}
-  if($('#play'))$('#play').onclick=()=>say(spoken(fill(step.atc)));
-  if($('#autov'))$('#autov').onclick=e=>{S.voice=!S.voice;save();const b=e.currentTarget;b.textContent=S.voice?'🔊 Auto-play on':'🔈 Auto-play off';b.setAttribute('aria-pressed',S.voice);if(S.voice)say(spoken(fill(step.atc)));else{try{speechSynthesis.cancel()}catch(_){}try{NATIVE&&NATIVE.TTS&&NATIVE.TTS.stop()}catch(_){}}};
+  if($('#play'))$('#play').onclick=()=>sayATC(spoken(fill(step.atc)));
+  if($('#autov'))$('#autov').onclick=e=>{S.voice=!S.voice;save();const b=e.currentTarget;b.textContent=S.voice?'🔊 Auto-play on':'🔈 Auto-play off';b.setAttribute('aria-pressed',S.voice);if(S.voice)sayATC(spoken(fill(step.atc)));else{try{speechSynthesis.cancel()}catch(_){}try{NATIVE&&NATIVE.TTS&&NATIVE.TTS.stop()}catch(_){}}};
   if($('#reveal'))$('#reveal').onclick=()=>{$('#atxt').hidden=false};
   const tx=$('#tx');
   if(matchMedia('(min-width:721px)').matches)tx.focus({preventScroll:true});
@@ -1834,6 +2122,23 @@ try{(window.visualViewport||window).addEventListener('resize',fitFlight)}catch(e
 function logSheet(){closeSheet();const d=document.createElement('div');d.className='vsheet logsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Transcript');
   d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Transcript</b><button class="btn" type="button" id="logx">Close</button></div><div class="log">${RD.log.length?logHtml():'<p class="muted">No exchanges yet.</p>'}</div></div>`;
   document.body.appendChild(d);d.querySelector('#logx').onclick=closeSheet;const l=d.querySelector('.log');l.scrollTop=l.scrollHeight}
+
+/* typing mirror: shows what you type just above the phone keyboard */
+(function(){let box=null,tgt=null;
+  const coarse=()=>{try{return matchMedia('(pointer: coarse)').matches||matchMedia('(max-width:720px)').matches}catch(e){return false}};
+  function ensure(){if(box)return box;box=document.createElement('div');box.id='kbm';box.setAttribute('aria-hidden','true');
+    box.innerHTML='<div class="kbm-t"></div><button type="button" class="kbm-go" tabindex="-1">Send</button>';
+    box.querySelector('.kbm-go').addEventListener('pointerdown',e=>{e.preventDefault();if(!tgt)return;tgt.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))});
+    document.body.appendChild(box);return box}
+  function place(){if(!box||!tgt)return;const vv=window.visualViewport;const h=box.offsetHeight||48;
+    const bottom=vv?vv.offsetTop+vv.height:innerHeight;box.style.top=Math.max(0,bottom-h-6)+'px'}
+  function show(){if(!tgt)return;ensure();const t=box.querySelector('.kbm-t');const v=tgt.value;t.textContent=v||tgt.getAttribute('placeholder')||'';t.classList.toggle('ph',!v);
+    box.querySelector('.kbm-go').textContent=tgt.id==='tx'?'Transmit':'Check';box.classList.add('on');t.scrollLeft=t.scrollWidth;place()}
+  document.addEventListener('focusin',e=>{const el=e.target;if(!coarse()||!el||!(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&el.type==='text'))||!el.closest('#view'))return;if(!(el.id==='tx'||el.id==='pin'))return;tgt=el;show();setTimeout(place,250);setTimeout(place,600)});
+  document.addEventListener('focusout',e=>{if(e.target===tgt){setTimeout(()=>{if(document.activeElement!==tgt){tgt=null;if(box)box.classList.remove('on')}},80)}});
+  document.addEventListener('input',e=>{if(e.target===tgt)show()});
+  try{(window.visualViewport||window).addEventListener('resize',place);window.visualViewport&&window.visualViewport.addEventListener('scroll',place)}catch(e){}
+})();
 function closeSheet(){document.querySelectorAll('.vsheet').forEach(x=>x.remove())}
 function voiceSheet(o){closeSheet();
   const df=wdiff(words(o.model),words(o.heard||''));
@@ -1848,6 +2153,7 @@ function voiceSheet(o){closeSheet();
   document.body.appendChild(d);
   const fire=f=>()=>{closeSheet();f&&f()};
   d.querySelector('.vs-ok').onclick=fire(o.onAccept);d.querySelector('.vs-go').onclick=fire(o.onContinue);d.querySelector('.vs-mic').onclick=fire(o.onAgain);}
+function startMission(n){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st};vRadio();speakStep();window.scrollTo(0,0)}
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
@@ -1863,7 +2169,7 @@ function advance(step,raw,first,miss,warn){
   if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id])S.stats['radio-'+sc.id]=pct;save();if(S.voice)say(spoken(fill(sc.end)))}
   vRadio();if(!RD.done)speakStep();
 }
-function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)say(spoken(fill(s.atc)))}
+function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)))}
 
 /* ---------- aerodromes ---------- */
 function adPanel(){return `<details class="panel" id="adp" ${S.adOpen?'open':''}><summary class="lbl" style="cursor:pointer">Your aerodromes (${S.ads.length}): add or remove</summary>
