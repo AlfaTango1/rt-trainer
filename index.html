@@ -527,12 +527,13 @@ nav button span{overflow:hidden;text-overflow:ellipsis;max-width:100%;white-spac
 .mn.done{background:var(--good-bg)} .mn.done b::after{content:" ✓";color:var(--good);font-size:.75rem}
 @media (max-width:720px){.mgridn{grid-template-columns:repeat(5,minmax(0,1fr));max-height:260px}.mpanel h2{font-size:1.3rem}}
 /* typing mirror */
-#kbm{position:fixed;left:6px;right:6px;top:0;z-index:90;display:none;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:12px;padding:6px 6px 6px 12px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#kbm{position:fixed;left:8px;right:8px;top:0;z-index:95;display:none;align-items:center;gap:8px;background:#0A131A;color:#F2F6F9;border:1px solid #2A3B48;border-radius:14px;padding:7px 7px 7px 14px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
 #kbm.on{display:flex}
-#kbm .kbm-t{flex:1;min-width:0;font:600 .95rem var(--f-mono);white-space:nowrap;overflow-x:auto;scrollbar-width:none;direction:ltr}
+#kbm.top{margin-top:calc(env(safe-area-inset-top,0px) + 6px)}
+#kbm .kbm-t{flex:1;min-width:0;font:600 1rem var(--f-mono);color:#F2F6F9;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
 #kbm .kbm-t::-webkit-scrollbar{display:none}
-#kbm .kbm-t.ph{opacity:.55;font-weight:400}
-#kbm .kbm-go{flex:none;border:0;border-radius:9px;background:var(--accent);color:#fff;font:700 .85rem var(--f-disp);padding:8px 12px;cursor:pointer}
+#kbm .kbm-t.ph{color:#8EA1AE;font-weight:400}
+#kbm .kbm-go{flex:none;border:0;border-radius:10px;background:#C2307E;color:#fff;font:700 .9rem var(--f-disp);letter-spacing:.03em;padding:9px 14px;cursor:pointer}
 @media (pointer:fine) and (min-width:721px){#kbm{display:none!important}}
 /* theme switch */
 .thm{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;font:600 .85rem var(--f-disp);letter-spacing:.04em}
@@ -2124,20 +2125,26 @@ function logSheet(){closeSheet();const d=document.createElement('div');d.classNa
   document.body.appendChild(d);d.querySelector('#logx').onclick=closeSheet;const l=d.querySelector('.log');l.scrollTop=l.scrollHeight}
 
 /* typing mirror: shows what you type just above the phone keyboard */
-(function(){let box=null,tgt=null;
+(function(){let box=null,tgt=null,kbH=0,vkH=0;
   const coarse=()=>{try{return matchMedia('(pointer: coarse)').matches||matchMedia('(max-width:720px)').matches}catch(e){return false}};
+  /* keyboard height sources: visual viewport, VirtualKeyboard API (Chrome), Capacitor Keyboard plugin (Android app) */
+  try{if(navigator.virtualKeyboard){navigator.virtualKeyboard.overlaysContent=true;navigator.virtualKeyboard.addEventListener('geometrychange',e=>{vkH=Math.round(e.target.boundingRect.height||0);place()})}}catch(e){}
+  try{const K=window.Capacitor&&(window.Capacitor.Plugins||{}).Keyboard;if(K&&K.addListener){K.addListener('keyboardWillShow',i=>{kbH=Math.round((i&&i.keyboardHeight)||0);place()});K.addListener('keyboardDidShow',i=>{kbH=Math.round((i&&i.keyboardHeight)||0);place()});K.addListener('keyboardWillHide',()=>{kbH=0;place()})}}catch(e){}
   function ensure(){if(box)return box;box=document.createElement('div');box.id='kbm';box.setAttribute('aria-hidden','true');
     box.innerHTML='<div class="kbm-t"></div><button type="button" class="kbm-go" tabindex="-1">Send</button>';
     box.querySelector('.kbm-go').addEventListener('pointerdown',e=>{e.preventDefault();if(!tgt)return;tgt.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))});
     document.body.appendChild(box);return box}
-  function place(){if(!box||!tgt)return;const vv=window.visualViewport;const h=box.offsetHeight||48;
-    const bottom=vv?vv.offsetTop+vv.height:innerHeight;box.style.top=Math.max(0,bottom-h-6)+'px'}
+  function place(){if(!box||!tgt)return;const vv=window.visualViewport,h=box.offsetHeight||52,H=window.innerHeight;
+    const vvInset=vv?Math.max(0,H-(vv.offsetTop+vv.height)):0;const inset=Math.max(vvInset,vkH,kbH);
+    if(inset>80){box.classList.remove('top');box.style.top=Math.max(0,H-inset-h-6)+'px'}
+    else if(vv&&vv.height<screen.height*.62){box.classList.remove('top');box.style.top=Math.max(0,vv.offsetTop+vv.height-h-6)+'px'}
+    else{/* keyboard size unknown: keep the mirror at the top of the screen, where the keyboard never covers it */box.classList.add('top');box.style.top=(vv?vv.offsetTop:0)+'px'}}
   function show(){if(!tgt)return;ensure();const t=box.querySelector('.kbm-t');const v=tgt.value;t.textContent=v||tgt.getAttribute('placeholder')||'';t.classList.toggle('ph',!v);
     box.querySelector('.kbm-go').textContent=tgt.id==='tx'?'Transmit':'Check';box.classList.add('on');t.scrollLeft=t.scrollWidth;place()}
-  document.addEventListener('focusin',e=>{const el=e.target;if(!coarse()||!el||!(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&el.type==='text'))||!el.closest('#view'))return;if(!(el.id==='tx'||el.id==='pin'))return;tgt=el;show();setTimeout(place,250);setTimeout(place,600)});
+  document.addEventListener('focusin',e=>{const el=e.target;if(!coarse()||!el||!(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&el.type==='text'))||!el.closest('#view'))return;if(!(el.id==='tx'||el.id==='pin'))return;tgt=el;show();[150,350,700,1200].forEach(ms=>setTimeout(place,ms))});
   document.addEventListener('focusout',e=>{if(e.target===tgt){setTimeout(()=>{if(document.activeElement!==tgt){tgt=null;if(box)box.classList.remove('on')}},80)}});
   document.addEventListener('input',e=>{if(e.target===tgt)show()});
-  try{(window.visualViewport||window).addEventListener('resize',place);window.visualViewport&&window.visualViewport.addEventListener('scroll',place)}catch(e){}
+  try{(window.visualViewport||window).addEventListener('resize',place);window.visualViewport&&window.visualViewport.addEventListener('scroll',place);addEventListener('resize',place)}catch(e){}
 })();
 function closeSheet(){document.querySelectorAll('.vsheet').forEach(x=>x.remove())}
 function voiceSheet(o){closeSheet();
@@ -2640,6 +2647,7 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTh
 applyTheme();
 go((location.hash||'').slice(1));
 </script>
+
 
 <script>if("serviceWorker" in navigator&&!window.Capacitor&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
 </html>
