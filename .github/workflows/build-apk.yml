@@ -39,13 +39,15 @@ jobs:
           npm install --no-audit --no-fund --legacy-peer-deps \
             @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 \
             @capacitor-community/speech-recognition@7 \
-            @capacitor-community/text-to-speech@6
+            @capacitor-community/text-to-speech@6 \
+            @capacitor/keyboard@7
           cat > capacitor.config.json <<'JSON'
           {
             "appId": "io.github.alfatango1.rttrainer",
             "appName": "RT Trainer",
             "webDir": "www",
-            "android": { "adjustMarginsForEdgeToEdge": "auto" }
+            "android": { "adjustMarginsForEdgeToEdge": "auto" },
+            "plugins": { "Keyboard": { "resize": "native", "resizeOnFullScreen": true } }
           }
           JSON
           npx cap add android
@@ -65,12 +67,38 @@ jobs:
                       ' <intent><action android:name="android.speech.RecognitionService" /></intent>\n'
                       ' <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>\n'
                       ' </queries>\n')
-          open(p, 'w').write(s.replace('</manifest>', add + '</manifest>'))
+          s = s.replace('</manifest>', add + '</manifest>')
+          if 'windowSoftInputMode' not in s:
+              s = s.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n android:windowSoftInputMode="adjustResize"', 1)
+          open(p, 'w').write(s)
           PY
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" build.gradle
           cp -r src/main/res /tmp/res-original
           cp build.gradle /tmp/build.gradle.original
+
+      - name: Keep text inside buttons (limit phone font scaling)
+        run: |
+          python3 - <<'PY'
+          import glob, re
+          for p in glob.glob('app/android/app/src/main/java/**/MainActivity.java', recursive=True):
+              s = open(p).read()
+              if 'setTextZoom' in s:
+                  continue
+              body = ('{\n'
+                      ' @Override\n'
+                      ' public void onCreate(android.os.Bundle savedInstanceState) {\n'
+                      ' super.onCreate(savedInstanceState);\n'
+                      ' try {\n'
+                      ' android.webkit.WebSettings ws = getBridge().getWebView().getSettings();\n'
+                      ' ws.setTextZoom(Math.min(ws.getTextZoom(), 110));\n'
+                      ' } catch (Exception e) { }\n'
+                      ' }\n'
+                      '}')
+              s2 = re.sub(r'extends BridgeActivity\s*\{\s*\}', 'extends BridgeActivity ' + body, s)
+              open(p, 'w').write(s2)
+              print(p); print(s2)
+          PY
 
       - name: Build the APK
         run: |
