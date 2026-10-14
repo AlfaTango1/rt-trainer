@@ -1687,7 +1687,9 @@ const APL=[
  {i:'RJTT',n:'Tokyo Haneda',r:'34R',rwy:[[[900,-200],157,3000,['16L','34R']],[[-350,150],157,3360,['16R','34L']],[[300,1900],42,2500,['04','22']],[[2000,-2300],51,2500,['05','23']]],apr:[[[250,0],900,2300,157]]},
  {i:'ZBAA',n:'Beijing Capital',r:'36R',rwy:[[[-1500,0],180,3200,['18R','36L']],[[-200,0],180,3800,['18L','36R']],[[1800,0],180,3800,['19','01']]],apr:[[[-850,0],2600,750,0],[[800,0],2900,1000,0]]},
  {i:'LIRF',n:'Rome Fiumicino',r:'16R',rwy:[[[1500,100],162,3900,['16L','34R']],[[300,-900],162,3600,['16C','34C']],[[-1300,-700],162,3900,['16R','34L']],[[-200,2300],72,3300,['07','25']]],apr:[[[-400,600],900,1700,162]]},
- {i:'UUDD',n:'Moscow Domodedovo',r:'32R',rwy:[[[900,900],138,3794,['14L','32R']],[[-900,-900],138,3500,['14R','32L']]],apr:[[[0,0],1600,800,138]]}
+ {i:'UUDD',n:'Moscow Domodedovo',r:'32R',rwy:[[[900,900],138,3794,['14L','32R']],[[-900,-900],138,3500,['14R','32L']]],apr:[[[0,0],1600,800,138]]},
+ {i:'UTTT',n:'Tashkent',r:'08L',rwy:[[[0,450],78,4000,['08L','26R']],[[250,-150],78,3905,['08R','26L']]],apr:[[[-300,-900],2000,600,78]]},
+ {i:'LTFM',n:'Istanbul',r:'35L',rwy:[[[-3000,200],166,3750,['16R','34L']],[[-2550,100],166,3750,['16L','34R']],[[1150,0],176,4100,['17R','35L']],[[1650,0],176,4100,['17L','35R']],[[3900,300],180,3060,['18','36']]],apr:[[[-700,0],2400,1300,176]]}
 ];
 const LIBC={},LIBSVG={};function buildLibLayout(sp,OFF=230){const ck=sp.i+'|'+OFF;if(LIBC[ck])return JSON.parse(LIBC[ck]);const out=buildLibLayout0(sp,OFF);LIBC[ck]=JSON.stringify(out);return out}
 function buildLibLayout0(sp,OFF=230){
@@ -1938,11 +1940,19 @@ const uElig=(kd,g,n)=>g==='gnd'?(kd==='full'||kd==='dep'):g==='app'||g==='arr'?(
 const U_NEED={};function uPer(g){if(U_NEED[g])return U_NEED[g];let e=0;for(let m=1;m<=100;m++)if(uElig(mKind(m),g,m))e++;return U_NEED[g]=Math.max(1,Math.ceil(uPool(g).length/Math.max(1,e)))}
 const uSlots=(kd,g,n)=>uElig(kd,g,n)?(g==='crz'?Math.max(uPer(g),kd==='enr'?3:2):uPer(g)):0;
 function uStart(n,g){let t=0;for(let m=1;m<n;m++)t+=uSlots(mKind(m),g,m);return t}
-function unitStep(n,k,g,sc,rw,twy){const pool=uPool(g);if(!pool.length)return null;const c=pool[(uStart(n,g)+k)%pool.length];let e=c.c.replace(/\s*\/.*$/,'').replace(/[.!]+$/,''),ru=PHR[c.i].r;const sec=PHR[c.i].s;
+/* the situation for a unit phrase, in English: what has happened, told to you (you / your), not the phrase to read out word for word */
+/* "a sick/disabled person on board" -> "a sick person on board": keep the first choice of each a/b list and the rest of the sentence */
+const U_FIX=[['in sight/ negative contact','in sight'],['NDB/ILS/VOR DME','ILS'],['extended/ entirely missing','extended'],['out of control / inoperative / failed','inoperative'],['sunk / got bogged down','got bogged down'],['Continue / fly RWY heading','Fly RWY heading'],['escape slides / chutes,','escape slides,'],['Yusufxona/Beldersay','Yusufxona'],['dump / burn','dump'],['restarted/relit','restarted']];
+function uClean(t){U_FIX.forEach(([a,b])=>{t=String(t).split(a).join(b)});return String(t).replace(/\.\.\)+|\.{3,}/g,'').split(/(?<=[.!?])\s+/).map(sn=>{if(!sn.includes('/'))return sn;
+  const sp=/\s\/\s/.exec(sn);if(sp){const after=sn.slice(sp.index+3);const before=sn.slice(0,sp.index);if(/^[A-Z]/.test(after)||after.split(/\s+/).length>=4)return before.replace(/[,;]\s*$/,'')+(/[.!?]$/.test(sn)&&!/[.!?]$/.test(before)?'.':'');
+    const rest=after.split(/\s+/).slice(1).join(' ');return (before+' '+rest).trim()}
+  const i=sn.indexOf('/'),before=sn.slice(0,i).replace(/\S*$/,m=>m),lastSl=sn.lastIndexOf('/'),after=sn.slice(lastSl+1);const rest=after.replace(/^[^\s,.;!?]+\s?/,'');return (before+(rest?(/^[,.;]/.test(rest)?'':' ')+rest:(/[.!?]$/.test(after)?after.slice(-1):''))).replace(/\s+([.,!?])/g,'$1').trim()}).join(' ')}
+function unitStep(n,k,g,sc,rw,twy){const pool=uPool(g);if(!pool.length)return null;const c=pool[(uStart(n,g)+k)%pool.length];let e=uClean(c.c).replace(/[.!]+$/,''),ru=PHR[c.i].r;const sec=PHR[c.i].s;
   /* a phrase naming one runway uses the runway of this flight instead */
   if(twy){const m=e.match(/\bTWY\s+([A-Z]?\d*[A-Z]?\d*)\b/);if(m&&m[1]&&m[1]!==twy){const rx=new RegExp('\\b'+m[1]+'\\b','g');e=e.replace('TWY '+m[1],'TWY '+twy);ru=String(ru).replace(rx,twy)}}
   if(rw){const ds=uniq([...e.matchAll(/\b(?:RWY|runway)\s*(\d{2}[LRC]?)\b/gi)].map(m=>m[1].toUpperCase()));if(ds.length===1&&ds[0]!==String(rw).toUpperCase()&&!/\b(left|right)\b.*\b(left|right)\b/i.test(e)){const d0=ds[0],rx=new RegExp('\\b'+d0+'\\b','gi');e=e.replace(rx,rw);ru=String(ru).replace(rx,rw)}}
-  if(!e||e.length<4)return null;const hasWe=/\b(we|our|us|i|i'm|my|me)\b/i.test(e)||(/\?$/.test(e)&&/^(what|where|why|when|how|is there|are there)\b/i.test(e)&&!/\b(you|your)\b/i.test(e));const pilot=hasWe||(U_PILOT.test(e)&&!U_ATC.test(e))||(U_PILOTSEC.includes(sec)&&!U_ATC.test(e));
+  if(!e||e.length<4)return null;const hasWe=/\b(we|our|us|i|i'm|my|me)\b/i.test(e)||(/\?$/.test(e)&&/^(what|where|why|when|how|is there|are there)\b/i.test(e)&&!/\b(you|your)\b/i.test(e));
+  const pilot=hasWe||(U_PILOT.test(e)&&!U_ATC.test(e))||(U_PILOTSEC.includes(sec)&&!U_ATC.test(e));
   if(pilot){const toks=uniq(norm(e).trim().split(' ').filter(t=>t&&t!=='zzsep'));const key=toks.filter(t=>/^\d/.test(t)).slice(0,2).concat(toks.filter(t=>t.length>=5&&!U_STOP.has(t)&&!/^\d/.test(t)).slice(0,3));
     if(!key.length)key.push(...toks.filter(t=>t.length>=3).slice(0,2));
     return {sit:'Unit phrase · '+sec+': '+ru,task:'Tell ATC in English.',need:key.map(t=>['\\b'+reEsc(t)+'\\b','"'+t+'"']),model:'{CS}, '+e,sc,unit:c.i}}
