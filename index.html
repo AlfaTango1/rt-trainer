@@ -7,6 +7,10 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RT Trainer">
 <meta name="theme-color" content="#13202A">
 <meta name="description" content="Aviation English radiotelephony trainer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -718,7 +722,13 @@ const PHON={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Gol
 const dg=s=>String(s).split('').map(c=>c==='.'?'decimal':(DW[c]!==undefined?DW[c]:c)).join(' ');
 function altW(n){n=+n;if(n%100)return dg(n);const th=Math.floor(n/1000),h=Math.floor(n%1000/100);return [th?dg(th)+' thousand':'',h?dg(h)+' hundred':''].filter(Boolean).join(' ')}
 const ACTYPE=[[/\bB(7[0-9]7)\b/g,'Boeing $1'],[/\bB738\b/g,'Boeing 737'],[/\bA(3[0-9]{2})\b/g,'Airbus $1'],[/\bE(1[79]0)\b/g,'Embraer $1'],[/\bCRJ ?(\d{3})\b/g,'CRJ $1'],[/\bATR ?(\d{2})\b/g,'ATR $1'],[/\bQ400\b/g,'Dash 8'],[/\bIl-(\d{2})\b/g,'Ilyushin $1'],[/\bAn-(\d{2})\b/g,'Antonov $1'],[/\bC-130\b/g,'Hercules']];
-function spoken(t){ACTYPE.forEach(([a,b])=>{t=t.replace(a,b)});t=t.replace(/\b(?!FL)([A-Z])-?(\d{1,3})\b/g,(m,l,d)=>(PHON[l]||l)+' '+d);return t
+/* written abbreviations are said in full (RWY = runway, TWY = taxiway); real spelled-out abbreviations are said letter by letter */
+const SAY_AS=[[/\bRWYs\b/g,'runways'],[/\bRWY\b/g,'runway'],[/\bTWYs\b/g,'taxiways'],[/\bTWY\b/g,'taxiway'],[/\bHDG\b/g,'heading'],[/\bTWR\b/g,'Tower'],[/\bGND\b/g,'Ground'],[/\bAPP\b/g,'Approach'],
+  [/\bACFT\b/gi,'aircraft'],[/\bTS\b/g,'thunderstorm'],[/\bWIP\b/g,'work in progress'],[/\bAPRX\b/g,'approximately'],[/\bTCAS\b/g,'tee-cas'],
+  [/\b(\d+)\s?NM\b/g,'$1 miles'],[/\bNM\b/g,'miles'],[/\b(\d+)\s?kts?\b/gi,'$1 knots'],[/\b(\d+)\s?km\b/g,'$1 kilometres'],[/\b(\d+)\s?m\b/g,'$1 metres'],[/\b(\d+)\s?ft\b/g,'$1 feet'],[/\b(\d+)\s?min\b/g,'$1 minutes'],
+  [/\bNo\.\s?(\d)/g,'number $1'],[/№\s?(\d)/g,'number $1'],[/(\d+)\s?°/g,'$1 degrees'],[/\s&\s/g,' and '],[/\bi\.e\.\s?/gi,'that is '],
+  [/\b(ILS|VOR|DME|NDB|QNH|QFE|ATC|RVSM|VIP|ETA|ETD|IFR|VFR|SID|STAR|CB|GPS|RNAV|ADF)\b/g,m=>/^(SID|STAR)$/.test(m)?m.charAt(0)+m.slice(1).toLowerCase():m.split('').join(' ')]];
+function spoken(t){t=t.replace(/\b(\d{1,2}):(\d{2})\b/g,(m,h,mm)=>pad(h)+mm);SAY_AS.forEach(([a,b])=>{t=t.replace(a,b)});ACTYPE.forEach(([a,b])=>{t=t.replace(a,b)});t=t.replace(/\b(?!FL)([A-Z])-?(\d{1,3})\b/g,(m,l,d)=>(PHON[l]||l)+' '+d);return t
   .replace(/\bFL\s?(\d{2,3})\b/g,(m,n)=>'flight level '+dg(n))
   .replace(/\bMach \.(\d+)/g,(m,n)=>'Mach point '+dg(n))
   .replace(/\b(\d{3,5}) (feet|ft)\b/g,(m,n)=>altW(n)+' feet')
@@ -753,11 +763,20 @@ try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged'
 const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
 const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>(WORDS.includes(w)||(w.length===5&&/[AEIOU]/.test(w)&&!/^(RVSM|TCAS|SQUAWK)$/.test(w)))?w[0]+w.slice(1).toLowerCase():w);
 let SAY_ATC=false;
-function sayATC(text,cb){SAY_ATC=true;squelch();setTimeout(()=>{say(text,cb);SAY_ATC=false},120)}
+/* radio background: a quiet band-limited hiss with small crackles while ATC is talking, like a real VHF receiver */
+let RNOISE=null;
+function radioNoise(on,maxMs){try{if(!on){if(RNOISE){const r=RNOISE;RNOISE=null;clearTimeout(r.t);try{r.g.gain.setTargetAtTime(0,r.ac.currentTime,.05);setTimeout(()=>{try{r.src.stop()}catch(e){}},300)}catch(e){}}return}
+  if(S.radioNoise===false)return;radioNoise(false);MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const ac=MIC_AC;if(ac.state==='suspended')ac.resume();
+  const n=ac.sampleRate*2,buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);let last=0;
+  for(let i=0;i<n;i++){let x=(Math.random()*2-1);last=last*.6+x*.4;d[i]=last*.8;if(Math.random()<.00025){const L=Math.floor(ac.sampleRate*.004);for(let k=0;k<L&&i+k<n;k++)d[i+k]+=(Math.random()*2-1)*1.6*(1-k/L)}}
+  const src=ac.createBufferSource();src.buffer=buf;src.loop=true;const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=350;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
+  const g=ac.createGain();g.gain.value=0;src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(ac.destination);src.start();g.gain.setTargetAtTime(.022,ac.currentTime,.04);
+  RNOISE={src,g,ac,t:setTimeout(()=>radioNoise(false),maxMs||12000)}}catch(e){}}
+function sayATC(text,cb){SAY_ATC=true;squelch();radioNoise(true,Math.min(30000,1500+String(text).length*85));setTimeout(()=>{say(text,ok=>{if(ok===false)radioNoise(false);cb&&cb(ok)});SAY_ATC=false},120)}
 function say(text,cb,rate){const atcFlag=SAY_ATC;text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
-  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:'en-GB',rate:rate||1,pitch:NVOICE_MALE?.95:.78,volume:1};if(NVOICE!==null)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{if(atcFlag)squelch(.07,.035)},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
+  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:'en-GB',rate:rate||1,pitch:NVOICE_MALE?.95:.78,volume:1};if(NVOICE!==null)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{if(atcFlag){radioNoise(false);squelch(.07,.035)}},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
   try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
-    const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||1.02;u.pitch=VOICE_MALE?.92:.72;const atc=SAY_ATC;u.onend=()=>{if(atc)squelch(.07,.035)};
+    const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||1.02;u.pitch=VOICE_MALE?.92:.72;const atc=SAY_ATC;u.onend=()=>{if(atc){radioNoise(false);squelch(.07,.035)}};
     let started=false;u.onstart=()=>{started=true;cb&&cb(true)};u.onerror=()=>{if(!started)cb&&cb(false)};
     const go=()=>{try{speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){}};if(busy)setTimeout(go,80);else go();if(cb)setTimeout(()=>{if(!started)cb(false)},2600)}catch(e){cb&&cb(false)}}
 function testVoice(el){el.textContent='Playing…';say('Air Force one two tree, radio check, read you fife',ok=>{el.textContent=ok?'Voice works. Turn up the volume if you hear nothing.':'No sound started. Your device or this view blocks speech: open the page in Chrome or Safari, and check that silent mode is off.'})}
@@ -767,6 +786,8 @@ const NW={zero:'0',one:'1',two:'2',three:'3',tree:'3',four:'4',fower:'4',five:'5
 const TENS={ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
 function norm(raw){
   let s=' '+raw.toLowerCase()+' ';
+  /* spelled abbreviations and joined words, as speech recognisers write them */
+  s=s.replace(/\bair-?force\b/g,'air force').replace(/\b(q\.?\s?n\.?\s?h|q and h|queue and h|cue and h|cuz nh)\b/g,'qnh').replace(/\bi\.?\s?l\.?\s?s\b/g,'ils').replace(/\ba\.?\s?t\.?\s?c\b/g,'atc').replace(/\bv\.?\s?o\.?\s?r\b/g,'vor').replace(/\bd\.?\s?m\.?\s?e\b/g,'dme').replace(/\bn\.?\s?d\.?\s?b\b/g,'ndb').replace(/\br\.?\s?v\.?\s?s\.?\s?m\b/g,'rvsm').replace(/\bt\.?\s?c\.?\s?a\.?\s?s\b|\btee ?cas\b/g,'tcas').replace(/\bc\.?\s?b\b(?=\s|$)/g,'cb').replace(/\bv\.?\s?i\.?\s?p\b/g,'vip');
   s=s.replace(/(\d),(?=\d{3}\b)/g,'$1').replace(/[’']/g,'')
    .replace(/\bm\.(\d)/g,'mach .$1')
    .replace(/\bfl\s?(?=\d)/g,'flight level ').replace(/\bfl\b/g,'flight level')
@@ -2054,9 +2075,11 @@ function genMission(n){
       S_({atc:`{CS}, roger, hold position, emergency services are on the way.`,task:'Read back.',need:[['holding','"Holding position"']],model:'Holding position, {CS}',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
       S_({sit:'The fire crew reports no fire. The aircraft can taxi.',task:'Request to vacate the runway and return to the stand.',need:[['vacat|return','"vacate" / "return to stand"'],['stand','"stand"']],model:'{CS}, request to vacate the runway and return to stand',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
       tags.push('rejected take-off');endMsg=`{CS}, vacate when able, taxi to stand ${PD.std} via ${PD.txr||'the apron'}, contact Ground ${fqG}.`;return finish()}}
+    // Tower: airborne time and transfer to Departure
+    {const tA=pad((n*7+13)%60);S_({atc:`{CS}, airborne at ${tA}, contact ${depN} Departure ${fqD}.`,task:'Read back the frequency.',need:[[fqRx(fqD),'Frequency '+fqD]],model:`${fqD}, {CS}`,sc:{t:'route',pos:.15,lvl:'1000 FT ↑',p:2}})}
     // departure
     const pass=mPick(r,[1500,2000,2500,3000].filter(x=>x<initAlt));
-    S_({st:st(depN+' Departure',fqD),sit:`Airborne. You change to Departure ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with Departure.',need:[[depX+' (departure|radar)',`Station "${depN} Departure"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} Departure, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
+    S_({st:st(depN+' Departure',fqD),sit:`You are now on Departure frequency ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with Departure.',need:[[depX+' (departure|radar)',`Station "${depN} Departure"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} Departure, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
     const dv=r();
     if(dv<.35)S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, proceed direct ${wps[1]}.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['direct','"direct"'],[wpRx(wps[1]),'Point '+wps[1]]],model:`Climbing FL${fl1}, direct ${wps[1]}, {CS}`,sc:{t:'route',pos:.6,lvl:'FL'+fl1+' ↑',p:2}});
     else if(dv<.7){const h=mInt(r,1,36)*10,lr=mPick(r,['left','right']);S_({atc:`{CS}, ${depN} Departure, identified, turn ${lr} heading ${pad(h,3)}, climb FL${fl1}.`,task:'Read back.',need:[[lr+' heading 0*'+h,lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+pad(h,3)],['flight level '+fl1,'FL'+fl1]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${pad(h,3)}, climbing FL${fl1}, {CS}`,sc:{t:'route',pos:.55,lvl:'FL'+fl1+' ↑',p:2}})}
@@ -2134,8 +2157,10 @@ function genMission(n){
     else if(lv<.5){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}, caution wake turbulence, preceding landing ${T2}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('wake turbulence')}
     else S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
     const exT=PA.ex&&PA.ex.name?PA.ex.name:PA.hp&&PA.hp.n?PA.hp.n:mPick(r,['B2','C3','A4','D1']),exRx=nameRx(exT),lr3=PA.ex?PA.ex.side:mPick(r,['left','right']);
-    S_({atc:`{CS}, vacate ${lr3} via ${nameSpk(exT)}, contact Ground ${fqGa}.`,task:'Read back.',need:[['vacat','"Vacating"'],[exRx,'Taxiway '+exT],[fqRx(fqGa),'Frequency '+fqGa]],model:`Vacating ${lr3} via ${nameSpk(exT)}, ${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});
     for(let k=0;k<uSlots(kind,'arr',n);k++){const u=unitStep(n,k,'arr',G_('landed',6,{arr:true}),AR,exT);if(u){S_(u);tags.push('unit phrases')}}
+    {const pu=steps[steps.length-1],gaveVac=pu&&pu.unit!==undefined&&pu.atc&&/vacate|turn off/i.test(pu.atc);
+     if(gaveVac)S_({atc:`{CS}, contact Ground ${fqGa}.`,task:'Read back the frequency.',need:[[fqRx(fqGa),'Frequency '+fqGa]],model:`${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});
+     else S_({atc:`{CS}, vacate ${lr3} via ${nameSpk(exT)}, contact Ground ${fqGa}.`,task:'Read back.',need:[['vacat','"Vacating"'],[exRx,'Taxiway '+exT],[fqRx(fqGa),'Frequency '+fqGa]],model:`Vacating ${lr3} via ${nameSpk(exT)}, ${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});}
     S_({st:st(arrN+' Ground',fqGa),sit:`Runway ${AR} vacated.`,task:'Call Ground.',need:[[arrX+' ground',`Station "${arrN} Ground"`],['vacated','"Runway vacated"']],model:`${arrN} Ground, {CS}, runway ${AR} vacated`,sc:G_('taxiin',6,{arr:true,start:true})});
     const sdA=PA.std||'4',txA=PA.ex?PA.ex.txr:(PA.txr||'the apron');
     const gw=r()<.4,pbS=gw&&PA.ok?pbxPick(PA,rLine(arrPts(PA)),0):null;S_({atc:`{CS}, taxi to stand ${sdA} via ${txA}${pbS?', give way to the '+T3+' pushing back from stand '+pbS.st.n:''}.`,task:'Read back.',need:[['taxi','"Taxi"'],['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA],...((PA.ex?PA.ex.txrx:PA.txrx)?[[PA.ex?PA.ex.txrx:PA.txrx,'Route: '+txA]]:[])],model:`Taxi to stand ${sdA} via ${txA}, {CS}`,sc:G_('taxiin',6,{arr:true})});
@@ -2170,10 +2195,23 @@ function rwyRe(r){const m=String(r).toUpperCase().match(/^(\d{1,2})([LRC])?$/);i
 function fillRe(p){const d=DEPAD(),a=DSTAD()||d;let P={};try{P=groundPlan(d)}catch(e){}p=p.replace(/\{HPX\}/g,P.hp&&P.hp.n?nameRx(P.hp.n):'').replace(/\{TXRX\}/g,P.txrx||'').replace(/\{STDX\}/g,reEsc(norm(String(P.std||'4')).trim())).replace(/\{FACEX\}/g,P.facing||'west');return p.replace(/\{DRX\}/g,rwyRe(d.r)).replace(/\{ARX\}/g,rwyRe(a.r)).replace(/\{DEPN\}/g,nameRe(d.n)).replace(/\{DSTN\}/g,nameRe(a.n))}
 const showAtc=t=>S.spoken?spoken(fill(t)):fill(t);
 function csRe(){return new RegExp(norm(csText()).trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')+'\\b')}
+/* speech recognisers run numbers together ("squawk 4613 124.85" -> "4613124.85") and slightly misspell names:
+   try the transcript with long numbers split, and with near-miss words corrected to the words of the expected call */
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m||!n)return m||n;let pr=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(pr[j]+1,c[j-1]+1,pr[j-1]+(a[i-1]===b[j-1]?0:1));pr=c}return pr[n]}
+function numSplits(n){const out=[];const toks=n.split(' ');toks.forEach((t,i)=>{if(/^\d[\d.]{4,}$/.test(t))for(let k=1;k<t.length;k++){if(t[k]==='.'||t[k-1]==='.')continue;const a=toks.slice();a.splice(i,1,t.slice(0,k),t.slice(k));out.push(a.join(' '))}});
+  const more=[];out.slice(0,40).forEach(v=>{v.split(' ').forEach((t,i)=>{if(/^\d[\d.]{4,}$/.test(t))for(let k=1;k<t.length;k++){if(t[k]==='.'||t[k-1]==='.')continue;const a=v.split(' ');a.splice(i,1,t.slice(0,k),t.slice(k));more.push(a.join(' '))}})});return out.concat(more.slice(0,200))}
+function fuzzyFix(n,vocab){const V=[...vocab].filter(w=>/^[a-z]{4,}$/.test(w));const toks=n.split(' ');const out=[];
+  for(let i=0;i<toks.length;i++){const t=toks[i];if(!/^[a-z]+$/.test(t)||vocab.has(t)){out.push(t);continue}
+    const j2=t+(toks[i+1]||'');if(toks[i+1]&&/^[a-z]+$/.test(toks[i+1])&&vocab.has(j2)){out.push(j2);i++;continue}/* "north field" -> "northfield" */
+    let best=null,bd=9;for(const w of V){if(w[0]!==t[0]||Math.abs(w.length-t.length)>2)continue;const d=lev(t,w);const lim=w.length>=8?2:w.length>=5?1:0;if(d<=lim&&d<bd){bd=d;best=w}}
+    out.push(best||t)}return out.join(' ')}
 function checkTx(step,raw){
-  const n=norm(raw),miss=[],warn=[];
-  if(!csRe().test(n)){const first=norm(S.cs.name).trim();miss.push(n.includes(first)?'Complete call sign "'+csText()+'" (it was cut off)':'Your call sign "'+csText()+'"')}
-  step.need.forEach(([p,l])=>{const pp=/^\d+$/.test(p)?'\\b'+p+'\\b':p;if(!new RegExp(fillRe(pp)).test(n))miss.push(fill(l))});
+  let n=norm(raw);const miss=[],warn=[];
+  const needOk=(p,txt)=>{const pp=/^\d+$/.test(p)?'\\b'+p+'\\b':p;return new RegExp(fillRe(pp)).test(txt)};
+  const passes=(test)=>{if(test(n))return true;const vv=numSplits(n);for(const v of vv)if(test(v))return true;
+    if(step.model){const voc=new Set((norm(fill(step.model))+' '+norm(csText())+' '+norm(String(fill('{CS}')))).split(' ').filter(Boolean));const f=fuzzyFix(n,voc);if(f!==n){if(test(f))return true;for(const v of numSplits(f))if(test(v))return true}}return false};
+  if(!passes(t=>csRe().test(t))){const first=norm(S.cs.name).trim();miss.push(n.includes(first)?'Complete call sign "'+csText()+'" (it was cut off)':'Your call sign "'+csText()+'"')}
+  step.need.forEach(([p,l])=>{if(!passes(t=>needOk(p,t)))miss.push(fill(l))});
   if(/\b(three|four|five|nine)\b/i.test(raw))warn.push('ICAO digits: tree, fower, fife, niner.');
   if(/\b(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b/i.test(raw))warn.push('Say numbers digit by digit (whole thousands and hundreds excepted).');
   if(/\b(good ?bye|good (morning|afternoon|evening|day)|thank(s| you)|bye)\b/i.test(raw))warn.push('No greetings or thanks on frequency.');
@@ -2248,10 +2286,10 @@ function vRadio(){
   view.innerHTML=`<div class="flight">
   <div class="fhead">${phaseBar(ph)}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
   <div class="rgrid">
-    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
+    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;else if(shouldHold(step)&&!RM)ANIM_OFF=0;/* waiting for the readback: always start position */let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
         return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
         <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
-        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span></div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
+        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span>${shouldHold(step)&&!RM?'<span class="k" style="margin-left:6px;opacity:.8">· AFTER READBACK</span>':''}</div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
       <div class="radio logbox" id="logd"><div class="lbl" style="padding:10px 14px 0">${esc(sc.title)} · transcript</div><div class="log" id="log">${RD.log.length?logHtml():'<p class="muted" style="font-size:.85rem">Your exchanges with ATC appear here.</p>'}</div></div></div>
     <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc).replace(/<\/div>$/,logBtn+'</div>')}
     <div class="turn" id="turn">
@@ -2268,6 +2306,7 @@ function vRadio(){
     </div></div></div>
   </div></div>`;
   $('#quit').onclick=leave;
+  if(shouldHold(step)&&!RM)holdOwn($('#sfig svg.scene'));else HELD=null;
   {const f=$('#sfig'),o=step.sc||{},key='p-'+o.t+(o.t==='ground'?'-'+(adOf(o)||{}).i:'');const stepId=(RD.sc&&RD.sc.id)+'#'+RD.i;if(!ZS[key]||ZS[key].step!==stepId){ZS[key]=(SCENE_FOCUS&&S.autoFocus!==false)?focusZ(SCENE_FOCUS):{s:1,cx:300,cy:150};ZS[key].step=stepId}RD.focus=SCENE_FOCUS;if(f)bindZoom(f,f.querySelector('svg.scene'),key)}
   {const fg=$('#sfig');const act=(ms=6000)=>{if(!fg)return;fg.classList.add('act');clearTimeout(fg._a);fg._a=setTimeout(()=>{if(!S.infoOpen)fg.classList.remove('act')},ms)};
    act(8000);if(fg){fg.addEventListener('pointerdown',()=>act());fg.addEventListener('mousemove',()=>act());fg.addEventListener('focusin',()=>act())}
@@ -2299,15 +2338,15 @@ function vRadio(){
     if(RD.tries===0){RD.firstMiss=best.r.miss;RD.firstSaid=best.c}
     const model=spoken(fill(step.model));
     voiceSheet({heard:best.c,model,note:'Missing: '+best.r.miss.join(' · '),
-      onAccept:()=>advance(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[]),
-      onContinue:()=>advance(step,best.c,false,best.r.miss,[]),
+      onAccept:()=>advanceAfterMotion(step,model+' 🎙',RD.tries===0,RD.firstMiss||[],[]),
+      onContinue:()=>advanceAfterMotion(step,best.c,false,best.r.miss,[]),
       onAgain:()=>startMic(tx,$('#mic'),$('#fb'),c=>sendVoice(c))})}
   function send(force){
     const raw=tx.value.trim();if(!raw)return;
     if(force!==true&&tx.dataset.voice==='1'){sendVoice([raw]);return}
     const led=$('.led.tx');if(led){led.classList.add('on');setTimeout(()=>led.classList.remove('on'),600)}
     const {miss,warn}=checkTx(step,raw);
-    if(!miss.length){{const v0=cur,sc0=RD.sc,i0=RD.i;setTimeout(()=>{if(cur===v0&&RD.sc===sc0&&RD.i===i0)advance(step,raw,RD.tries===0,RD.firstMiss||[],warn)},RM?0:350)}}
+    if(!miss.length){advanceAfterMotion(step,raw,RD.tries===0,RD.firstMiss||[],warn)}
     else{
       if(RD.tries===0){RD.firstMiss=miss;RD.firstSaid=raw}
       RD.tries++;
@@ -2448,6 +2487,30 @@ function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
 function scrollLog(){const f=()=>{const l=$('#log');if(l)l.scrollTop=l.scrollHeight};f();requestAnimationFrame(f)}
+/* ---------- the aircraft moves only after the pilot has read back ----------
+   On a step where ATC gives an instruction, your aircraft waits where it is; after a correct readback it carries it out, then the next step follows. */
+let HELD=null;
+function shouldHold(step){const q=step&&step.sc;if(!step||!step.atc||!q)return false;
+  if(q.t==='ground')return q.ac!=='landed'&&!(q.ac==='taxiin'&&q.start);
+  if(q.t==='profile')return !['level','turb'].includes(q.mode);
+  if(q.t==='vector')return true;if(q.t==='route')return !!(q.dev&&!q.back);return false}
+function holdOwn(svg){HELD=null;if(!svg)return;const list=[];
+  svg.querySelectorAll('animateMotion').forEach(a=>{const g=a.parentNode,p=g.querySelector(':scope>path');if(!p||p.getAttribute('class')!=='ac')return;
+    const tp=document.createElementNS('http://www.w3.org/2000/svg','path');tp.setAttribute('d',a.getAttribute('path'));svg.appendChild(tp);const L=tp.getTotalLength();
+    const q0=tp.getPointAtLength(0),q1=tp.getPointAtLength(Math.min(L,2));tp.remove();const rot=a.getAttribute('rotate')||'auto';
+    let h=Math.atan2(q1.y-q0.y,q1.x-q0.x)*180/Math.PI;if(rot==='auto-reverse')h+=180;else if(rot!=='auto')h=parseFloat(rot)||0;
+    const st=document.createElementNS('http://www.w3.org/2000/svg','g');st.setAttribute('transform',`translate(${q0.x.toFixed(1)} ${q0.y.toFixed(1)}) rotate(${h.toFixed(1)})`);
+    st.innerHTML=g.innerHTML.replace(/<animateMotion[\s\S]*?(\/>|<\/animateMotion>)/g,'').replace(/<set[^>]*\/>/g,'').replace(/ transform="scale\(/g,' transform="scale(');
+    g.parentNode.insertBefore(st,g);g.style.display='none';a.setAttribute('begin','indefinite');list.push({a,g,st,dur:parseFloat(a.getAttribute('dur'))||0})});
+  if(list.length)HELD={list,svg}}
+function releaseOwn(){if(!HELD)return 0;let d=0;HELD.list.forEach(x=>{try{x.st.remove();x.g.style.display='';x.a.beginElement();d=Math.max(d,x.dur)}catch(e){}});HELD=null;return d}
+function advanceAfterMotion(step,raw,first,miss,warn){const v0=cur,sc0=RD.sc,i0=RD.i;const ok=()=>cur===v0&&RD.sc===sc0&&RD.i===i0;
+  const d=RM?0:releaseOwn();
+  if(d<.6){setTimeout(()=>{if(ok())advance(step,raw,first,miss,warn)},RM?0:350);return}
+  /* show the aircraft carrying out the instruction, then go on (or tap Next) */
+  const fbx=$('#fb');if(fbx){fbx.innerHTML=`<div class="fb ok">Correct. <button class="btn sm" id="gonext" type="button" style="margin-left:8px">Next ▶</button></div>`;const b=$('#gonext');if(b)b.onclick=()=>{clearTimeout(RD._go);if(ok())advance(step,raw,first,miss,warn)}}
+  ['#tx','#send','#mic'].forEach(q=>{const e=$(q);if(e)e.disabled=true});
+  clearTimeout(RD._go);RD._go=setTimeout(()=>{if(ok())advance(step,raw,first,miss,warn)},Math.min(d,9)*1000+400)}
 function advance(step,raw,first,miss,warn){
   const sc=RD.sc;
   if(step.atc)RD.log.push({w:'atc',t:showAtc(step.atc),st:fill((RD.st||'').split('|')[0])});
@@ -2917,7 +2980,7 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Home','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t,pop){closeFull();closeSheet();document.body.classList.remove('flying');if(!VIEWS[t])t='home';const prev=cur;cur=t;
+function go(t,pop){closeFull();closeSheet();radioNoise(false);document.body.classList.remove('flying');if(!VIEWS[t])t='home';const prev=cur;cur=t;
   if(t!=='phrases'&&PH.ta&&PH.ta.timer){clearInterval(PH.ta.timer);PH.ta=null}
   document.querySelectorAll('.mic.rec').forEach(b=>{try{b._finish&&b._finish()}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 addEventListener('popstate',()=>{if(document.querySelector('.vsheet')){closeSheet();try{history.pushState(null,'','#'+cur)}catch(e){}return}const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
