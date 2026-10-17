@@ -24,7 +24,6 @@
   --dep:#D4E4F2; --arr:#F1E4C3; --misc:#E2DAF0; --wx:#D7EBDF;
   --grass:#CBD9BE; --grass2:#C0D0B2; --conc:#D6DBDD; --term:#8E9AA3; --twrwin:#BFE3F2; --twyc:#5E676E; --asph:#3F474E; --mark:#F5F7F8; --yel:#E3B505; --parked:#9AA4AB; --chart:#EEF1E9; --terr:#BFAE8C; --terr2:#A89470; --sky1:#B8D3EC; --sky2:#EAF2F8; --cloud:#FFFFFF;
   --strip:#D3E0C6; --shld:#8A949B;
-  --fbg:#ECEDEF; --fpave:#2F3237; --fyel:#E2A500; --fterm:#B9BCC0; --ftermb:#8E9297; --fink:#3A3D42;
   --scene:#E2EAE0; --sky:#E4EEF6; --rwy:#48525A; --rwym:#F4F6F7; --twy:#A3AFB6; --apron:#CDD5DA; --tr:#C27200; --holdl:#D9A800; --scope:#06140D; --scopeg:#45D985;
   --good:#28744A; --good-bg:#DDEFE3; --bad:#B42318; --bad-bg:#F7E1DD; --warn:#9A5F0E; --warn-bg:#F5EAD3;
   --f-disp:'Barlow Condensed','Arial Narrow',sans-serif;
@@ -32,7 +31,6 @@
   --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --fbg:#171B1F; --fpave:#353A40; --fyel:#D49B05; --fterm:#4B5057; --ftermb:#646A72; --fink:#D9DDE1;
   --strip:#1C2D21; --shld:#2E373E;
   --grass:#16241A; --grass2:#1B2B1F; --conc:#29323A; --term:#46525C; --twrwin:#5D8FA6; --twyc:#30393F; --asph:#20262C; --mark:#C9D1D6; --yel:#C9A20E; --parked:#56626B; --chart:#121A16; --terr:#3B3426; --terr2:#4A4130; --sky1:#0C1F33; --sky2:#1A2B3C; --cloud:#3A4A58;
   --scene:#13211A; --sky:#0F1B26; --rwy:#2E373E; --rwym:#C7D0D6; --twy:#3B4851; --apron:#22303A; --tr:#F2A93A; --holdl:#E8C23A;
@@ -43,7 +41,6 @@
   --good:#5CC38B; --good-bg:#14301F; --bad:#F1806F; --bad-bg:#3A1C19; --warn:#E5B158; --warn-bg:#382B14;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --fbg:#171B1F; --fpave:#353A40; --fyel:#D49B05; --fterm:#4B5057; --ftermb:#646A72; --fink:#D9DDE1;
   --strip:#1C2D21; --shld:#2E373E;
   --grass:#16241A; --grass2:#1B2B1F; --conc:#29323A; --term:#46525C; --twrwin:#5D8FA6; --twyc:#30393F; --asph:#20262C; --mark:#C9D1D6; --yel:#C9A20E; --parked:#56626B; --chart:#121A16; --terr:#3B3426; --terr2:#4A4130; --sky1:#0C1F33; --sky2:#1A2B3C; --cloud:#3A4A58;
   --scene:#13211A; --sky:#0F1B26; --rwy:#2E373E; --rwym:#C7D0D6; --twy:#3B4851; --apron:#22303A; --tr:#F2A93A; --holdl:#E8C23A;
@@ -384,18 +381,40 @@ body.noscroll{overflow:hidden}
 .twym{fill:none;stroke:var(--twyc);stroke-width:8;stroke-linejoin:round;stroke-linecap:round}
 .rwoff{opacity:.55}
 .hpl{fill:var(--ink);font:700 9px var(--f-mono);paint-order:stroke;stroke:var(--grass);stroke-width:3px}
-.fbg{fill:var(--fbg)} .fap,.ftw,.frw,.fpv{fill:var(--fpave)} .ftw,.fpv{fill:none;stroke:var(--fpave);stroke-width:13;stroke-linejoin:round;stroke-linecap:round}
-.fcl{fill:none;stroke:var(--fyel);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round}
-.fsh{fill:#000;opacity:.12} .fterm{fill:var(--fterm);stroke:var(--ftermb);stroke-width:1} .ftlab{fill:var(--fink);font:700 7px var(--f-mono);letter-spacing:.12em} .ftlab2{fill:var(--fink);font:600 8px var(--f-mono)}
-.fedge,.fthr{stroke:#F2F2F2;stroke-width:.9} .fthr{stroke-width:1.4} .fpk{stroke:#F2F2F2;stroke-width:1.3} .ftdz{stroke:#F2F2F2;stroke-width:2.2} .fcen{stroke:#F2F2F2;stroke-width:1;stroke-dasharray:7 6}
+/* aerodrome (flat map): day palette in :root, night palette under the dark theme */
+:root{--fbg:#9FB283;--fmw:#A8BA8C;--fstrip:#AFC095;--fpave:#4A5056;--frw:#3A3F45;--frws:#5D636A;--fap:#C9CCCB;--fjn:#B4B8B8;--fyel:#E9B10E;--fwh:#F6F6F2;--fterm:#E4E7EA;--ftermb:#98A0A7;--fink:#353A40;--fals:#F4F1E2;--fjb:#8E969D;--frl:#FFF6D8;--frlo:.5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--fbg:#18231A;--fmw:#1C281E;--fstrip:#1F2D21;--fpave:#33393F;--frw:#272C32;--frws:#363C42;--fap:#454B50;--fjn:#3D4347;--fyel:#D8A10B;--fwh:#D3D8DB;--fterm:#58616A;--ftermb:#727B84;--fink:#E3E7EA;--fals:#FFE7A0;--fjb:#6C747B;--frl:#FFF1C4;--frlo:1}}
+:root[data-theme="dark"]{--fbg:#18231A;--fmw:#1C281E;--fstrip:#1F2D21;--fpave:#33393F;--frw:#272C32;--frws:#363C42;--fap:#454B50;--fjn:#3D4347;--fyel:#D8A10B;--fwh:#D3D8DB;--fterm:#58616A;--ftermb:#727B84;--fink:#E3E7EA;--fals:#FFE7A0;--fjb:#6C747B;--frl:#FFF1C4;--frlo:1}
+.fbg{fill:var(--fbg)} .fmw{fill:var(--fmw)} .fstrip{fill:var(--fstrip)}
+.ftw,.fpv{fill:none;stroke:var(--fpave);stroke-width:12.4;stroke-linejoin:round;stroke-linecap:round}
+.ftwe{fill:none;stroke:var(--fyel);stroke-width:13.8;stroke-linejoin:round;stroke-linecap:round;opacity:.9}
+.fap{fill:var(--fap);stroke:var(--fjn);stroke-width:.8} .fapj{stroke:none} .fjn{fill:none;stroke:var(--fjn);stroke-width:.35}
+.frw{fill:var(--frw)} .frws{fill:var(--frws)}
+.fcl{fill:none;stroke:var(--fyel);stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
+.fsh{fill:#000;opacity:.16}
+.fterm{fill:var(--fterm);stroke:var(--ftermb);stroke-width:1.1} .frdg{stroke:var(--ftermb);stroke-width:.6;stroke-dasharray:3 2} .fplant{fill:var(--ftermb);opacity:.55}
+.ftlab{fill:var(--fink);font:700 7px var(--f-mono);letter-spacing:.14em;opacity:.75} .ftlab2{fill:var(--fink);font:700 7.5px var(--f-mono);paint-order:stroke;stroke:var(--fbg);stroke-width:2.5px}
+.fjb{stroke:var(--fjb);stroke-width:3.2;stroke-linecap:round} .fjr{fill:var(--fjb)}
+.ftwrb{fill:var(--fterm);stroke:var(--ftermb);stroke-width:1} .ftwrc{fill:var(--ftermb)}
+.fedge,.fthr{stroke:var(--fwh);stroke-width:.9} .fthr{stroke-width:1.4} .fpk{stroke:var(--fwh);stroke-width:1.5} .ftdz{stroke:var(--fwh);stroke-width:1.8} .faim{stroke:var(--fwh);stroke-width:2.8} .fcen{stroke:var(--fwh);stroke-width:1;stroke-dasharray:7 6}
+.fals{stroke:var(--fals);stroke-width:1.1;stroke-linecap:round;opacity:.85}
+.frl{fill:var(--frl);opacity:var(--frlo)} .frlg{fill:#3FD27E;opacity:var(--frlo)}
 .fchev{fill:none;stroke:var(--fyel);stroke-width:1.2}
-.frn{fill:#F2F2F2;font:700 8px var(--f-mono);letter-spacing:.06em}
-.fstn{fill:var(--fyel);font:700 7px var(--f-mono)} .fstn.mine{fill:var(--accent);font-size:9px}
+.frn{fill:var(--fwh);font:700 8px var(--f-mono);letter-spacing:.06em}
+.fstn{fill:var(--fyel);font:700 6.5px var(--f-mono)} .fstn.mine{fill:var(--accent);font-size:8.5px;paint-order:stroke;stroke:var(--fap);stroke-width:2px}
+.fstb{fill:none;stroke:var(--fwh);stroke-width:.45;stroke-dasharray:2 1.5;opacity:.7} .fstop{stroke:var(--fyel);stroke-width:1.4}
 .fhp{stroke:var(--fyel);stroke-width:1} .fhpd{stroke-dasharray:2 1.4}
+.fstopb{fill:#FF4B3E}
+.fveh{fill:#F2C230;stroke:#6B5A12;stroke-width:.3} .fveh2{fill:#E9ECEF;stroke:#7A838B;stroke-width:.3}
+.fsockp{fill:var(--ftermb)} .fsockc{fill:#F26A1B} .fsockw{stroke:#fff;stroke-width:.9}
+.lvt{stroke:none} .lv1{fill:#1E5C8D} .lv2{fill:#B3261E} .lv3{fill:#2E7D4F} .lv4{fill:#D99A00} .lv5{fill:#5B3E99}
 .flatmap .ac{fill:#fff;stroke:var(--accent);stroke-width:2.2}
-.flatmap .parked{fill:#fff;stroke:#9AA0A6;stroke-width:1}
+.flatmap .parked{fill:#F7F8F9;stroke:#8E959C;stroke-width:.9}
 .flatmap .tr{fill:#fff;stroke:var(--tr);stroke-width:2.2}
+.flatmap .ac,.flatmap .tr,.flatmap .parked{filter:drop-shadow(2px 3px 0 rgba(0,0,0,.22))}
 .flatmap .halo{fill:var(--accent);opacity:.16}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .flatmap .flights{filter:drop-shadow(0 0 1.2px #FFE7A0)}}
+:root[data-theme="dark"] .flatmap .flights{filter:drop-shadow(0 0 1.2px #FFE7A0)}
 .flatmap .route{stroke:var(--accent);stroke-width:3;opacity:.9}
 .mic{display:inline-flex;align-items:center;gap:6px} .mic.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:blink 1s steps(2) infinite}
 
@@ -404,6 +423,20 @@ body.noscroll{overflow:hidden}
 .hhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .hhead h1{font-size:2rem;margin-top:4px}
 .hgo{display:inline-flex;align-items:center;gap:8px}
+.hhero{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--fbg);flex:none}
+.hmap .scene{display:block;width:100%;height:clamp(230px,40vh,400px)}
+.hbody{position:absolute;left:0;right:0;bottom:0;padding:44px 18px 16px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:6px 14px;background:linear-gradient(to top,rgba(8,15,20,.88),rgba(8,15,20,.6) 55%,rgba(8,15,20,0));color:#fff;pointer-events:none}
+.hbody>*{pointer-events:auto}
+.hbody h1{color:#fff;font-size:2.1rem;grid-column:1;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.hbody .hgo{grid-column:2;grid-row:1/3;padding:11px 18px;font-size:1rem;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.hstrip{display:inline-flex;align-items:center;gap:10px;justify-self:start;font-size:.76rem;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.14);padding:3px 9px;border-radius:6px;color:#D7E1E7}
+.hstrip b{color:#FFC94D;font-weight:600}
+@media (max-width:720px){
+  .hmap .scene{height:clamp(210px,34vh,300px)}
+  .hbody{grid-template-columns:1fr;padding:40px 12px 12px}
+  .hbody h1{font-size:1.55rem}
+  .hbody .hgo{grid-column:1;grid-row:auto;justify-content:center;width:100%}
+}
 .hgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;flex:1}
 .htile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px;cursor:pointer;min-width:0;min-height:120px;position:relative;transition:transform .12s,border-color .12s}
 .htile:hover{border-color:var(--ink);transform:translateY(-2px)}
@@ -426,7 +459,11 @@ body.noscroll{overflow:hidden}
   .hhead h1{font-size:1.5rem}
   .hhead .hgo{width:100%;justify-content:center}
   .hgrid{grid-template-columns:1fr 1fr;gap:10px}
-  .htile{min-height:0;padding:12px;border-radius:12px}
+  .htile{min-height:0;padding:10px 12px;border-radius:12px;display:grid;grid-template-columns:38px minmax(0,1fr);column-gap:10px;row-gap:0;align-items:center}
+  .htile .hic{grid-row:1/3}
+  .htile b{margin-top:0;line-height:1.1}
+  .htile .hs{font-size:.78rem}
+  .htile .hst{display:none}
   .htile .hd{display:none}
   .hgrid{max-height:none}
   .htile b{font-size:1.15rem}
@@ -591,6 +628,17 @@ body.flying .turn{flex:1;min-height:0;overflow-y:auto}
   body.flying .tbtns .btn .ico{width:20px;height:20px}
   body.flying .tbtns .mic .vbars{display:none}
 }
+/* mobile flight: the aerodrome picture takes all the room the radio panel does not need */
+@media (max-width:720px){
+  body.flying .rleft.tall{flex:1 1 auto;min-height:22dvh;display:flex;flex-direction:column}
+  body.flying .rleft.tall #sfig{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+  body.flying .rleft.tall .scene{flex:1 1 0;width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:auto}
+  body.flying .rleft.tall.compact{flex:0 0 17dvh;min-height:0}
+  body.flying .rleft.tall.typing{flex:0 0 15dvh;min-height:0}
+  body.flying .rleft.tall+.rright{flex:0 1 auto;min-height:0;display:flex;flex-direction:column}
+  body.flying .rleft.tall+.rright .rr{height:auto;flex:0 1 auto;min-height:0}
+  body.flying .rleft.tall+.rright .turn{flex:0 1 auto}
+}
 /* voice result sheet */
 .vsheet{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--bad-bg);border-top:3px solid var(--bad);box-shadow:0 -8px 24px rgba(0,0,0,.25);animation:sheetup .22s ease-out;max-height:75vh;overflow-y:auto}
 .vs-in{max-width:980px;margin:0 auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
@@ -744,10 +792,10 @@ const NATIVE=(()=>{try{const C=window.Capacitor;if(!C)return null;const nat=C.is
 function canSpeak(){if(NATIVE&&NATIVE.TTS)return true;try{return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance)}catch(e){return false}}
 const MALE_RX=/\b(male|daniel|george|ryan|arthur|oliver|thomas|james|brian|guy|alex|fred|rishi|aaron|harry|william|liam|reed|eddy|gordon|matthew|roger|christopher|eric|davis|tony|jason|andrew|steffan|noah|ralph|lee)\b/i;
 const FEMALE_RX=/(female|zira|susan|hazel|libby|sonia|maisie|karen|samantha|victoria|serena|kate|moira|tessa|fiona|emma|amy|joanna|salli|kimberly|ivy|aria|jenny|michelle|catherine|natasha|clara|nancy|ava|allison|google us english|google uk english female)/i;
-let VOICE_MALE=false;
+let VOICE_MALE=false,VOICE2=null;
 function voiceScore(x){let s=0;if(/en[-_]GB/i.test(x.lang))s+=3;else if(/^en[-_](US|AU|IE|CA|IN)/i.test(x.lang))s+=2;else if(/^en/i.test(x.lang))s+=1;else return -99;
   const n=(x.name||'')+' '+(x.voiceURI||'');if(/google uk english male/i.test(n))s+=8;if(MALE_RX.test(n))s+=6;if(FEMALE_RX.test(n))s-=7;if(/natural|neural|online/i.test(n))s+=2;if(/-x-(gbd|rjs|gbb|iom|iol|tpd)\b/i.test(n))s+=7;if(/-x-(gba|gbc|gbg|iob|iog|sfg|tpc|tpf)\b/i.test(n))s-=3;return s}
-function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));if(!v.length){VOICE=null;return}v.sort((a,b)=>voiceScore(b)-voiceScore(a));VOICE=v[0];const n=VOICE.name+' '+VOICE.voiceURI;VOICE_MALE=(MALE_RX.test(n)||/-x-(gbd|rjs|gbb|iom|iol|tpd)\b/i.test(n))&&!FEMALE_RX.test(n)}catch(e){}}
+function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));if(!v.length){VOICE=null;return}v.sort((a,b)=>voiceScore(b)-voiceScore(a));VOICE=v[0];VOICE2=v.find(x=>x!==VOICE&&!/en[-_]GB/i.test(x.lang)&&!FEMALE_RX.test(x.name||''))||v.find(x=>x!==VOICE)||VOICE;const n=VOICE.name+' '+VOICE.voiceURI;VOICE_MALE=(MALE_RX.test(n)||/-x-(gbd|rjs|gbb|iom|iol|tpd)\b/i.test(n))&&!FEMALE_RX.test(n)}catch(e){}}
 /* Android app: pick a male English voice from the phone's speech engine */
 let NVOICE=null,NVOICE_MALE=false,NVOICE_DONE=false;
 async function nativeVoice(){if(NVOICE_DONE||!(NATIVE&&NATIVE.TTS&&NATIVE.TTS.getSupportedVoices))return;NVOICE_DONE=true;
@@ -755,28 +803,50 @@ async function nativeVoice(){if(NVOICE_DONE||!(NATIVE&&NATIVE.TTS&&NATIVE.TTS.ge
     v.forEach((x,i)=>{const id=((x.voiceURI||'')+' '+(x.name||'')).toLowerCase();if(!/en[-_]/.test(id)&&!/^en/i.test(x.lang||''))return;let sc=0;if(/en[-_]gb/.test(id)||/en[-_]GB/.test(x.lang||''))sc+=3;
       const k=pref.findIndex(p=>id.includes('-x-'+p)||id.includes(p+'-'));if(k>=0)sc+=10-k;if(MALE_RX.test(id))sc+=6;if(FEMALE_RX.test(id))sc-=7;if(/network/.test(id))sc+=1;if(sc>bs){bs=sc;best=i}});
     if(best>=0&&bs>=8){NVOICE=best;NVOICE_MALE=true}else if(best>=0){NVOICE=best}}catch(e){}}
-/* radio squelch: short click and noise before and after an ATC transmission */
-function squelch(len=.09,vol=.05){try{MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const ac=MIC_AC;if(ac.state==='suspended')ac.resume();
-  const n=Math.floor(ac.sampleRate*len),buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
-  const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;const g=ac.createGain();g.gain.value=vol;src.connect(f);f.connect(g);g.connect(ac.destination);src.start()}catch(e){}}
+/* VHF radio sound: press-to-talk click, open-squelch hiss that fades a little, crackle, and the squelch tail when the
+   station lets go of the button */
+function acx(){MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();if(MIC_AC.state==='suspended')MIC_AC.resume();return MIC_AC}
+function nburst(len,f0,q,vol,shape){try{const ac=acx(),n=Math.max(1,Math.floor(ac.sampleRate*len)),buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<n;i++){const t=i/n;d[i]=(Math.random()*2-1)*shape(t)}
+  const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=f0;f.Q.value=q;const g=ac.createGain();g.gain.value=vol;src.connect(f);f.connect(g);g.connect(ac.destination);src.start()}catch(e){}}
+function keyClick(vol=.13){if(S.radioNoise===false)return;nburst(.012,900,.7,vol*1.4,t=>1-t);setTimeout(()=>nburst(.05,1900,.9,vol*.7,t=>Math.min(1,t*8)*(1-t)),14)}
+function squelchTail(vol=.11,len=.19){if(S.radioNoise===false)return;nburst(len,2300,.6,vol,t=>Math.min(1,t*14)*Math.pow(1-t,1.6))}
+function squelch(len=.09,vol=.05){nburst(len,1800,.8,vol,t=>1-t)}
 try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged',loadVoices)}}catch(e){}
 const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
 const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>(WORDS.includes(w)||(w.length===5&&/[AEIOU]/.test(w)&&!/^(RVSM|TCAS|SQUAWK)$/.test(w)))?w[0]+w.slice(1).toLowerCase():w);
-let SAY_ATC=false;
 /* radio background: a quiet band-limited hiss with small crackles while ATC is talking, like a real VHF receiver */
 let RNOISE=null;
-function radioNoise(on,maxMs){try{if(!on){if(RNOISE){const r=RNOISE;RNOISE=null;clearTimeout(r.t);try{r.g.gain.setTargetAtTime(0,r.ac.currentTime,.05);setTimeout(()=>{try{r.src.stop()}catch(e){}},300)}catch(e){}}return}
+function radioNoise(on,maxMs,level){try{if(!on){if(RNOISE){const r=RNOISE;RNOISE=null;clearTimeout(r.t);try{r.g.gain.setTargetAtTime(0,r.ac.currentTime,.03);setTimeout(()=>{try{r.src.stop();r.lfo&&r.lfo.stop()}catch(e){}},250)}catch(e){}}return}
   if(S.radioNoise===false)return;radioNoise(false);MIC_AC=MIC_AC||new (window.AudioContext||window.webkitAudioContext)();const ac=MIC_AC;if(ac.state==='suspended')ac.resume();
   const n=ac.sampleRate*2,buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);let last=0;
-  for(let i=0;i<n;i++){let x=(Math.random()*2-1);last=last*.6+x*.4;d[i]=last*.8;if(Math.random()<.00025){const L=Math.floor(ac.sampleRate*.004);for(let k=0;k<L&&i+k<n;k++)d[i+k]+=(Math.random()*2-1)*1.6*(1-k/L)}}
+  for(let i=0;i<n;i++){let x=(Math.random()*2-1);last=last*.55+x*.45;d[i]=last*.85;if(Math.random()<.0005){const L=Math.floor(ac.sampleRate*.004);for(let k=0;k<L&&i+k<n;k++)d[i+k]+=(Math.random()*2-1)*1.6*(1-k/L)}}
   const src=ac.createBufferSource();src.buffer=buf;src.loop=true;const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=350;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
-  const g=ac.createGain();g.gain.value=0;src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(ac.destination);src.start();g.gain.setTargetAtTime(.022,ac.currentTime,.04);
-  RNOISE={src,g,ac,t:setTimeout(()=>radioNoise(false),maxMs||12000)}}catch(e){}}
-function sayATC(text,cb){SAY_ATC=true;squelch();radioNoise(true,Math.min(30000,1500+String(text).length*85));setTimeout(()=>{say(text,ok=>{if(ok===false)radioNoise(false);cb&&cb(ok)});SAY_ATC=false},120)}
-function say(text,cb,rate){const atcFlag=SAY_ATC;text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
-  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:'en-GB',rate:rate||1,pitch:NVOICE_MALE?.95:.78,volume:1};if(NVOICE!==null)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{if(atcFlag){radioNoise(false);squelch(.07,.035)}},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
+  const g=ac.createGain();g.gain.value=0;src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(ac.destination);src.start();g.gain.setTargetAtTime(level||.04,ac.currentTime,.03);
+  let lfo=null;try{lfo=ac.createOscillator();lfo.frequency.value=.3+Math.random()*.5;const lg=ac.createGain();lg.gain.value=(level||.04)*.3;lfo.connect(lg);lg.connect(g.gain);lfo.start()}catch(e){lfo=null}
+  RNOISE={src,g,ac,lfo,t:setTimeout(()=>radioNoise(false),maxMs||12000)}}catch(e){}}
+/* other aircraft on the same frequency: one short call or readback before ATC calls you */
+const OTHER_CS=['Skyline four five two','Orient three one seven','Stellar two eight','Polar niner zero five','Caspian six four one','Falcon seven tree','Atlas two one six','Meridian fife fife','Aurora one zero niner'];
+function chatterLine(){const st=(fill((RD&&RD.st)||'|').split('|')[0]||'').trim(),cs=OTHER_CS[Math.floor(Math.random()*OTHER_CS.length)],k=/ground|delivery/i.test(st)?'g':/tower/i.test(st)?'t':/approach|departure|radar|director/i.test(st)?'a':'c';
+  const L={g:[`Pushback approved, facing south, ${cs}`,`Holding position, ${cs}`,`${st}, ${cs}, stand one one, request start-up`,`Give way to the Embraer, ${cs}`,`${st}, ${cs}, request taxi`],
+    t:[`Lining up and waiting, ${cs}`,`${st}, ${cs}, on final`,`Runway vacated, ${cs}`,`Wilco, ${cs}`,`Continue approach, ${cs}`],
+    a:[`Descending four thousand feet, ${cs}`,`Turning left heading two seven zero, ${cs}`,`Speed two one zero knots, ${cs}`,`${st}, ${cs}, passing flight level niner zero, climbing flight level one two zero`,`Reduce speed one eight zero knots, ${cs}`],
+    c:[`Climbing flight level tree four zero, ${cs}`,`Maintaining flight level tree six zero, ${cs}`,`${st}, ${cs}, request flight level tree eight zero`,`Squawking two four one six, ${cs}`,`Roger, ${cs}`]}[k];
+  return L[Math.floor(Math.random()*L.length)]}
+const ATC_RATE=1.08;let SAYTOK=0;
+function sayATC(text,cb,o={}){const tok=++SAYTOK,fx=S.radioNoise!==false,est=t=>Math.min(30000,1800+String(t).length*80);
+  const emerg=/mayday|pan pan|7700|7600|7500/i.test(text)||(RD&&RD.from==='emergency');
+  const main=()=>{if(tok!==SAYTOK)return;if(fx){keyClick();radioNoise(true,est(text))}setTimeout(()=>{if(tok!==SAYTOK)return;say(text,ok=>{if(ok===false)radioNoise(false);cb&&cb(ok)},ATC_RATE,{onend:()=>{if(tok!==SAYTOK)return;radioNoise(false);squelchTail()}})},fx?170:0)};
+  const line=o.chatter&&S.chatter!==false&&!emerg&&Math.random()<.35?chatterLine():null;
+  if(!line){main();return}
+  let started=false;const next=()=>{if(started)return;started=true;radioNoise(false);squelchTail(.08,.15);setTimeout(main,700)};
+  if(fx){keyClick(.09);radioNoise(true,est(line),.03)}
+  setTimeout(()=>{if(tok!==SAYTOK)return;say(line,ok=>{if(ok===false)next()},1.14,{pilot:true,volume:.62,onend:next})},fx?150:0);
+  setTimeout(next,est(line)+900)}
+function say(text,cb,rate,O={}){text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
+  if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:O.pilot?'en-US':'en-GB',rate:Math.max(.8,(rate||1)*.97),pitch:O.pilot?1.08:(NVOICE_MALE?.95:.78),volume:O.volume||1};if(NVOICE!==null&&!O.pilot)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{O.onend&&O.onend()},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
   try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
-    const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:'en-GB';u.rate=rate||1.02;u.pitch=VOICE_MALE?.92:.72;const atc=SAY_ATC;u.onend=()=>{if(atc){radioNoise(false);squelch(.07,.035)}};
+    const u=new SpeechSynthesisUtterance(text),vc=O.pilot?(VOICE2||VOICE):VOICE;if(vc)u.voice=vc;u.lang=vc?vc.lang:'en-GB';u.rate=rate||1.02;u.pitch=O.pilot?1.05:(VOICE_MALE?.92:.72);if(O.volume)u.volume=O.volume;u.onend=()=>{O.onend&&O.onend()};
     let started=false;u.onstart=()=>{started=true;cb&&cb(true)};u.onerror=()=>{if(!started)cb&&cb(false)};
     const go=()=>{try{speechSynthesis.resume();speechSynthesis.speak(u)}catch(e){}};if(busy)setTimeout(go,80);else go();if(cb)setTimeout(()=>{if(!started)cb(false)},2600)}catch(e){cb&&cb(false)}}
 function testVoice(el){el.textContent='Playing…';say('Air Force one two tree, radio check, read you fife',ok=>{el.textContent=ok?'Voice works. Turn up the volume if you hear nothing.':'No sound started. Your device or this view blocks speech: open the page in Chrome or Safari, and check that silent mode is off.'})}
@@ -907,8 +977,16 @@ const ACSL=ACS.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g,(m,x,y)=>(-x)+','+
 let UID=0;
 function pl(x,y,rot,cls='ac',s=.8,d=ACP){return `<g transform="translate(${(+x).toFixed(1)} ${(+y).toFixed(1)}) rotate(${(+rot).toFixed(1)}) scale(${s})">${cls==='ac'&&d===ACP?'<circle class="halo" r="22"/>':''}<path d="${d}" class="${cls}"/></g>`}
 let ANIM_OFF=0,STEP_T=null;/* seconds this step has already been on screen: re-drawing the same step continues the motion instead of replaying it */
-function mv(path,end,o={}){const {dur=6,rep='1',cls='ac',s=.8,rot='auto',d=ACP}=o;if(o.hideEnd&&(RM||ANIM_OFF>=dur))return '';if(RM||(rep==='1'&&ANIM_OFF>=dur+.05))return pl(end[0],end[1],end[2],cls,s,d);
-  return `<g${o.hideEnd?` opacity="1"><set attributeName="opacity" to="0" begin="${(dur-ANIM_OFF).toFixed(2)}s"/`:''}>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" begin="${(-ANIM_OFF).toFixed(2)}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${path}"${o.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${o.ease}"`:''}/></g>`}
+/* rounds the corners of a straight-line path so aircraft turn along an arc instead of snapping to the new heading */
+let MV_ROUND=0;
+function roundD(path,r){if(!r||!/^M[-\d., L]+$/.test(path))return path;const P=path.slice(1).split(/ ?L ?/).map(x=>x.split(',').map(Number));if(P.length<3||P.some(q=>q.length<2||isNaN(q[0])||isNaN(q[1])))return path;
+  const f=v=>v.toFixed(1);let s=`M${f(P[0][0])},${f(P[0][1])}`;
+  for(let i=1;i<P.length-1;i++){const a=P[i-1],p=P[i],b=P[i+1],la=dist(a,p),lb=dist(p,b);if(la<.01||lb<.01){continue}const u1=[(p[0]-a[0])/la,(p[1]-a[1])/la],u2=[(b[0]-p[0])/lb,(b[1]-p[1])/lb],cs=u1[0]*u2[0]+u1[1]*u2[1];
+    if(cs>.996){s+=` L${f(p[0])},${f(p[1])}`;continue}const k=Math.min(r*(1.15-cs*.15),la*.45,lb*.45),p1=[p[0]-u1[0]*k,p[1]-u1[1]*k],p2=[p[0]+u2[0]*k,p[1]+u2[1]*k];
+    s+=` L${f(p1[0])},${f(p1[1])} Q ${f(p[0])},${f(p[1])} ${f(p2[0])},${f(p2[1])}`}
+  const e=P[P.length-1];return s+` L${f(e[0])},${f(e[1])}`}
+function mv(path,end,o={}){const {dur=6,rep='1',cls='ac',s=.8,rot='auto',d=ACP}=o;const rpath=roundD(path,o.round!==undefined?o.round:MV_ROUND),poly=rpath!==path?` data-poly="${path}"`:'';if(o.hideEnd&&(RM||ANIM_OFF>=dur))return '';if(RM||(rep==='1'&&ANIM_OFF>=dur+.05))return pl(end[0],end[1],end[2],cls,s,d);
+  return `<g${o.hideEnd?` opacity="1"><set attributeName="opacity" to="0" begin="${(dur-ANIM_OFF).toFixed(2)}s"/`:''}>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" begin="${(-ANIM_OFF).toFixed(2)}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${rpath}"${poly}${o.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${o.ease}"`:''}/></g>`}
 const csShort=()=>S.cs.name.trim().split(/\s+/).map(w=>w[0]||'').join('').toUpperCase()+S.cs.num.trim();
 const SVG=(inner,label)=>`<svg class="scene" viewBox="0 0 600 300" role="img" aria-label="${esc(label)}">${inner}</svg>`;
 function tag(x,y,lines,w=96){w=Math.round(Math.max(w*1.15,Math.max(...lines.map(l=>l.length))*7.6+14));x=Math.min(x,592-w);return `<g transform="translate(${x} ${y})"><rect class="tag" width="${w}" height="${lines.length*16+8}" rx="3"/>${lines.map((l,k)=>`<text class="tagt" x="7" y="${17+k*16}">${esc(l)}</text>`).join('')}</g>`}
@@ -1157,7 +1235,7 @@ function autoLayout(ad){
     L.twy.push({n:'',p:[[-345,-86],[345,-86]]});L.twy.push({n:'',p:[[-345,86],[345,86]]});
     L.apr.push({n:'APRON',p:[[-330,-108],[330,-108],[330,108],[-330,108]]});
     L.bld.push({n:'TERMINAL',p:[[-270,-16],[270,16]]});L.twr=[310,-2];
-    for(let i=0;i<6;i++){L.std.push({n:String(i+1),p:[-225+i*90,-62],v:1});L.std.push({n:String(i+7),p:[-225+i*90,62],v:-1})}
+    for(let i=0;i<6;i++){L.std.push({n:String(i+1),p:[-225+i*90,-47],v:1});L.std.push({n:String(i+7),p:[-225+i*90,47],v:-1})}
   }else{
     L.rwy.push({a:[-500,0],b:[500,0],d:[pad(n)+sfx,rwyNum(h+180)+SFXO[sfx]]});
     L.twy.push({n:'A',p:[[-470,120],[470,120]]});
@@ -1314,54 +1392,103 @@ function standClear(L,s){const ck=s.p.join(',')+'|'+L.twy.length+'|'+L.rwy.lengt
   for(const t of L.twy){for(let k=0;k<t.p.length-1&&ok;k++)if(projSeg(s.p,t.p[k],t.p[k+1]).d<13)ok=false;if(!ok)break}
   if(ok)for(const rw of L.rwy)if(projSeg(s.p,rw.a,rw.b).d<26){ok=false;break}
   try{Object.defineProperty(s,'_clr',{value:{k:ck,v:ok},enumerable:false,configurable:true,writable:true})}catch(e){}return ok}
+/* aerodrome seen from above: grass, graded strips, concrete apron, asphalt taxiways with edge and centre markings,
+   runways with full ICAO markings and lights, terminal with air bridges, tower, parked aircraft with ground equipment */
+function ptSegD(p,a,b){return projSeg(p,a,b).d}
+function polyD(p,poly){let d=1e9;for(let i=0;i<poly.length;i++){const q=projSeg(p,poly[i],poly[(i+1)%poly.length]);if(q.d<d)d=q.d}return d}
+function polyNear(p,poly){let best=null;for(let i=0;i<poly.length;i++){const q=projSeg(p,poly[i],poly[(i+1)%poly.length]);if(!best||q.d<best.d)best=q}return best}
+function inPoly(p,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/((b[1]-a[1])||1e-9)+a[0])c=!c}return c}
+const LIVERY=['lv1','lv2','lv3','lv4','lv5'];
+/* tail fin + stabiliser tips of the ACP silhouette, coloured per airline */
+const ACT='M-12.6,-2 L-17,-7.5 L-19.5,-7.5 L-16.5,-1.6 Z M-12.6,2 L-17,7.5 L-19.5,7.5 L-16.5,1.6 Z M-14,-0.9 L-19.4,-0.9 L-19.4,0.9 L-14,0.9 Z';
 function renderFlat(L,o){
-  const R=9;let pave='',cl='';
+  const R=9;let pave='',edge='',cl='';
+  const f1=v=>(+v).toFixed(1),ln=(a,b,c)=>`<line class="${c}" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
+  const ra0=L.rwy[0]?angDeg(sub(L.rwy[0].b,L.rwy[0].a)):0;
   /* fillets at taxiway junctions */
   let G=null;try{G=buildGraph(L)}catch(e){}
   if(G)G.N.forEach((p,i)=>{const ed=G.adj[i];for(let a=0;a<ed.length;a++)for(let b=a+1;b<ed.length;b++){const u1=nrm(sub(G.N[ed[a].j],p)),u2=nrm(sub(G.N[ed[b].j],p)),cs=u1[0]*u2[0]+u1[1]*u2[1];if(cs>.85||cs<-.85)continue;
-    const r=Math.min(R,dist(G.N[ed[a].j],p)/2,dist(G.N[ed[b].j],p)/2),p1=add(p,mul(u1,r)),p2=add(p,mul(u2,r)),d=`M${p1[0].toFixed(1)},${p1[1].toFixed(1)} Q${p[0].toFixed(1)},${p[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-    pave+=`<path class="fpv" d="${d}"/>`;cl+=`<path class="fcl" d="${d}"/>`}});
-  let g=`<rect x="-300" y="-300" width="1200" height="900" class="fbg"/>`;
-  L.bld.forEach(b=>{g+=`<polygon class="fsh" points="${PTS(b.p.map(p=>add(p,[3,4])))}"/>`});
-  L.apr.forEach(a=>{g+=`<polygon class="fap" points="${PTS(a.p)}"/>`});
-  L.twy.forEach(t=>{if(t.p.length>1)g+=`<path class="ftw" d="${rp(t.p)}"/>`});
-  g+=pave;
+    const r=Math.min(R,dist(G.N[ed[a].j],p)/2,dist(G.N[ed[b].j],p)/2),p1=add(p,mul(u1,r)),p2=add(p,mul(u2,r)),d=`M${f1(p1[0])},${f1(p1[1])} Q${f1(p[0])},${f1(p[1])} ${f1(p2[0])},${f1(p2[1])}`;
+    edge+=`<path class="ftwe" d="${d}"/>`;pave+=`<path class="fpv" d="${d}"/>`;cl+=`<path class="fcl" d="${d}"/>`}});
+  /* ground: mown grass, stripes along the main runway */
+  let g=`<defs><pattern id="rtmow" width="34" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(${f1(ra0)})"><rect width="34" height="17" class="fmw"/></pattern>`+
+    `<pattern id="rtcon" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(${f1(ra0)})"><path d="M12,0 V12 H0" class="fjn"/></pattern></defs>`;
+  g+=`<rect x="-300" y="-300" width="1200" height="900" class="fbg"/><rect x="-300" y="-300" width="1200" height="900" fill="url(#rtmow)"/>`;
+  /* graded runway strips and approach lights (under everything paved) */
+  L.rwy.forEach(rw=>{const u=nrm(sub(rw.b,rw.a)),n=[-u[1],u[0]],l=dist(rw.a,rw.b),P=(t,s)=>add(add(rw.a,mul(u,t)),mul(n,s));
+    g+=`<polygon class="fstrip" points="${PTS([P(-26,-30),P(l+26,-30),P(l+26,30),P(-26,30)])}"/>`;
+    for(const [e,dir,des] of [[0,-1,rw.d[0]],[l,1,rw.d[1]]]){if(des==='—')continue;
+      g+=ln(P(e+dir*14,0),P(e+dir*74,0),'fals');for(let k=1;k<=5;k++){const t=e+dir*(14+k*12),w=k===3?9:4.5;g+=ln(P(t,-w),P(t,w),'fals')}}});
+  L.bld.forEach(b=>{g+=`<polygon class="fsh" points="${PTS(b.p.map(p=>add(p,[3.5,4.5])))}"/>`});
+  /* taxiways: yellow edge markings first, then the asphalt over them so edges show only on the outside, then the apron concrete on top */
+  L.twy.forEach(t=>{if(t.p.length>1){edge+=`<path class="ftwe" d="${rp(t.p)}"/>`;pave+=`<path class="ftw" d="${rp(t.p)}"/>`}});
+  g+=edge+pave;
+  L.apr.forEach(a=>{g+=`<polygon class="fap" points="${PTS(a.p)}"/><polygon class="fapj" points="${PTS(a.p)}" fill="url(#rtcon)"/>`});
   L.twy.forEach(t=>{if(t.p.length>1)g+=`<path class="fcl" d="${rp(t.p)}"/>`});
   g+=cl;
-  /* stands: lead-in lines, parked aircraft, numbers */
-  L.std.forEach((s,k)=>{const d=dirH(s.h),own=o.own===s.n,b=sub(s.p,mul(d,24)),nose=add(s.p,mul(d,9)),lp=add(s.p,mul(d,14));
-    g+=`<path class="fcl" d="M${b[0].toFixed(1)},${b[1].toFixed(1)} L${nose[0].toFixed(1)},${nose[1].toFixed(1)}"/>`;
-    if(o.parked&&!own&&k%2===0&&s.n!==o.skip&&standClear(L,s))g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5);
-    g+=`<text class="fstn ${own?'mine':''}" x="${lp[0].toFixed(1)}" y="${(lp[1]+3).toFixed(1)}" text-anchor="middle">${esc(s.n)}</text>`});
-  L.bld.forEach(b=>{const xs=b.p.map(p=>p[0]),ys=b.p.map(p=>p[1]);g+=`<polygon class="fterm" points="${PTS(b.p)}"/><text class="ftlab" x="${(Math.min(...xs)+Math.max(...xs))/2}" y="${(Math.min(...ys)+Math.max(...ys))/2+3}" text-anchor="middle">${esc(b.n||'')}</text>`});
+  /* terminal buildings: roof, roof plant, glazed front; air bridges to the stands in front of them */
+  const bridges=[];
+  L.std.forEach(s=>{const d=dirH(s.h),door=add(add(s.p,mul(d,5)),mul([d[1],-d[0]],4));for(const b of L.bld){const q=polyNear(door,b.p);if(q&&q.d<34&&q.d>4){bridges.push([q.q,door]);break}}});
+  /* stands: safety box, lead-in line, stop bar, number */
+  L.std.forEach((s,k)=>{const d=dirH(s.h),own=o.own===s.n,pp=[-d[1],d[0]],b=sub(s.p,mul(d,26)),nose=add(s.p,mul(d,10)),lp=add(add(s.p,mul(d,-19)),mul(pp,6.5));
+        g+=`<path class="fcl" d="M${f1(b[0])},${f1(b[1])} L${f1(nose[0])},${f1(nose[1])}"/>`+ln(add(nose,mul(pp,-3.5)),add(nose,mul(pp,3.5)),'fstop');
+    g+=`<text class="fstn ${own?'mine':''}" x="${f1(lp[0])}" y="${f1(lp[1]+3)}" text-anchor="middle">${esc(s.n)}</text>`});
+  bridges.forEach(([a,b])=>{g+=ln(a,b,'fjb')+`<circle class="fjr" cx="${f1(a[0])}" cy="${f1(a[1])}" r="2.6"/>`});
+  L.bld.forEach(b=>{const xs=b.p.map(p=>p[0]),ys=b.p.map(p=>p[1]),c=[(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
+    g+=`<polygon class="fterm" points="${PTS(b.p)}"/>`;
+    if(b.p.length===4){/* long axis: roof ridge and plant units along it */const e1=sub(b.p[1],b.p[0]),e2=sub(b.p[3],b.p[0]),Lg=vlen(e1)>=vlen(e2)?e1:e2,Sh=Lg===e1?e2:e1,ul=nrm(Lg),us=nrm(Sh),len=vlen(Lg),wid=vlen(Sh);
+      if(wid>8){const m0=add(add(b.p[0],mul(us,wid/2)),mul(ul,6)),m1=add(add(b.p[0],mul(us,wid/2)),mul(ul,len-6));g+=ln(m0,m1,'frdg');
+        const nU=Math.floor(len/70);for(let k=0;k<nU;k++){const q=add(add(b.p[0],mul(ul,35+k*70)),mul(us,wid*.28));g+=`<rect class="fplant" x="-4" y="-2.2" width="8" height="4.4" transform="translate(${f1(q[0])} ${f1(q[1])}) rotate(${f1(angDeg(ul))})"/>`}}}
+    g+=`<text class="ftlab" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle">${esc(b.n||'')}</text>`});
+  /* parked aircraft with ground equipment beside them */
+  L.std.forEach((s,k)=>{const own=o.own===s.n;if(!(o.parked&&!own&&k%2===0&&s.n!==o.skip&&standClear(L,s)))return;const d=dirH(s.h),pp=[-d[1],d[0]];
+    g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5).replace('</g>',`<path d="${ACT}" class="lvt ${LIVERY[k%LIVERY.length]}"/></g>`);
+    const v1=add(add(s.p,mul(d,-6.5)),mul(pp,-3.4)),v2=add(add(s.p,mul(d,-2.6)),mul(pp,6.2));
+    g+=`<rect class="fveh" x="-1.9" y="-.9" width="3.8" height="1.8" rx=".4" transform="translate(${f1(v1[0])} ${f1(v1[1])}) rotate(${f1(s.h)})"/><rect class="fveh2" x="-2.2" y="-1" width="4.4" height="2" rx=".4" transform="translate(${f1(v2[0])} ${f1(v2[1])}) rotate(${f1(s.h)})"/>`});
   /* runways */
-  L.rwy.forEach(rw=>{const u=nrm(sub(rw.b,rw.a)),n=[-u[1],u[0]],W=18,l=dist(rw.a,rw.b),P=(t,s)=>add(add(rw.a,mul(u,t)),mul(n,s)),ln=(a,b,c)=>`<line class="${c}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`;
+  L.rwy.forEach(rw=>{const u=nrm(sub(rw.b,rw.a)),n=[-u[1],u[0]],W=18,l=dist(rw.a,rw.b),P=(t,s)=>add(add(rw.a,mul(u,t)),mul(n,s));
+    g+=`<polygon class="frws" points="${PTS([P(-13,-W/2-2.4),P(l+13,-W/2-2.4),P(l+13,W/2+2.4),P(-13,W/2+2.4)])}"/>`;
     g+=`<polygon class="frw" points="${PTS([P(-13,-W/2),P(l+13,-W/2),P(l+13,W/2),P(-13,W/2)])}"/>`;
-    for(const [e,dir] of [[0,-1],[l,1]])for(let k=0;k<3;k++){const t0=e+dir*(3+k*3.6);g+=`<path class="fchev" d="M${P(t0,-W/2+1.5)[0].toFixed(1)},${P(t0,-W/2+1.5)[1].toFixed(1)} L${P(t0+dir*4,0)[0].toFixed(1)},${P(t0+dir*4,0)[1].toFixed(1)} L${P(t0,W/2-1.5)[0].toFixed(1)},${P(t0,W/2-1.5)[1].toFixed(1)}"/>`}
+    for(const [e,dir] of [[0,-1],[l,1]])for(let k=0;k<3;k++){const t0=e+dir*(3+k*3.6);g+=`<path class="fchev" d="M${f1(P(t0,-W/2+1.5)[0])},${f1(P(t0,-W/2+1.5)[1])} L${f1(P(t0+dir*4,0)[0])},${f1(P(t0+dir*4,0)[1])} L${f1(P(t0,W/2-1.5)[0])},${f1(P(t0,W/2-1.5)[1])}"/>`}
     g+=ln(P(0,-W/2+1.4),P(l,-W/2+1.4),'fedge')+ln(P(0,W/2-1.4),P(l,W/2-1.4),'fedge')+ln(P(0,-W/2+1),P(0,W/2-1),'fthr')+ln(P(l,-W/2+1),P(l,W/2-1),'fthr');
-    for(let k=0;k<5;k++){const s=-W/2+3.2+k*(W-6.4)/4;g+=ln(P(2.5,s),P(11,s),'fpk')+ln(P(l-11,s),P(l-2.5,s),'fpk')}
-    let ra=angDeg(u);const t1=P(20,0),t2=P(l-20,0);
-    g+=`<text class="frn" transform="translate(${t1[0].toFixed(1)} ${t1[1].toFixed(1)}) rotate(${(ra+90).toFixed(1)})" text-anchor="middle" dy="3">${esc(rw.d[0])}</text><text class="frn" transform="translate(${t2[0].toFixed(1)} ${t2[1].toFixed(1)}) rotate(${(ra-90).toFixed(1)})" text-anchor="middle" dy="3">${esc(rw.d[1]==='—'?'':rw.d[1])}</text>`;
-    for(const t of [34,50,66])for(const sg of [-1,1]){g+=ln(P(t,sg*W*.27),P(t+7,sg*W*.27),'ftdz')+ln(P(l-t-7,sg*W*.27),P(l-t,sg*W*.27),'ftdz')}
-    if(l>140){g+=ln(P(84,0),P(l-84,0),'fcen')}});
+    for(let k=0;k<6;k++){const s=-W/2+2.6+k*(W-5.2)/5;if(Math.abs(s)<1.2)continue;g+=ln(P(2.5,s),P(11,s),'fpk')+ln(P(l-11,s),P(l-2.5,s),'fpk')}
+    const ra=angDeg(u),t1=P(19,0),t2=P(l-19,0);
+    g+=`<text class="frn" transform="translate(${f1(t1[0])} ${f1(t1[1])}) rotate(${f1(ra+90)})" text-anchor="middle" dy="3">${esc(rw.d[0])}</text><text class="frn" transform="translate(${f1(t2[0])} ${f1(t2[1])}) rotate(${f1(ra-90)})" text-anchor="middle" dy="3">${esc(rw.d[1]==='—'?'':rw.d[1])}</text>`;
+    /* touchdown zone and aiming point */
+    for(const t of [32,46,74,88])for(const sg of [-1,1]){g+=ln(P(t,sg*W*.27),P(t+6,sg*W*.27),'ftdz')+ln(P(l-t-6,sg*W*.27),P(l-t,sg*W*.27),'ftdz')}
+    for(const sg of [-1,1]){g+=ln(P(56,sg*W*.24),P(68,sg*W*.24),'faim')+ln(P(l-68,sg*W*.24),P(l-56,sg*W*.24),'faim')}
+    if(l>160){g+=ln(P(100,0),P(l-100,0),'fcen')}
+    /* edge lights, green threshold and red end lights */
+    let lt='';const nL=Math.max(2,Math.round(l/16));for(let k=0;k<=nL;k++){const t=k*l/nL;for(const sg of [-1,1]){const q=P(t,sg*(W/2+1.2));lt+=`<circle class="frl" cx="${f1(q[0])}" cy="${f1(q[1])}" r=".75"/>`}}
+    for(const [e,c] of [[-.6,'frlg'],[l+.6,'frlg']])for(let s=-W/2+1.5;s<=W/2-1.4;s+=3){const q=P(e,s);lt+=`<circle class="${c}" cx="${f1(q[0])}" cy="${f1(q[1])}" r=".7"/>`}
+    g+=`<g class="flights">${lt}</g>`});
+  /* windsock beside the runway in use: it streams away from where the wind comes from */
+  if(o.rw&&o.wind!==undefined&&!isNaN(o.wind)){const rw=o.rw,u=nrm(sub(rw.b,rw.a)),n=[-u[1],u[0]],side=o.hp&&((o.hp.p[0]-rw.a[0])*n[0]+(o.hp.p[1]-rw.a[1])*n[1])>0?-1:1,q=add(add(rw.a,mul(u,62)),mul(n,side*24)),w=dirH(+o.wind+180);
+    const tip=add(q,mul(w,10)),pn=[-w[1],w[0]],p1=add(q,mul(pn,2.4)),p2=add(q,mul(pn,-2.4)),p3=add(tip,mul(pn,-1.2)),p4=add(tip,mul(pn,1.2));
+    g+=`<g class="fsock"><circle class="fsockp" cx="${f1(q[0])}" cy="${f1(q[1])}" r="1.6"/><polygon class="fsockc" points="${PTS([p1,p4,p3,p2])}"/></g>`;
+    for(const fr of [.34,.67]){const a=add(add(q,mul(w,10*fr)),mul(pn,2.4-1.2*fr)),b=add(add(q,mul(w,10*fr)),mul(pn,-2.4+1.2*fr));g+=ln(a,b,'fsockw')}}
   /* holding points: marking + signs */
   const segs=[];L.twy.forEach(t=>{for(let k=0;k<t.p.length-1;k++)segs.push([t.p[k],t.p[k+1]])});
   const SG=[],ovl=(a,b)=>a[0]<b[2]+2&&b[0]<a[2]+2&&a[1]<b[3]+1&&b[1]<a[3]+1;/* signs never overlap each other */
   L.hp.slice().sort((a,b)=>(o.hp===b)-(o.hp===a)).forEach(h=>{let best=null;segs.forEach(sg=>{const pr=projSeg(h.p,sg[0],sg[1]);if(!best||pr.d<best.d)best=Object.assign(pr,{s:sg})});
     const u=best?nrm(sub(best.s[1],best.s[0])):[1,0],n=[-u[1],u[0]],act=o.hp===h;
-    for(const [k,c] of [[-1.8,'fhp'],[-.6,'fhp'],[.6,'fhp fhpd'],[1.8,'fhp fhpd']]){const q=add(h.p,mul(u,k)),a=add(q,mul(n,-6)),b=add(q,mul(n,6));g+=`<line class="${c}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`}
+    for(const [k,c] of [[-1.8,'fhp'],[-.6,'fhp'],[.6,'fhp fhpd'],[1.8,'fhp fhpd']]){const q=add(h.p,mul(u,k)),a=add(q,mul(n,-6)),b=add(q,mul(n,6));g+=ln(a,b,c)}
+    if(act&&!o.stopOff)for(let s=-4.8;s<=4.9;s+=1.6){const c=add(add(h.p,mul(u,-3.6)),mul(n,s));g+=`<circle class="fstopb" cx="${f1(c[0])}" cy="${f1(c[1])}" r=".55"/>`}
     const rw=L.rwy.find(r=>r.d.includes(String(h.r).toUpperCase())),side=rw?(((rw.a[0]+rw.b[0])/2-h.p[0])*n[0]+((rw.a[1]+rw.b[1])/2-h.p[1])*n[1]>=0?1:-1):1,sp=add(h.p,mul(n,(act?24:13)*side));
     const lab=act&&rw?rw.d.filter(x=>x!=='—').join('-'):'',nm=h.n||'',w1=lab?lab.length*6+6:0,w2=nm.length*6.5+6,x0=sp[0]-(w1+w2)/2;
     const rc=[x0,sp[1]-5.5,x0+w1+w2+1,sp[1]+5.5];if((lab||nm)&&!act&&SG.some(q=>ovl(q,rc)))return;if(lab||nm)SG.push(rc);
-    if(lab||nm)g+=`<g transform="translate(${x0.toFixed(1)} ${(sp[1]-5.5).toFixed(1)})">${lab?`<rect class="sgnR" width="${w1}" height="11" rx="1.5"/><text class="sgnT" x="3" y="8.5">${esc(lab)}</text>`:''}${nm?`<rect class="sgnK" x="${w1?w1+1:0}" width="${w2}" height="11" rx="1.5"/><text class="sgnY" x="${(w1?w1+1:0)+3}" y="8.5">${esc(nm)}</text>`:''}</g>`});
+    if(lab||nm)g+=`<g transform="translate(${f1(x0)} ${f1(sp[1]-5.5)})">${lab?`<rect class="sgnR" width="${w1}" height="11" rx="1.5"/><text class="sgnT" x="3" y="8.5">${esc(lab)}</text>`:''}${nm?`<rect class="sgnK" x="${w1?w1+1:0}" width="${w2}" height="11" rx="1.5"/><text class="sgnY" x="${(w1?w1+1:0)+3}" y="8.5">${esc(nm)}</text>`:''}</g>`});
   const hpN=new Set(L.hp.map(h=>h.n)),onRoute=new Set(o.route||[]);
   L.twy.filter(t=>t.n&&t.p.length>1&&!hpN.has(t.n)).sort((a,b)=>onRoute.has(b.n)-onRoute.has(a.n)).forEach(t=>{
     const cand=[];for(let k=0;k<t.p.length-1;k++){const d=dist(t.p[k],t.p[k+1]);if(d>=22)cand.push({k,d})}cand.sort((a,b)=>b.d-a.d);const w=t.n.length*6.8+6;
-    for(const c of cand){for(const f of [.5,.3,.7]){const m=add(t.p[c.k],mul(sub(t.p[c.k+1],t.p[c.k]),f)),x=m[0]-t.n.length*3.4-3,rc=[x,m[1]-5.5,x+w,m[1]+5.5];if(SG.some(q=>ovl(q,rc)))continue;SG.push(rc);
-      g+=`<g transform="translate(${x.toFixed(1)} ${(m[1]-5.5).toFixed(1)})"><rect class="sgnK ${onRoute.has(t.n)?'onr':''}" width="${w}" height="11" rx="1.5"/><text class="sgnY" x="3" y="8.5">${esc(t.n)}</text></g>`;return}}});
-  if(L.twr){const [x,y]=L.twr;g+=`<g transform="translate(${x} ${y})"><circle class="fterm" r="5"/><circle class="twrwin" r="2.6"/><text class="ftlab2" x="8" y="3.5">TWR</text></g>`}
+    for(const c of cand){for(const fr of [.5,.3,.7]){const m=add(t.p[c.k],mul(sub(t.p[c.k+1],t.p[c.k]),fr)),x=m[0]-t.n.length*3.4-3,rc=[x,m[1]-5.5,x+w,m[1]+5.5];if(SG.some(q=>ovl(q,rc)))continue;SG.push(rc);
+      g+=`<g transform="translate(${f1(x)} ${f1(m[1]-5.5)})"><rect class="sgnK ${onRoute.has(t.n)?'onr':''}" width="${w}" height="11" rx="1.5"/><text class="sgnY" x="3" y="8.5">${esc(t.n)}</text></g>`;return}}});
+  /* control tower: shaft shadow, glazed octagonal cab */
+  if(L.twr){const [x,y]=L.twr,oc=r=>Array.from({length:8},(_,k)=>[Math.cos((k+.5)*Math.PI/4)*r,Math.sin((k+.5)*Math.PI/4)*r].map(f1).join(',')).join(' ');
+    g+=`<g transform="translate(${f1(x)} ${f1(y)})"><path class="fsh" d="M-3,2 L5,12 L10,9 L3,-3 Z"/><polygon class="ftwrb" points="${oc(6)}"/><polygon class="twrwin" points="${oc(4.2)}"/><circle class="ftwrc" r="1.6"/><text class="ftlab2" x="9" y="3.5">TWR</text></g>`}
   return g;
 }
+
 let SCENE_FOCUS=null,SCENE_INFO='',SCENE_CAP=null;
 function bbox(pts,m=20){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return {x0:Math.min(...xs)-m,y0:Math.min(...ys)-m,x1:Math.max(...xs)+m,y1:Math.max(...ys)+m}}
 function focusZ(b){const w=Math.max(b.x1-b.x0,(b.y1-b.y0)*2,300),s=Math.max(1,Math.min(2,600/w));return {s,cx:(b.x0+b.x1)/2,cy:(b.y0+b.y1)/2+(SCENE_CAP&&SCENE_CAP.you?34/s:0)}}/* captions cover the bottom of the picture: keep the action above them */
@@ -1463,8 +1590,8 @@ function polyAt(pts,f){const L=plen(pts);let t=f*L;for(let k=1;k<pts.length;k++)
 function moverPos(m,t){if(m.pts.length<2||!m.dur)return m.pts[0];if(m.hide&&t>=m.dur)return null;let f=Math.min(1,t/m.dur);if(m.kp){const u=f;let j=1;while(j<m.kt.length-1&&m.kt[j]<u)j++;const span=m.kt[j]-m.kt[j-1];f=m.kp[j-1]+(m.kp[j]-m.kp[j-1])*(span?(u-m.kt[j-1])/span:1)}if(m.ease){const k=m.ease.split(/[ ,]+/).map(Number);f=bezY(k[0],k[1],k[2],k[3],f)}return polyAt(m.pts,f)}
 function minSep(a,b,T){let mn=1e9;for(let t=0;t<=T;t+=.2){const p=moverPos(a,t),q=moverPos(b,t);if(p&&q){const d=dist(p,q);if(d<mn)mn=d}}return mn}
 function resolveTraffic(g,ac,TRQ,GS,OWNS){
-  let own=OWNS||null;if(!own){const m=ac.match(/class="ac" transform="scale\([^)]*\)"\/><animateMotion dur="([\d.]+)s"[^>]*?path="([^"]+)"([^>]*)/);
-    if(m){own={dur:+m[1],pts:m[2].slice(1).split(' L').map(x=>x.split(',').map(Number))};const ks=/keySplines="([^"]+)"/.exec(m[3]);if(ks)own.ease=ks[1]}
+  let own=OWNS||null;if(!own){const m=ac.match(/class="ac" transform="scale\([^)]*\)"\/><animateMotion ([^>]*)/),dm=m&&/dur="([\d.]+)s"/.exec(m[1]),pm=m&&(/data-poly="([^"]+)"/.exec(m[1])||/ path="([^"]+)"/.exec(m[1]));
+    if(dm&&pm){own={dur:+dm[1],pts:pm[1].slice(1).split(/ ?L ?/).map(x=>x.split(',').map(Number))};const ks=/keySplines="([^"]+)"/.exec(m[1]);if(ks)own.ease=ks[1]}
     else{const s=ac.match(/translate\(([-\d.]+) ([-\d.]+)\)[^>]*>(?:<circle class="halo"[^>]*\/>)?<path d="[^"]*" class="ac"/);if(s)own={pts:[[+s[1],+s[2]]],dur:0}}}
   const SEP=14,draw=x=>{if(x.pts.length<2||!x.dur)return pl(x.pts[0][0],x.pts[0][1],x.h!==undefined?x.h:0,'tr',GS);const e=x.pts[x.pts.length-1];return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:x.dur,cls:'tr',s:GS,ease:x.ease,hideEnd:x.hide})};
   /* parked / waiting aircraft are placed first, then moving ones; nobody may pass through you or through another aircraft */
@@ -1494,7 +1621,8 @@ function pbxPick(P,R,f0,only){if(!P.G)return null;const L=P.L,TP={f0};parkPath(P
     return best?Object.assign(best,{fs:best.wait?Math.max(TP.f0,best.fC-34/R.tot):-1}):null}
 function padMark(R2,f){const q=R2.at(f),u=dirH(q[2]+90),n=[-u[1],u[0]],c=[q[0],q[1]],P4=[add(add(c,mul(u,16)),mul(n,12)),add(add(c,mul(u,16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,12))];
   return `<polygon class="fap" points="${PTS(P4)}" opacity=".9"/><polygon points="${PTS(P4)}" fill="none" class="fhp" stroke-dasharray="3 2"/><text class="ftlab2" x="${(c[0]+n[0]*18).toFixed(1)}" y="${(c[1]+n[1]*18+3).toFixed(1)}" text-anchor="middle">DE-ICE</text>`}
-function sGround(o){
+function sGround(o){const sv=MV_ROUND;MV_ROUND=6;try{return sGround0(o)}finally{MV_ROUND=sv}}
+function sGround0(o){
   const ad=adOf(o),P=groundPlan(ad),L=P.L,v=V(),GS=.5,ua=angDeg(P.u),wdTxt=o.arr?v.AW:v.DW1;
   const off=['lineup','roll','rto','remote','landed'].includes(o.ac);
   const st=P.st,pb=P.pb||(st&&st.p)||[300,150];
@@ -1505,7 +1633,7 @@ function sGround(o){
   /* arrival "give way to the aircraft pushing back": pick an occupied stand next to your route; it pushes back while you wait, then taxis off */
   let PBX=null,OWNS=null;const PUSHT=5;
   if(TP&&R&&o.ac==='taxiin'&&o.tt&&o.tt.k==='ahead'&&P.G)PBX=pbxPick(P,R,TP.f0,o.tt.std||null);
-  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,skip:PBX?PBX.st.n:null,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
+  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,wind:parseFloat(wdTxt),parked:true,skip:PBX?PBX.st.n:null,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
   SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/${MSX()?(o.arr?MSX().wind.as:MSX().wind.s):8} KT`;
   {const hpn=P.hp&&P.hp.n?P.hp.n:'',via=P.names.length?' via '+P.names.join(', '):'';
    const Y={stand:`On stand ${P.std}${o.tug?' · tug connected':''}`,push:`Pushing back from stand ${P.std}`,pushed:o.tug?'Pushed back · tug on · engines off':'Engines running · ready to taxi',
@@ -1561,7 +1689,7 @@ function sGround(o){
       if(full.length>1&&plen(full)>10)g+=trMove(full,Math.max(6,plen(full)/30),full[Math.min(1,full.length-1)])}}
   else if(o.ac==='push'&&GCTX&&P.ok&&P.pts.length>2){const pv=GCTX.steps[GCTX.i-1];if(pv&&pv.sc&&pv.sc.ac==='stand'&&pv.sc.tt&&pv.sc.tt.k==='behind'){const e=P.pts[P.pts.length-1];g+=trMove(takeoffPts(P,e),12,null,{ease:'.4 0 .85 .55',hideEnd:true,nofp:true})}}
   const ownTaxi=()=>{const {f0,f1}=TP,a=R.at(f0),e=R.at(f1);fp.push(a,e,R.at(Math.min(1,f1+40/R.tot)));
-    let s=`<path class="route" d="${pth(R.part(f0,1))}"/>`;
+    let s=`<path class="route" d="${roundD(pth(R.part(f0,1)),6)}"/>`;
     if(f1-f0<.004)return s+own(e[0],e[1],e[2]);
     if(PBX&&PBX.fs>f0&&PBX.fs<f1){/* give way: stop short, wait for the pushback to finish and clear, then continue */
       const seg=R.part(f0,f1),L1=(PBX.fs-f0)*R.tot,L3=(f1-PBX.fs)*R.tot,t1=Math.max(1.5,L1/22),tw=Math.max(t1+.5,PUSHT+3),T=tw+Math.max(1.5,L3/22),ks=L1/(L1+L3);
@@ -1581,7 +1709,7 @@ function sGround(o){
       if(tko){/* take-off clearance: (line up and) roll, rotate and climb away */const pts=(lined?[P.E2]:[e,P.E,P.E2]).concat([P.B,add(P.B,mul(P.u,70))]);const end=pts[pts.length-1];fp.push(lined?P.E2:e,add(P.E2,mul(P.u,120)));
         return mv(pth(pts),[end[0],end[1],ua],{dur:lined?9:11,s:GS,ease:'.45 0 .9 .6'})}
       fp.push(e,P.E,P.E2,add(P.E,mul(P.u,140)));if(lined)return truck+own(P.E2[0],P.E2[1],ua);/* already lined up: it waits there */
-      return truck+`<path class="route" d="${pth([e,P.E,P.E2])}"/>`+mv(pth([e,P.E,P.E2]),[P.E2[0],P.E2[1],ua],{dur:3.5,s:GS})},
+      return truck+`<path class="route" d="${roundD(pth([e,P.E,P.E2]),6)}"/>`+mv(pth([e,P.E,P.E2]),[P.E2[0],P.E2[1],ua],{dur:3.5,s:GS})},
     roll:()=>{fp.push(P.A,P.B);return mv(pth([P.E2||P.A,P.B]),[P.B[0],P.B[1],ua],{dur:5,s:GS})},
     rto:()=>{const p=add(P.A,mul(P.u,P.len*.48));fp.push(add(p,mul(P.u,-90)),add(p,mul(P.u,90)));const vert=Math.abs(P.u[1])>Math.abs(P.u[0]);let nn=[-P.u[1],P.u[0]];const bc=(L.bld&&L.bld[0]&&L.bld[0].p&&L.bld[0].p.length)?L.bld[0].p.reduce((a,q)=>[a[0]+q[0]/L.bld[0].p.length,a[1]+q[1]/L.bld[0].p.length],[0,0]):[300,260];if((bc[0]-p[0])*nn[0]+(bc[1]-p[1])*nn[1]>0)nn=mul(nn,-1);
       const lp=vert?add(p,mul(nn,22)):[p[0],p[1]+(nn[1]>0?28:-18)],anc=vert?(nn[0]>0?'start':'end'):'middle';fp.push(lp);
@@ -1593,13 +1721,13 @@ function sGround(o){
     landed:()=>{if(P.ex&&P.ok){const a0=add(P.A,mul(P.u,15)),e=arrPts(P)[0],pts=[a0,P.ex.xc,P.ex.X,e].filter((q,i,a)=>i===0||dist(q,a[i-1])>1);fp.push(a0,P.ex.xc,e);return mv(pth(pts),[e[0],e[1],lastHdg(pts)],{dur:7,s:GS,ease:'0 0 .45 1'})}
       const p=add(P.A,mul(P.u,P.len*.72));fp.push(add(p,mul(P.u,-80)),add(p,mul(P.u,60)));return mv(pth([add(P.A,mul(P.u,P.len*.2)),p]),[p[0],p[1],ua],{dur:4,s:GS})},
     taxiin:()=>{if(!P.ok){fp.push(pb);return own(pb[0],pb[1],(P.face||0)+90)}const pts=arrPts(P);if(o.start){const e=pts[0];fp.push(e,P.E||P.A,pts[Math.min(2,pts.length-1)]);return own(e[0],e[1],angDeg(sub(pts[1]||e,e)))}if(TP)return ownTaxi();fp.push(...pts,st.p);const e=pts[pts.length-1];return own(e[0],e[1],lastHdg(pts))},
-    topad:()=>{if(!P.ok)return own(pb[0],pb[1],(P.face||0)-90);const R2=rLine(P.pts),fp2=padF(P,R2),seg=R2.part(0,fp2),e=R2.at(fp2);fp.push(seg[0],e);return padMark(R2,fp2)+`<path class="route" d="${pth(seg)}"/>`+mv(pth(seg),[e[0],e[1],lastHdg(seg)],{dur:Math.max(3,fp2*R2.tot/22),s:GS})},
+    topad:()=>{if(!P.ok)return own(pb[0],pb[1],(P.face||0)-90);const R2=rLine(P.pts),fp2=padF(P,R2),seg=R2.part(0,fp2),e=R2.at(fp2);fp.push(seg[0],e);return padMark(R2,fp2)+`<path class="route" d="${roundD(pth(seg),6)}"/>`+mv(pth(seg),[e[0],e[1],lastHdg(seg)],{dur:Math.max(3,fp2*R2.tot/22),s:GS})},
     atpad:()=>{if(!P.ok)return own(pb[0],pb[1],(P.face||0)-90);const R2=rLine(P.pts),fp2=padF(P,R2),e=R2.at(fp2);fp.push(e,R2.at(Math.min(1,fp2+.15)));return padMark(R2,fp2)+own(e[0],e[1],e[2])},
     deice:()=>{const R2=P.ok?rLine(P.pts):null,fp2=R2?padF(P,R2):0,q0=R2?R2.at(fp2):[pb[0],pb[1],(P.face||0)-90];const pbq=[q0[0],q0[1]];fp.push(pbq,R2?R2.at(Math.min(1,fp2+.12)):pbq,R2?R2.at(Math.max(0,fp2-.12)):pbq);const h=q0[2]+90,f=dirH(h),n=[-f[1],f[0]];let s=(R2?padMark(R2,fp2):'')+own(pbq[0],pbq[1],q0[2]);const pb=pbq;
       for(const sd of [-1,1]){const t=add(pb,mul(n,sd*16)),t0=add(t,mul(f,-40));s+=o.done?(()=>{const q=add(t,mul(f,-34));return pl(q[0],q[1],h-90,'truckr',.7,TRK)})():mv(`M${t0[0].toFixed(1)},${t0[1].toFixed(1)} L${t[0].toFixed(1)},${t[1].toFixed(1)}`,[t[0],t[1],h-90],{dur:3.5,cls:'truckr',s:.7,d:TRK,rot:'0'})}
       return s},
     remote:()=>{const far=L.std.slice().sort((a,b)=>dist(b.p,P.A)-dist(a.p,P.A))[0];const G=buildGraph(L),m=add(P.A,mul(P.u,P.len*.55)),s0=gAttach(G,m),fq=far?sub(far.p,mul(dirH(far.h),24)):m,e0=gAttach(G,fq),pa=gPath(G,s0,e0);
-      const pts=pa?[m,...pa.pts,fq]:[m,fq];fp.push(...pts);return `<path class="route" d="${pth(pts)}"/>`+mv(pth(pts),[fq[0],fq[1],lastHdg(pts)],{dur:8,s:GS})+`<text class="wl halo" x="${fq[0].toFixed(0)}" y="${(fq[1]+24).toFixed(0)}" text-anchor="middle">PARK · STAND ${esc(far?far.n:'')}</text>`}
+      const pts=pa?[m,...pa.pts,fq]:[m,fq];fp.push(...pts);return `<path class="route" d="${roundD(pth(pts),6)}"/>`+mv(pth(pts),[fq[0],fq[1],lastHdg(pts)],{dur:8,s:GS})+`<text class="wl halo" x="${fq[0].toFixed(0)}" y="${(fq[1]+24).toFixed(0)}" text-anchor="middle">PARK · STAND ${esc(far?far.n:'')}</text>`}
   };
   let ac='',acA='';try{ac=(A[o.ac]||A.stand)();const sv=ANIM_OFF;ANIM_OFF=0;const fl=fp.length;acA=(A[o.ac]||A.stand)();fp.length=fl;ANIM_OFF=sv}catch(e){ac=ac||''}
   g+=ac;g=resolveTraffic(g,acA||ac,TRQ,GS,OWNS);SCENE_FOCUS=fp.length?bbox(fp,o.ac==='roll'||o.ac==='rto'?22:30):null;
@@ -1768,7 +1896,7 @@ const ZS={};
 function svgPt(svg,x,y){const m=svg.getScreenCTM();if(!m)return [300,150];const P=svg.createSVGPoint();P.x=x;P.y=y;const q=P.matrixTransform(m.inverse());return [q.x,q.y]}
 function zoomable(svg,key,canPan=()=>true){
   if(!svg)return null;const z=ZS[key]||(ZS[key]={s:1,cx:300,cy:150});svg.classList.add('zoomable');
-  const apply=()=>{z.s=Math.max(1,Math.min(10,z.s));const w=600/z.s,h=300/z.s;z.cx=Math.max(w/2-40,Math.min(640-w/2,z.cx));z.cy=Math.max(h/2-30,Math.min(330-h/2,z.cy));
+  const flat=svg.classList.contains('flatmap'),VB={w:600,h:300};const apply=()=>{z.s=Math.max(1,Math.min(10,z.s));let ar=2;if(flat){const r=svg.getBoundingClientRect();if(r.width>40&&r.height>40)ar=Math.max(.9,Math.min(3.2,r.width/r.height))}const w=600/z.s,h=flat?w/ar:300/z.s;VB.w=w;VB.h=h;z.cx=Math.max(w/2-40,Math.min(640-w/2,z.cx));z.cy=flat?Math.max(h/2-260,Math.min(560-h/2,z.cy)):Math.max(h/2-30,Math.min(330-h/2,z.cy));
     svg.setAttribute('viewBox',`${(z.cx-w/2).toFixed(2)} ${(z.cy-h/2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);const lab=svg.closest('figure,.edbox');const l=lab&&lab.querySelector('.zlab');if(l){const t=Math.round(z.s*100)+'%';if(l.textContent!==t){if(l._t){l.classList.add('show');clearTimeout(l._h);l._h=setTimeout(()=>l.classList.remove('show'),900)}l._t=1;l.textContent=t}}};
   const zoomAt=(f,px,py)=>{const ns=Math.max(1,Math.min(10,z.s*f)),k=z.s/ns;z.cx=px-(px-z.cx)*k;z.cy=py-(py-z.cy)*k;z.s=ns;apply()};
   const ptr=new Map();let pan=null,pinch=null;
@@ -1776,13 +1904,13 @@ function zoomable(svg,key,canPan=()=>true){
   svg.addEventListener('pointerdown',e=>{ptr.set(e.pointerId,[e.clientX,e.clientY]);
     if(ptr.size===2){const [a,b]=[...ptr.values()];pinch={d:dist(a,b),m:mul(add(a,b),.5)};pan=null}
     else if(ptr.size===1&&canPan(e)){pan={x:e.clientX,y:e.clientY,cx:z.cx,cy:z.cy};try{svg.setPointerCapture(e.pointerId)}catch(_){}}});
-  svg.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;ptr.set(e.pointerId,[e.clientX,e.clientY]);const r=svg.getBoundingClientRect(),sc=Math.max((600/z.s)/r.width,(300/z.s)/r.height);
+  svg.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;ptr.set(e.pointerId,[e.clientX,e.clientY]);const r=svg.getBoundingClientRect(),sc=Math.max(VB.w/r.width,VB.h/r.height);
     if(pinch&&ptr.size===2){const [a,b]=[...ptr.values()],d=dist(a,b),m=mul(add(a,b),.5),[x,y]=svgPt(svg,m[0],m[1]);zoomAt(d/(pinch.d||d),x,y);z.cx-=(m[0]-pinch.m[0])*sc;z.cy-=(m[1]-pinch.m[1])*sc;apply();pinch={d,m}}
     else if(pan){z.cx=pan.cx-(e.clientX-pan.x)*sc;z.cy=pan.cy-(e.clientY-pan.y)*sc;apply()}});
   const up=e=>{ptr.delete(e.pointerId);if(ptr.size<2)pinch=null;if(!ptr.size)pan=null};
   svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')up(e)});
   svg.addEventListener('dblclick',e=>{if(!canPan(e))return;const [x,y]=svgPt(svg,e.clientX,e.clientY);zoomAt(2,x,y)});
-  apply();return {apply,zoomAt,z};
+  apply();if(flat&&window.ResizeObserver){let lw=0,lh=0;new ResizeObserver(es=>{const c=es[0].contentRect;if(Math.abs(c.width-lw)<1&&Math.abs(c.height-lh)<1)return;lw=c.width;lh=c.height;apply()}).observe(svg)}return {apply,zoomAt,z};
 }
 const zoomCtl=(full=true,foc=false,size=false)=>`<div class="zctl"><span class="zlab">100%</span>${size?`<button class="zb mob" data-z="size" aria-label="Diagram size" title="Diagram size">${S.compact?'▢':'▭'}</button>`:''}${foc?'<button class="zb" data-z="focus" aria-label="Focus on my aircraft" title="Focus on my aircraft">◎</button>':''}<button class="zb" data-z="in" aria-label="Zoom in">+</button><button class="zb" data-z="out" aria-label="Zoom out">−</button><button class="zb" data-z="reset" aria-label="Show whole chart">⤢</button>${full?'<button class="zb" data-z="full" aria-label="Full screen">⛶</button>':''}</div>`;
 function bindZoom(root,svg,key,canPan){const Zo=zoomable(svg,key,canPan);if(!Zo)return;
@@ -2198,7 +2326,7 @@ function csRe(){return new RegExp(norm(csText()).trim().replace(/[.*+?^${}()|[\]
 /* speech recognisers run numbers together ("squawk 4613 124.85" -> "4613124.85") and slightly misspell names:
    try the transcript with long numbers split, and with near-miss words corrected to the words of the expected call */
 function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m||!n)return m||n;let pr=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(pr[j]+1,c[j-1]+1,pr[j-1]+(a[i-1]===b[j-1]?0:1));pr=c}return pr[n]}
-function numSplits(n){const out=[];const toks=n.split(' ');toks.forEach((t,i)=>{if(/^\d[\d.]{4,}$/.test(t))for(let k=1;k<t.length;k++){if(t[k]==='.'||t[k-1]==='.')continue;const a=toks.slice();a.splice(i,1,t.slice(0,k),t.slice(k));out.push(a.join(' '))}});
+function numSplits(n){const out=[];const toks=n.split(' '),cn=String(S.cs.num||'').replace(/\D/g,'');toks.forEach((t,i)=>{if(cn&&/^\d+$/.test(t)&&t.length>cn.length&&t.length<5&&t.startsWith(cn)){const a=toks.slice();a.splice(i,1,cn,t.slice(cn.length));out.push(a.join(' '))}if(/^\d[\d.]{4,}$/.test(t))for(let k=1;k<t.length;k++){if(t[k]==='.'||t[k-1]==='.')continue;const a=toks.slice();a.splice(i,1,t.slice(0,k),t.slice(k));out.push(a.join(' '))}});
   const more=[];out.slice(0,40).forEach(v=>{v.split(' ').forEach((t,i)=>{if(/^\d[\d.]{4,}$/.test(t))for(let k=1;k<t.length;k++){if(t[k]==='.'||t[k-1]==='.')continue;const a=v.split(' ');a.splice(i,1,t.slice(0,k),t.slice(k));more.push(a.join(' '))}})});return out.concat(more.slice(0,200))}
 function fuzzyFix(n,vocab){const V=[...vocab].filter(w=>/^[a-z]{4,}$/.test(w));const toks=n.split(' ');const out=[];
   for(let i=0;i<toks.length;i++){const t=toks[i];if(!/^[a-z]+$/.test(t)||vocab.has(t)){out.push(t);continue}
@@ -2238,6 +2366,8 @@ function vRadio(){
         <label class="check"><input type="checkbox" id="o-sp" ${S.spoken?'checked':''}> Show ATC in ICAO spoken form</label>
         <label class="check"><input type="checkbox" id="o-vo" ${S.voice?'checked':''}> Read ATC aloud</label>
         <label class="check"><input type="checkbox" id="o-li" ${S.listen?'checked':''}> Listening mode (hide ATC text)</label>
+        <label class="check"><input type="checkbox" id="o-rn" ${S.radioNoise!==false?'checked':''}> Radio sound (squelch and static)</label>
+        <label class="check"><input type="checkbox" id="o-ch" ${S.chatter!==false?'checked':''}> Other aircraft on the frequency</label>
         <span class="lbl">Departure</span><select id="sdep" aria-label="Departure aerodrome">${S.ads.map((a,k)=>`<option value="${k}" ${k===S.dep?'selected':''}>${esc(a.n)}</option>`).join('')}</select>
         <span class="lbl">Destination</span><select id="sdst" aria-label="Destination aerodrome">${S.ads.map((a,k)=>`<option value="${k}" ${k===S.dst?'selected':''}>${esc(a.n)}</option>`).join('')}</select>
         <button class="btn" id="vtest">Test voice</button><span id="vstat" class="muted" style="font-size:.88rem">${canSpeak()?'':'This view has no speech engine. Open the page in Chrome or Safari.'}</span>
@@ -2253,6 +2383,7 @@ function vRadio(){
     $('#csd').oninput=e=>{S.cs.num=e.target.value||'123';save()};
     $('#o-sp').onchange=e=>{S.spoken=e.target.checked;save()};
     $('#o-vo').onchange=e=>{S.voice=e.target.checked;save()};
+    $('#o-rn').onchange=e=>{S.radioNoise=e.target.checked;save()};$('#o-ch').onchange=e=>{S.chatter=e.target.checked;save()};
     $('#o-li').onchange=e=>{S.listen=e.target.checked;if(S.listen)S.voice=true;save();vRadio()};
     $('#sdep').onchange=e=>{S.dep=+e.target.value;save()};
     $('#sdst').onchange=e=>{S.dst=+e.target.value;save()};
@@ -2286,10 +2417,10 @@ function vRadio(){
   view.innerHTML=`<div class="flight">
   <div class="fhead">${phaseBar(ph)}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
   <div class="rgrid">
-    <div class="rleft ${S.compact?'compact':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;else if(shouldHold(step)&&!RM)ANIM_OFF=0;/* waiting for the readback: always start position */let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
+    <div class="rleft ${S.compact?'compact':''} ${step.sc&&step.sc.t==='ground'?'tall':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;else if(shouldHold(step)&&!RM)ANIM_OFF=0;/* waiting for the readback: always start position */let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
         return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
         <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
-        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span>${shouldHold(step)&&!RM?'<span class="k" style="margin-left:6px;opacity:.8">· AFTER READBACK</span>':''}</div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
+        `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span>${shouldHold(step)&&!RM?'<span class="k arb" style="margin-left:6px;opacity:.8">· AFTER READBACK</span>':''}</div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
       <div class="radio logbox" id="logd"><div class="lbl" style="padding:10px 14px 0">${esc(sc.title)} · transcript</div><div class="log" id="log">${RD.log.length?logHtml():'<p class="muted" style="font-size:.85rem">Your exchanges with ATC appear here.</p>'}</div></div></div>
     <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc).replace(/<\/div>$/,logBtn+'</div>')}
     <div class="turn" id="turn">
@@ -2494,16 +2625,12 @@ function shouldHold(step){const q=step&&step.sc;if(!step||!step.atc||!q)return f
   if(q.t==='ground')return q.ac!=='landed'&&!(q.ac==='taxiin'&&q.start);
   if(q.t==='profile')return !['level','turb'].includes(q.mode);
   if(q.t==='vector')return true;if(q.t==='route')return !!(q.dev&&!q.back);return false}
-function holdOwn(svg){HELD=null;if(!svg)return;const list=[];
-  svg.querySelectorAll('animateMotion').forEach(a=>{const g=a.parentNode,p=g.querySelector(':scope>path');if(!p||p.getAttribute('class')!=='ac')return;
-    const tp=document.createElementNS('http://www.w3.org/2000/svg','path');tp.setAttribute('d',a.getAttribute('path'));svg.appendChild(tp);const L=tp.getTotalLength();
-    const q0=tp.getPointAtLength(0),q1=tp.getPointAtLength(Math.min(L,2));tp.remove();const rot=a.getAttribute('rotate')||'auto';
-    let h=Math.atan2(q1.y-q0.y,q1.x-q0.x)*180/Math.PI;if(rot==='auto-reverse')h+=180;else if(rot!=='auto')h=parseFloat(rot)||0;
-    const st=document.createElementNS('http://www.w3.org/2000/svg','g');st.setAttribute('transform',`translate(${q0.x.toFixed(1)} ${q0.y.toFixed(1)}) rotate(${h.toFixed(1)})`);
-    st.innerHTML=g.innerHTML.replace(/<animateMotion[\s\S]*?(\/>|<\/animateMotion>)/g,'').replace(/<set[^>]*\/>/g,'').replace(/ transform="scale\(/g,' transform="scale(');
-    g.parentNode.insertBefore(st,g);g.style.display='none';a.setAttribute('begin','indefinite');list.push({a,g,st,dur:parseFloat(a.getAttribute('dur'))||0})});
-  if(list.length)HELD={list,svg}}
-function releaseOwn(){if(!HELD)return 0;let d=0;HELD.list.forEach(x=>{try{x.st.remove();x.g.style.display='';x.a.beginElement();d=Math.max(d,x.dur)}catch(e){}});HELD=null;return d}
+/* until the pilot reads back, the whole picture waits at its first frame (your aircraft and the traffic together,
+   so the timing between them stays exactly as planned); the readback starts the clock */
+function holdOwn(svg){HELD=null;if(!svg||!svg.pauseAnimations)return;let d=0;
+  svg.querySelectorAll('animateMotion').forEach(a=>{const p=a.parentNode.querySelector(':scope>path');if(p&&p.getAttribute('class')==='ac')d=Math.max(d,parseFloat(a.getAttribute('dur'))||0)});
+  if(!d)return;try{svg.pauseAnimations();svg.setCurrentTime(0)}catch(e){return}svg.classList.add('held');HELD={svg,dur:d}}
+function releaseOwn(){if(!HELD)return 0;const h=HELD;HELD=null;document.querySelectorAll('.scap .arb').forEach(x=>x.remove());try{h.svg.classList.remove('held');h.svg.unpauseAnimations()}catch(e){}return h.dur}
 function advanceAfterMotion(step,raw,first,miss,warn){const v0=cur,sc0=RD.sc,i0=RD.i;const ok=()=>cur===v0&&RD.sc===sc0&&RD.i===i0;
   const d=RM?0:releaseOwn();
   if(d<.6){setTimeout(()=>{if(ok())advance(step,raw,first,miss,warn)},RM?0:350);return}
@@ -2522,7 +2649,7 @@ function advance(step,raw,first,miss,warn){
   if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id])S.stats['radio-'+sc.id]=pct;save();if(S.voice)say(spoken(fill(sc.end)))}
   vRadio();if(!RD.done)speakStep();
 }
-function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)))}
+function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)),null,{chatter:true})}
 
 /* ---------- aerodromes ---------- */
 function adPanel(){return `<details class="panel" id="adp" ${S.adOpen?'open':''}><summary class="lbl" style="cursor:pointer">Your aerodromes (${S.ads.length}): add or remove</summary>
@@ -2949,6 +3076,21 @@ function vMatch(){
 
 /* ---------- home ---------- */
 const MODS=[['radio','Radio practice'],['phrases','Phrases'],['numbers','Numbers'],['letters','Phonetic alphabet'],['metar','METAR'],['taf','TAF'],['match','Match']];
+/* home: a live aerodrome — your aircraft taxis out, holds while traffic lands and vacates, then takes off; loops */
+function heroScene(){try{const ad=S.ads[S.dep]||S.ads[0],P=groundPlan(ad);if(!P||!P.ok||!P.E)return '';const L=P.L,GS=.5;
+  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,wind:(P.rw?hdgOf(P.B,P.A):0)});
+  const taxi=P.pts.slice(),to=takeoffPts(P,taxi[taxi.length-1]).slice(1),full=taxi.concat(to),Lt=plen(taxi),Le=Lt+dist(taxi[taxi.length-1],P.E)+dist(P.E,P.E2),La=plen(full);
+  const tT=Math.max(8,Lt/20),T=[0,tT,tT+6,tT+10,tT+11.5,tT+17,tT+21],K=[0,Lt/La,Lt/La,Le/La,Le/La,(Le+(La-Le)*.22)/La,1],TT=T[6]+3;
+  const kt=T.map(t=>(t/TT).toFixed(4)).concat(['1']).join(';'),kp=K.map(k=>Math.min(1,k).toFixed(4)).concat(['1']).join(';');
+  const e=P.st.p;
+  if(RM)return SVG(g+pl(P.pb[0],P.pb[1],(P.face||0)-90,'ac',GS),'Aerodrome').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"');
+  g+=`<g><circle class="halo" r="${(22*GS).toFixed(1)}"/><path d="${ACP}" class="ac" transform="scale(${GS})"/><animateMotion dur="${TT.toFixed(2)}s" repeatCount="indefinite" rotate="auto" path="${roundD(pth(full),6)}" calcMode="linear" keyTimes="${kt}" keyPoints="${kp}"/></g>`;
+  /* landing traffic: touches down, rolls out and vacates before you line up */
+  if(P.ex){const a0=sub(P.A,mul(P.u,320)),td=add(P.A,mul(P.u,24)),pts=[a0,td,P.ex.xc,P.ex.X,P.ex.pts[1]||P.ex.X].filter((q,i,a)=>i===0||dist(q,a[i-1])>1),L1=dist(a0,td),L2=plen(pts),t0=Math.max(.5,tT-14);
+    const tl=[0,t0,t0+7,t0+13,t0+15.5,t0+16,TT].map(t=>(t/TT).toFixed(4)).join(';'),kl=[0,0,L1/L2,(L1+dist(td,P.ex.xc))/L2,1,1,1].map(k=>Math.min(1,k).toFixed(4)).join(';');
+    const vis=`<animate attributeName="opacity" dur="${TT.toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${(t0/TT).toFixed(4)};${((t0+16)/TT).toFixed(4)}" values="0;1;0"/>`;
+    g+=`<g opacity="0">${vis}<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${TT.toFixed(2)}s" repeatCount="indefinite" rotate="auto" path="${roundD(pth(pts),6)}" calcMode="linear" keyTimes="${tl}" keyPoints="${kl}"/></g>`}
+  return SVG(g,'Aerodrome: your aircraft taxis out and takes off').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"')}catch(e){return ''}}
 function vHome(){
   const T=k=>TABS.find(t=>t[0]===k)[2];
   const stp=k=>{const x=S.stats[k];return x&&x.t?Math.round(x.r/x.t*100)+'%':''};
@@ -2960,9 +3102,11 @@ function vHome(){
     ['weather','Weather','METAR · TAF',stp('metar')||'4 games','t-wx','Group hunt, decode quiz, pilot questions, TAF timeline and a free decoder.'],
     ['match','Match','Codes · terms',Object.keys(SETS).length+' sets','t-misc','Standard words, Q-codes, weather and cloud codes, abbreviations.']];
   const tot=MODS.reduce((a,[k])=>a+((S.stats[k]||{}).t||0),0),ok=MODS.reduce((a,[k])=>a+((S.stats[k]||{}).r||0),0);
+  const had=S.ads[S.dep]||S.ads[0],hp0=(()=>{try{return groundPlan(had)}catch(e){return null}})();
   view.innerHTML=`<div class="home">
-   <div class="hhead"><div><span class="lbl">ICAO radiotelephony · Units 1–8</span><h1>Choose your training</h1></div>
-    <button class="btn pri hgo" data-go="radio"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${T('radio')}"/></svg>Start a flight</button></div>
+   <section class="hhero"><div class="hmap">${heroScene()}</div>
+    <div class="hbody"><p class="hstrip mono"><b>${esc(csText())}</b><span>${esc(had.i||'')} · RWY ${esc(hp0?hp0.des:had.r||'')}</span></p><h1>Choose your training</h1>
+    <button class="btn pri hgo" data-go="radio"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${T('radio')}"/></svg>Start a flight</button></div></section>
    <div class="hgrid">${tiles.map(([k,l,sub,st,c,d])=>`<button class="htile ${c}" data-go="${k}"><span class="hic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${T(k)}"/></svg></span><b>${l}</b><span class="hs">${sub}</span><span class="hd">${d}</span><span class="hst">${esc(String(st))}</span></button>`).join('')}</div>
    <div class="hfoot">
     <button class="hmini" data-go="library"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>Airports</button>
@@ -2980,7 +3124,7 @@ function strip(go,cls,code,sub,title,desc,fx){return `<button class="strip ${cls
 const VIEWS={library:vLibrary,layout:vLayout,home:vHome,radio:vRadio,emergency:vEmerg,phrases:vPhrases,numbers:vNumbers,weather:vWeather,match:vMatch};
 const TABS=[['home','Home','M3 11l9-7 9 7v9h-6v-6H9v6H3z'],['radio','Radio','M4 14a8 8 0 0 1 16 0M4 14v5h4v-6H4M20 14v5h-4v-6h4'],['emergency','Mayday','M12 3 2 20h20L12 3zM12 10v4M12 17v.5'],['phrases','Phrases','M4 5h16v11H9l-5 4z'],['numbers','Numbers','M9 3 7 21M17 3l-2 18M4 9h17M3 15h17'],['weather','Weather','M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z'],['match','Match','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z']];
 let cur='home';
-function go(t,pop){closeFull();closeSheet();radioNoise(false);document.body.classList.remove('flying');if(!VIEWS[t])t='home';const prev=cur;cur=t;
+function go(t,pop){closeFull();closeSheet();radioNoise(false);SAYTOK++;document.body.classList.remove('flying');if(!VIEWS[t])t='home';const prev=cur;cur=t;
   if(t!=='phrases'&&PH.ta&&PH.ta.timer){clearInterval(PH.ta.timer);PH.ta=null}
   document.querySelectorAll('.mic.rec').forEach(b=>{try{b._finish&&b._finish()}catch(e){}});$('#nav').innerHTML=TABS.map(([k,l,ic])=>`<button data-t="${k}" title="${l}" aria-current="${k===t}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></button>`).join('');view.classList.remove('enter');void view.offsetWidth;view.classList.add('enter');$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));VIEWS[t]();try{if(pop||prev===t||!prev)history.replaceState(null,'','#'+t);else history.pushState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
 addEventListener('popstate',()=>{if(document.querySelector('.vsheet')){closeSheet();try{history.pushState(null,'','#'+cur)}catch(e){}return}const ff=document.querySelector('body > .scenebox.full');if(ff){const fb=ff.querySelector('[data-z=full]');ff._fromPop=true;if(fb){fb.click();return}}const t=(location.hash||'').slice(1)||'home';if(t!==cur)go(t,true)});
@@ -2993,7 +3137,6 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTh
 applyTheme();
 go((location.hash||'').slice(1));
 </script>
-
 
 <script>if("serviceWorker" in navigator&&!window.Capacitor&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
 </html>
