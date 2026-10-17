@@ -34,6 +34,7 @@ jobs:
           cp index.html app/www/index.html
           cp icon-192.png icon-512.png app/www/ 2>/dev/null || true
           cp icon-512.png app/assets/logo.png 2>/dev/null || true
+          cp icon-1024.png app/assets/icon-only.png 2>/dev/null || true
           cd app
           npm init -y > /dev/null
           npm install --no-audit --no-fund --legacy-peer-deps \
@@ -108,7 +109,7 @@ jobs:
 
           add_icons() {
             npx --yes @capacitor/assets@3 generate --android \
-              --iconBackgroundColor '#13202A' --iconBackgroundColorDark '#13202A' \
+              --iconBackgroundColor '#000C1A' --iconBackgroundColorDark '#000C1A' \
               --splashBackgroundColor '#13202A' --splashBackgroundColorDark '#13202A' || echo "Icon generation skipped"
           }
           use_fixed_key() {

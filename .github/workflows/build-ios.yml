@@ -66,8 +66,9 @@ jobs:
           ICON_DIR=app/ios/App/App/Assets.xcassets/AppIcon.appiconset
           ls "$ICON_DIR" || true
           TARGET=$(ls "$ICON_DIR"/*.png 2>/dev/null | head -1)
-          if [ -n "$TARGET" ] && [ -f icon-512.png ]; then
-            sips -s format png -z 1024 1024 icon-512.png --out "$TARGET" && echo "Icon replaced: $TARGET"
+          SRC=icon-1024.png; [ -f "$SRC" ] || SRC=icon-512.png
+          if [ -n "$TARGET" ] && [ -f "$SRC" ]; then
+            sips -s format png -z 1024 1024 "$SRC" --out "$TARGET" && echo "Icon replaced: $TARGET"
           else
             echo "::warning::Kept the default Capacitor icon."
           fi

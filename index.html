@@ -6,7 +6,7 @@
 <title>ICAO RT Trainer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -825,24 +825,10 @@ function radioNoise(on,maxMs,level){try{if(!on){if(RNOISE){const r=RNOISE;RNOISE
   const g=ac.createGain();g.gain.value=0;src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(ac.destination);src.start();g.gain.setTargetAtTime(level||.04,ac.currentTime,.03);
   let lfo=null;try{lfo=ac.createOscillator();lfo.frequency.value=.3+Math.random()*.5;const lg=ac.createGain();lg.gain.value=(level||.04)*.3;lfo.connect(lg);lg.connect(g.gain);lfo.start()}catch(e){lfo=null}
   RNOISE={src,g,ac,lfo,t:setTimeout(()=>radioNoise(false),maxMs||12000)}}catch(e){}}
-/* other aircraft on the same frequency: one short call or readback before ATC calls you */
-const OTHER_CS=['Skyline four five two','Orient three one seven','Stellar two eight','Polar niner zero five','Caspian six four one','Falcon seven tree','Atlas two one six','Meridian fife fife','Aurora one zero niner'];
-function chatterLine(){const st=(fill((RD&&RD.st)||'|').split('|')[0]||'').trim(),cs=OTHER_CS[Math.floor(Math.random()*OTHER_CS.length)],k=/ground|delivery/i.test(st)?'g':/tower/i.test(st)?'t':/approach|departure|radar|director/i.test(st)?'a':'c';
-  const L={g:[`Pushback approved, facing south, ${cs}`,`Holding position, ${cs}`,`${st}, ${cs}, stand one one, request start-up`,`Give way to the Embraer, ${cs}`,`${st}, ${cs}, request taxi`],
-    t:[`Lining up and waiting, ${cs}`,`${st}, ${cs}, on final`,`Runway vacated, ${cs}`,`Wilco, ${cs}`,`Continue approach, ${cs}`],
-    a:[`Descending four thousand feet, ${cs}`,`Turning left heading two seven zero, ${cs}`,`Speed two one zero knots, ${cs}`,`${st}, ${cs}, passing flight level niner zero, climbing flight level one two zero`,`Reduce speed one eight zero knots, ${cs}`],
-    c:[`Climbing flight level tree four zero, ${cs}`,`Maintaining flight level tree six zero, ${cs}`,`${st}, ${cs}, request flight level tree eight zero`,`Squawking two four one six, ${cs}`,`Roger, ${cs}`]}[k];
-  return L[Math.floor(Math.random()*L.length)]}
 const ATC_RATE=1.08;let SAYTOK=0;
 function sayATC(text,cb,o={}){const tok=++SAYTOK,fx=S.radioNoise!==false,est=t=>Math.min(30000,1800+String(t).length*80);
-  const emerg=/mayday|pan pan|7700|7600|7500/i.test(text)||(RD&&RD.from==='emergency');
   const main=()=>{if(tok!==SAYTOK)return;if(fx){keyClick();radioNoise(true,est(text))}setTimeout(()=>{if(tok!==SAYTOK)return;say(text,ok=>{if(ok===false)radioNoise(false);cb&&cb(ok)},ATC_RATE,{onend:()=>{if(tok!==SAYTOK)return;radioNoise(false);squelchTail()}})},fx?170:0)};
-  const line=o.chatter&&S.chatter!==false&&!emerg&&Math.random()<.35?chatterLine():null;
-  if(!line){main();return}
-  let started=false;const next=()=>{if(started)return;started=true;radioNoise(false);squelchTail(.08,.15);setTimeout(main,700)};
-  if(fx){keyClick(.09);radioNoise(true,est(line),.03)}
-  setTimeout(()=>{if(tok!==SAYTOK)return;say(line,ok=>{if(ok===false)next()},1.14,{pilot:true,volume:.62,onend:next})},fx?150:0);
-  setTimeout(next,est(line)+900)}
+  main()}
 function say(text,cb,rate,O={}){text=ttsText(text);if(!canSpeak()){cb&&cb(false);return}
   if(NATIVE&&NATIVE.TTS){const T=NATIVE.TTS;Promise.resolve().then(()=>nativeVoice()).then(()=>T.stop&&T.stop()).catch(()=>{}).then(()=>{let ok=true;const o={text,lang:O.pilot?'en-US':'en-GB',rate:Math.max(.8,(rate||1)*.97),pitch:O.pilot?1.08:(NVOICE_MALE?.95:.78),volume:O.volume||1};if(NVOICE!==null&&!O.pilot)o.voice=NVOICE;Promise.resolve(T.speak(o)).then(()=>{O.onend&&O.onend()},()=>{ok=false;cb&&cb(false)});setTimeout(()=>{if(ok)cb&&cb(true)},300)});return}
   try{const busy=speechSynthesis.speaking||speechSynthesis.pending;if(busy)speechSynthesis.cancel();if(!VOICE)loadVoices();
@@ -986,7 +972,7 @@ function roundD(path,r){if(!r||!/^M[-\d., L]+$/.test(path))return path;const P=p
     s+=` L${f(p1[0])},${f(p1[1])} Q ${f(p[0])},${f(p[1])} ${f(p2[0])},${f(p2[1])}`}
   const e=P[P.length-1];return s+` L${f(e[0])},${f(e[1])}`}
 function mv(path,end,o={}){const {dur=6,rep='1',cls='ac',s=.8,rot='auto',d=ACP}=o;const rpath=roundD(path,o.round!==undefined?o.round:MV_ROUND),poly=rpath!==path?` data-poly="${path}"`:'';if(o.hideEnd&&(RM||ANIM_OFF>=dur))return '';if(RM||(rep==='1'&&ANIM_OFF>=dur+.05))return pl(end[0],end[1],end[2],cls,s,d);
-  return `<g${o.hideEnd?` opacity="1"><set attributeName="opacity" to="0" begin="${(dur-ANIM_OFF).toFixed(2)}s"/`:''}>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" begin="${(-ANIM_OFF).toFixed(2)}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${rpath}"${poly}${o.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${o.ease}"`:''}/></g>`}
+  return `<g${o.hideEnd?` opacity="1"><set attributeName="opacity" to="0" begin="${(dur-ANIM_OFF).toFixed(2)}s"/`:''}>${cls==='ac'&&d===ACP?`<circle class="halo" r="${(22*s).toFixed(1)}"/>`:''}<path d="${d}" class="${cls}" transform="scale(${s})"/><animateMotion dur="${dur}s" begin="${(-ANIM_OFF).toFixed(2)}s" repeatCount="${rep}" fill="freeze" rotate="${rot}" path="${rpath}"${poly}${o.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${o.ease}"`:o.kp?` calcMode="linear" keyTimes="${o.kt.map(v=>v.toFixed(4)).join(';')}" keyPoints="${o.kp.map(v=>Math.min(1,v).toFixed(4)).join(';')}"`:''}/></g>`}
 const csShort=()=>S.cs.name.trim().split(/\s+/).map(w=>w[0]||'').join('').toUpperCase()+S.cs.num.trim();
 const SVG=(inner,label)=>`<svg class="scene" viewBox="0 0 600 300" role="img" aria-label="${esc(label)}">${inner}</svg>`;
 function tag(x,y,lines,w=96){w=Math.round(Math.max(w*1.15,Math.max(...lines.map(l=>l.length))*7.6+14));x=Math.min(x,592-w);return `<g transform="translate(${x} ${y})"><rect class="tag" width="${w}" height="${lines.length*16+8}" rx="3"/>${lines.map((l,k)=>`<text class="tagt" x="7" y="${17+k*16}">${esc(l)}</text>`).join('')}</g>`}
@@ -1227,21 +1213,21 @@ function autoLayout(ad){
   if(sfx==='L'||sfx==='R'){
     const vU=sfx==='L'?-230:230,other=SFXO[sfx];
     [[vU,sfx],[-vU,other]].forEach(([v,s])=>{L.rwy.push({a:[-500,v],b:[500,v],d:[pad(n)+s,rwyNum(h+180)+SFXO[s]]})});
-    for(const [nm,v] of [['A',-130],['B',130]]){const rv=v<0?-230:230,ri=L.rwy.findIndex(r=>r.a[1]===rv),R=L.rwy[ri];
+    for(const [nm,v] of [['A',-152],['B',152]]){const rv=v<0?-230:230,ri=L.rwy.findIndex(r=>r.a[1]===rv),R=L.rwy[ri];
       L.twy.push({n:nm,p:[[-470,v],[470,v]]});
       L.twy.push({n:nm+'1',p:[[-470,v],[-470,rv]]});L.twy.push({n:nm+'2',p:[[-170,v],[-250,rv]]});L.twy.push({n:nm+'3',p:[[170,v],[250,rv]]});L.twy.push({n:nm+'4',p:[[470,v],[470,rv]]});
       const hv=v+(rv-v)*.55;L.hp.push({n:nm+'1',p:[-470,hv],r:R.d[0]});L.hp.push({n:nm+'4',p:[470,hv],r:R.d[1]})}
-    L.twy.push({n:'C',p:[[-345,-130],[-345,130]]});L.twy.push({n:'D',p:[[345,-130],[345,130]]});
-    L.twy.push({n:'',p:[[-345,-86],[345,-86]]});L.twy.push({n:'',p:[[-345,86],[345,86]]});
-    L.apr.push({n:'APRON',p:[[-330,-108],[330,-108],[330,108],[-330,108]]});
+    L.twy.push({n:'C',p:[[-345,-152],[-345,152]]});L.twy.push({n:'D',p:[[345,-152],[345,152]]});
+    L.twy.push({n:'',p:[[-345,-103],[345,-103]]});L.twy.push({n:'',p:[[-345,103],[345,103]]});
+    L.apr.push({n:'APRON',p:[[-330,-124],[330,-124],[330,124],[-330,124]]});
     L.bld.push({n:'TERMINAL',p:[[-270,-16],[270,16]]});L.twr=[310,-2];
-    for(let i=0;i<6;i++){L.std.push({n:String(i+1),p:[-225+i*90,-47],v:1});L.std.push({n:String(i+7),p:[-225+i*90,47],v:-1})}
+    for(let i=0;i<6;i++){L.std.push({n:String(i+1),p:[-225+i*90,-45],v:1});L.std.push({n:String(i+7),p:[-225+i*90,45],v:-1})}
   }else{
     L.rwy.push({a:[-500,0],b:[500,0],d:[pad(n)+sfx,rwyNum(h+180)+SFXO[sfx]]});
     L.twy.push({n:'A',p:[[-470,120],[470,120]]});
     L.twy.push({n:'A1',p:[[-470,120],[-470,0]]});L.twy.push({n:'A2',p:[[-170,120],[-250,0]]});L.twy.push({n:'A3',p:[[170,120],[250,0]]});L.twy.push({n:'A4',p:[[470,120],[470,0]]});
     L.hp.push({n:'A1',p:[-470,55],r:L.rwy[0].d[0]});L.hp.push({n:'A4',p:[470,55],r:L.rwy[0].d[1]});
-    L.twy.push({n:'B',p:[[-220,120],[-220,172]]});L.twy.push({n:'C',p:[[220,120],[220,172]]});L.twy.push({n:'',p:[[-320,172],[320,172]]});
+    L.twy.push({n:'B',p:[[-220,120],[-220,160]]});L.twy.push({n:'C',p:[[220,120],[220,160]]});L.twy.push({n:'',p:[[-320,160],[320,160]]});
     L.apr.push({n:'APRON',p:[[-330,150],[330,150],[330,300],[-330,300]]});
     L.bld.push({n:'TERMINAL',p:[[-300,268],[300,300]]});L.twr=[380,210];
     for(let i=0;i<8;i++)L.std.push({n:String(i+1),p:[-245+i*70,226],v:1});
@@ -1250,7 +1236,7 @@ function autoLayout(ad){
   const T=p=>[p[0]*D[0]+p[1]*RV[0],p[0]*D[1]+p[1]*RV[1]];
   const all=[];L.rwy.forEach(r=>all.push(r.a,r.b));L.twy.forEach(t=>all.push(...t.p));L.apr.forEach(a=>all.push(...a.p));L.bld.forEach(b=>all.push(...b.p));
   const tp=all.map(T),xs=tp.map(p=>p[0]),ys=tp.map(p=>p[1]),bw=Math.max(...xs)-Math.min(...xs),bh=Math.max(...ys)-Math.min(...ys);
-  const k=Math.min(540/bw,250/bh),cx=(Math.max(...xs)+Math.min(...xs))/2,cy=(Math.max(...ys)+Math.min(...ys))/2;
+  const k=Math.max(Math.min(540/bw,250/bh),Math.min(.4,540/bw)),cx=(Math.max(...xs)+Math.min(...xs))/2,cy=(Math.max(...ys)+Math.min(...ys))/2;
   const F=p=>{const q=T(p);return r1([300+(q[0]-cx)*k,154+(q[1]-cy)*k])};
   const out={rwy:L.rwy.map(r=>({a:F(r.a),b:F(r.b),d:r.d})),twy:L.twy.map(t=>({n:t.n,p:t.p.map(F)})),apr:L.apr.map(a=>({n:a.n,p:a.p.map(F)})),
     bld:L.bld.map(b=>{const c=[b.p[0],[b.p[1][0],b.p[0][1]],b.p[1],[b.p[0][0],b.p[1][1]]].map(F);return {n:b.n,p:c}}),twr:F(L.twr),
@@ -1388,8 +1374,13 @@ function renderMin(L,o){
 /* flat illustrated aerodrome (style of the reference pictures) */
 function rp(pts){return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')}
 /* a parked aircraft is drawn only where it cannot sit on a taxiway or next to a runway */
-function standClear(L,s){const ck=s.p.join(',')+'|'+L.twy.length+'|'+L.rwy.length;if(s._clr&&s._clr.k===ck)return s._clr.v;let ok=true;
-  for(const t of L.twy){for(let k=0;k<t.p.length-1&&ok;k++)if(projSeg(s.p,t.p[k],t.p[k+1]).d<13)ok=false;if(!ok)break}
+/* aircraft symbol size for a layout: big airports squeezed into the chart get smaller aircraft so they fit the stands and taxiways */
+function acScale(L){if(L._gs!==undefined)return L._gs;let sp=1e9,tw=1e9,rw=1e9;L.std.forEach((s,i)=>L.std.forEach((t,j)=>{if(i<j)sp=Math.min(sp,dist(s.p,t.p))}));
+  L.std.forEach(s=>L.twy.forEach(t=>{for(let k=0;k<t.p.length-1;k++)tw=Math.min(tw,projSeg(s.p,t.p[k],t.p[k+1]).d)}));L.rwy.forEach(r=>rw=Math.min(rw,dist(r.a,r.b)));
+  const g=Math.max(.25,Math.min(.5,.5*sp/30,.5*tw/20.5,.5*rw/300));try{Object.defineProperty(L,'_gs',{value:g,enumerable:false,configurable:true,writable:true})}catch(e){}return g}
+function standClear(L,s){const ck=s.p.join(',')+'|'+L.twy.length+'|'+L.rwy.length+'|3';if(s._clr&&s._clr.k===ck)return s._clr.v;let ok=true;
+  const K=acScale(L)/.5,d=dirH(s.h),pp=[-d[1],d[0]],fp=[add(s.p,mul(d,9.5*K)),add(s.p,mul(d,-10*K)),add(add(s.p,mul(d,-3.5*K)),mul(pp,8.6*K)),add(add(s.p,mul(d,-3.5*K)),mul(pp,-8.6*K)),add(add(s.p,mul(d,-9.2*K)),mul(pp,3.8*K)),add(add(s.p,mul(d,-9.2*K)),mul(pp,-3.8*K)),s.p];
+  for(const t of L.twy){for(let k=0;k<t.p.length-1&&ok;k++)for(const q of fp)if(projSeg(q,t.p[k],t.p[k+1]).d<12*K){ok=false;break}if(!ok)break}
   if(ok)for(const rw of L.rwy)if(projSeg(s.p,rw.a,rw.b).d<26){ok=false;break}
   try{Object.defineProperty(s,'_clr',{value:{k:ck,v:ok},enumerable:false,configurable:true,writable:true})}catch(e){}return ok}
 /* aerodrome seen from above: grass, graded strips, concrete apron, asphalt taxiways with edge and centre markings,
@@ -1441,9 +1432,9 @@ function renderFlat(L,o){
         const nU=Math.floor(len/70);for(let k=0;k<nU;k++){const q=add(add(b.p[0],mul(ul,35+k*70)),mul(us,wid*.28));g+=`<rect class="fplant" x="-4" y="-2.2" width="8" height="4.4" transform="translate(${f1(q[0])} ${f1(q[1])}) rotate(${f1(angDeg(ul))})"/>`}}}
     g+=`<text class="ftlab" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle">${esc(b.n||'')}</text>`});
   /* parked aircraft with ground equipment beside them */
-  L.std.forEach((s,k)=>{const own=o.own===s.n;if(!(o.parked&&!own&&k%2===0&&s.n!==o.skip&&standClear(L,s)))return;const d=dirH(s.h),pp=[-d[1],d[0]];
-    g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5).replace('</g>',`<path d="${ACT}" class="lvt ${LIVERY[k%LIVERY.length]}"/></g>`);
-    const v1=add(add(s.p,mul(d,-6.5)),mul(pp,-3.4)),v2=add(add(s.p,mul(d,-2.6)),mul(pp,6.2));
+  L.std.forEach((s,k)=>{const own=o.own===s.n;if(!(o.parked&&!own&&k%2===0&&!(o.skip instanceof Set?o.skip.has(s.n):s.n===o.skip)&&standClear(L,s)))return;const d=dirH(s.h),pp=[-d[1],d[0]];
+    const K=acScale(L)/.5;g+=pl(s.p[0],s.p[1],s.h-90,'parked',.5*K).replace('</g>',`<path d="${ACT}" class="lvt ${LIVERY[k%LIVERY.length]}"/></g>`);
+    const v1=add(add(s.p,mul(d,-6.5*K)),mul(pp,-3.4*K)),v2=add(add(s.p,mul(d,-2.6*K)),mul(pp,6.2*K));
     g+=`<rect class="fveh" x="-1.9" y="-.9" width="3.8" height="1.8" rx=".4" transform="translate(${f1(v1[0])} ${f1(v1[1])}) rotate(${f1(s.h)})"/><rect class="fveh2" x="-2.2" y="-1" width="4.4" height="2" rx=".4" transform="translate(${f1(v2[0])} ${f1(v2[1])}) rotate(${f1(s.h)})"/>`});
   /* runways */
   L.rwy.forEach(rw=>{const u=nrm(sub(rw.b,rw.a)),n=[-u[1],u[0]],W=18,l=dist(rw.a,rw.b),P=(t,s)=>add(add(rw.a,mul(u,t)),mul(n,s));
@@ -1524,7 +1515,7 @@ function gRun(o){if(!GCTX||!GCTX.steps)return null;const S=GCTX.steps,i=GCTX.i,s
   if(!same(S[i]))return null;let a=i,b=i;while(a>0&&same(S[a-1]))a--;while(b<S.length-1&&same(S[b+1]))b++;return {k:i-a,run:S.slice(a,b+1).map(x=>x.sc)}}
 function gTaxiPlan(P,R,run){const out=[];let f=run[0]&&run[0].fromPad&&!run[0].arr?padF(P,R):0;const n=run.length;const iS=P.cross?run.findIndex(x=>x.hs==='short'):-1,capS=iS>=0?(P.cross.at-26)/R.tot:1;
   for(let j=0;j<n;j++){const sc=run[j],tk=sc.tt&&sc.tt.k;let f1=j===n-1?1:f+(1-f)/(n-j),J=null;
-    if((tk==='crossing'||tk==='ahead')&&P.G&&!sc.arr){J=findJ(P.G,R,f+30/R.tot);if(J){const stop=J.f-32/R.tot;f1=tk==='crossing'?Math.max(f,stop):Math.max(f,Math.min(f1,stop))}}
+    if((tk==='crossing'||tk==='ahead')&&P.G&&!sc.arr){J=findJ(P.G,R,f+30/R.tot);if(J){const stop=J.f-48/R.tot;f1=tk==='crossing'?Math.max(f,stop):Math.max(f,Math.min(f1,stop))}}
     if(tk==='crossing'&&!J&&j<n-1)f1=f+(f1-f)*.6;
     if(j<iS)f1=Math.min(f1,f+(capS-f)/(iS-j+1));
     if(P.cross&&sc.hs==='short')f1=Math.max(f,(P.cross.at-26)/R.tot);/* stop at the runway holding position */
@@ -1552,54 +1543,107 @@ function parkPath(P,from,ban,minLen=90,avoid){if(!P.G)return null;const G=P.G2||
     const pa=gPathAvoid(G,from,P._ln[st.n],ban,eok);if(!pa)return;const pts=pa.concat([lead,st.p]).filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),l=plen(pts);
     const sc=l<minLen?l+1000:l;if(!best||sc<best.sc)best={sc,pts,st}});
   if(best)P._taken.add(best.st.n);return best}
+/* where a traffic aircraft comes from: one of the parked aircraft (drawn on its stand in every earlier picture) pushes back
+   and taxis out to the junction, so nobody appears out of nowhere */
+function originStand(P,to,ban,avoid,minLen=40){if(!P.G||to<0)return null;parkPath(P,-1,new Set());const G=P.G2,L=P.L;P._orig=P._orig||new Set();
+  const lines=avoid&&avoid.lines||[],eok=(u,j)=>{const a=G.N[u],b=G.N[j];for(const f of [.25,.5,.75]){const q=add(a,mul(sub(b,a),f));for(const r of lines)for(let k=1;k<r.length;k++)if(projSeg(q,r[k-1],r[k]).d<4)return false;if(avoid&&avoid.pts&&avoid.pts.some(x=>dist(x,q)<(avoid.rad||24)))return false}return true};
+  let best=null;L.std.forEach((st,k)=>{if(k%2!==0||st===P.st||P._orig.has(st.n)||!standClear(L,st))return;const d=dirH(st.h),lead=sub(st.p,mul(d,24)),s0=P._ln[st.n];if(s0===undefined||s0<0)return;
+    const b2=new Set(ban);b2.delete(s0);const pa=gPathAvoid(G,s0,to,b2,eok);if(!pa)return;const pts=[lead].concat(pa).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5),l=plen(pts);if(l<minLen)return;
+    if(!best||l<best.l)best={st,lead,pts,l}});
+  if(best)P._orig.add(best.st.n);return best}
 function takeoffPts(P,from){return [from,P.E||P.A,P.E2||P.A,P.B,add(P.B,mul(P.u,520))].filter((q,i,a)=>i===0||dist(q,a[i-1])>.5)}
 const phMv=pts=>({pts,dur:Math.max(4,plen(pts)/26)}),phTo=pts=>({pts,dur:12,ease:'.25 .1 .8 .6',hide:true});
 /* the de-icing pad: a widened spot on your taxi route, about a third of the way to the runway */
 function padF(P,R){return Math.min(.45,Math.max(.2,70/R.tot))}
+/* "behind" traffic follows you along your route, extended back along the taxiway you came from */
+function behindInfo(P,R){
+        const XK='_ext'+R.pts[0].map(Math.round).join('_');if(!P[XK]){let tail=[];const G=P.G,n1=G&&R.pts.length>2?gNear(G,R.pts[1]):-1;if(n1>=0){const fw=nrm(sub(R.pts[2],R.pts[1]));let bk=null,bc=2;G.adj[n1].forEach(e=>{if(e.w<2)return;const v=nrm(sub(G.N[e.j],G.N[n1])),c=v[0]*fw[0]+v[1]*fw[1];if(c<bc){bc=c;bk=e}});const nr=q=>{for(let k=2;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<10)return true;return false};if(bk&&bc<-.3&&!nr(G.N[bk.j]))tail=gWalk(G,n1,bk.j,160,nr).reverse()}
+          const ext=tail.length?tail.concat(R.pts.slice(2)):R.pts.slice(),off=tail.length?plen(tail)-plen(R.pts.slice(0,2)):0;P[XK]={E:rLine(ext),off}}
+        const X=P[XK],E=X.E,dOwn=f=>Math.max(0,f*R.tot+X.off),back=f=>{const d0=dOwn(f),q0=R.at(f);let d=d0-50;while(d>0&&dist(E.at(d/E.tot),q0)<30)d-=3;return Math.max(0,d)/E.tot};
+        return {E,back,X}}
+/* where crossing traffic comes from when no parked aircraft can reach the junction: it lands on the runway in use,
+   rolls out, vacates and taxis across your route (it is never created out of nowhere) */
+function landOrigin(P,J,nbJ,ban){const G=P.G;if(!G)return null;let best=null;
+  G.N.forEach((q,i)=>{const pr=projSeg(q,P.A,P.B);if(pr.d>3||pr.t<.12||pr.t>.98)return;const pa=gPathAvoid(G,J.node,i,ban,null);if(!pa||pa.length<2)return;
+    if(nbJ!==undefined&&dist(pa[1],G.N[nbJ])>1)return;const l=plen(pa);if(!best||l<best.l)best={pa,l,X:q,xp:pr.q}});
+  if(!best)return null;const inn=best.pa.slice().reverse(),a0=sub(P.A,mul(P.u,320)),td=add(P.A,mul(P.u,Math.min(25,dist(P.A,best.xp)*.4)));
+  const pts=[a0,td,best.xp].concat(inn).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5);
+  return {pts,La:dist(a0,td),Lr:dist(td,best.xp),inn}}
+function landTimed(pts,La,Lr,extra){const Lt=plen(pts),t1=La/95,t2=t1+Lr/50,t3=t2+(Lt-La-Lr)/24;return {pts,dur:t3,kt:[0,t1/t3,t2/t3,1],kp:[0,La/Lt,(La+Lr)/Lt,1]}}
 function gStories(P,R,plan,arr){P._sty=P._sty||new Map();const key=(arr?'a':'d')+JSON.stringify(plan.map(x=>[x.tk||'',+x.f1.toFixed(4)]));if(P._sty.has(key))return P._sty.get(key);
   const G=P.G,out=[];
   plan.forEach((pl,c)=>{const tk=pl.tk;if(!tk||!G)return;
-    if(tk==='behind'){out.push({c,behind:true});return}
-    const J=pl.J;let inn=null;
-    if(J){const p=R.pts[J.i],d=nrm(sub(p,R.pts[J.i-1])),cr=v=>d[0]*v[1]-d[1]*v[0];const nb=J.nbs.map(e=>({e,v:nrm(sub(G.N[e.j],p))})).sort((a,b)=>tk==='crossing'?cr(a.v)-cr(b.v):cr(b.v)-cr(a.v));const nearR=q=>{for(let k=1;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<8)return true;return dist(q,R.pts[0])<30};inn=gWalk(G,J.node,nb[0].e.j,75,nearR).reverse()}
-    if((tk==='crossing'||arr)&&J){const ban=nodesOf(G,R.pts.concat(inn.slice(0,-1)));ban.delete(J.node);const pk=parkPath(P,J.node,ban,90,{lines:[R.pts,inn]});
-      if(pk){const ph=splitAt(inn.concat(pk.pts.slice(1)),plen(inn)+70);out.push({c,phases:[phMv(ph[0]),phMv(ph[1])],park:pk.st});return}}
+    if(tk==='behind'){const BI=behindInfo(P,R),E=BI.E,a0=BI.back(pl.f0)*E.tot;let node=-1,bd=-1;
+      G.N.forEach((q,i)=>{let best=1e9,dd=0;for(let k=1;k<E.pts.length;k++){const pr=projSeg(q,E.pts[k-1],E.pts[k]);if(pr.d<best){best=pr.d;dd=E.cum[k-1]+pr.t*dist(E.pts[k-1],E.pts[k])}}if(best<3&&dd<=a0+.5&&dd>bd){bd=dd;node=i}});
+      let org=null;if(node>=0){const ahead=R.part(pl.f0,1),ban0=nodesOf(G,ahead);ban0.delete(node);org=originStand(P,node,ban0,{lines:[ahead],pts:[R.at(pl.f0)],rad:24},20)||originStand(P,node,new Set(),{lines:[R.part(pl.f0,pl.f1)],pts:[R.at(pl.f0).slice(0,2),R.at(pl.f1).slice(0,2)],rad:26},20)}
+      out.push(org?{c,behind:true,from:org.st.n,org:{pts:org.pts,dN:bd,pre:{pts:[org.st.p,org.lead],dur:5}}}:{c,behind:true});return}
+    const J=pl.J;let inn=null,pre=null,from=null,land=null;const PRE=s=>{if(pre&&s.phases&&s.phases[0])s.phases[0]=Object.assign({},s.phases[0],{pre});if(from)s.from=from;return s};
+    if(J){const p=R.pts[J.i],d=nrm(sub(p,R.pts[J.i-1])),cr=v=>d[0]*v[1]-d[1]*v[0];const nb=J.nbs.map(e=>({e,v:nrm(sub(G.N[e.j],p))})).sort((a,b)=>tk==='crossing'?cr(a.v)-cr(b.v):cr(b.v)-cr(a.v));const nearR=q=>{for(let k=1;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<8)return true;return dist(q,R.pts[0])<30};inn=gWalk(G,J.node,nb[0].e.j,75,nearR).reverse();{const ban0=nodesOf(G,R.pts);ban0.delete(J.node);let org=originStand(P,J.node,ban0,{lines:[R.pts],pts:[R.pts[0]],rad:22});if(!org){const ahead=R.part(pl.f0,1),b1=nodesOf(G,ahead);b1.delete(J.node);org=originStand(P,J.node,b1,{lines:[ahead],pts:[R.at(pl.f0).slice(0,2)],rad:24})}if(!org&&tk!=='crossing'&&!arr){org=originStand(P,J.node,new Set(),{pts:[R.at(pl.f0).slice(0,2)],rad:30})}
+      if(org){inn=org.pts;pre={pts:[org.st.p,org.lead],dur:5};from=org.st.n}
+      else if(tk==='crossing'){const ban1=nodesOf(G,R.pts);ban1.delete(J.node);const lo=landOrigin(P,J,nb[0].e.j,ban1);if(lo){inn=lo.inn;land=lo}}}}
+    if((tk==='crossing'||arr)&&J){const ban=nodesOf(G,R.pts.concat(inn.slice(0,-1)));ban.delete(J.node);let pk=parkPath(P,J.node,ban,90,{lines:[R.pts,inn]});if(!pk&&land)pk=parkPath(P,J.node,new Set(nodesOf(G,inn.slice(0,-1))),40);
+      if(pk){const ph=splitAt(inn.concat(pk.pts.slice(1)),plen(inn)+70);
+        if(land){const p0=land.pts.slice(0,3).concat(ph[0].slice(1)).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5);out.push({c,phases:[landTimed(p0,land.La,land.Lr),phMv(ph[1])],park:pk.st});return}
+        out.push(PRE({c,phases:[phMv(ph[0]),phMv(ph[1])],park:pk.st}));return}}
     if(arr)return;/* arriving traffic only ever goes to a stand */
     /* otherwise it is departing: taxi to the holding point, then line up and take off */
-    const full=J?inn.concat(R.pts.slice(J.i+1)):R.part(Math.min(1,pl.f1+45/R.tot),1);if(full.length<2||plen(full)<5)return;
+    let full=J?inn.concat(R.pts.slice(J.i+1)):R.part(Math.min(1,pl.f1+45/R.tot),1);
+    if(!J&&full.length>1){/* no side junction ahead: a parked aircraft pushes back and joins your route well ahead of you */const fs=Math.min(1,pl.f1+45/R.tot);let k=1;while(k<R.pts.length-1&&R.fOf(k)<fs)k++;const node=gNear(G,R.pts[k]);
+      if(node>=0&&R.tot-R.cum[k]>20){const behindPart=R.part(pl.f0,R.fOf(k)),b1=nodesOf(G,behindPart);b1.delete(node);const org=originStand(P,node,b1,{lines:[behindPart],pts:[R.at(pl.f0).slice(0,2),R.at(pl.f1).slice(0,2)],rad:26},20);
+        if(org){full=org.pts.concat(R.pts.slice(k+1)).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5);pre={pts:[org.st.p,org.lead],dur:5};from=org.st.n}}}if(full.length<2||plen(full)<5)return;
     const toP=takeoffPts(P,full[full.length-1]),to=phTo(toP);
     /* little room left before the holding point: it taxis straight onto the runway and departs in one go, well before you get there */
     const both=pts=>({pts:pts.concat(toP.slice(1)),dur:plen(pts)/26+11,ease:'.2 0 .8 .6',hide:true});
     const last=c>=plan.length-1;/* you reach the holding point on the very next step: it must be gone by then */
-    if(!J||(1-pl.f1)*R.tot<70||last){out.push({c,phases:[both(full)]});return}
-    if(tk==='crossing'){const ph=splitAt(full,(inn?plen(inn):0)+70);out.push({c,phases:c+1>=plan.length-1?[phMv(ph[0]),both(ph[1])]:[phMv(ph[0]),phMv(ph[1]),to]})}
-    else out.push({c,phases:[phMv(full),to]})});
+    if(!J||(1-pl.f1)*R.tot<70||last){out.push(PRE({c,phases:[both(full)]}));return}
+    if(tk==='crossing'){const ph=splitAt(full,(inn?plen(inn):0)+70);out.push(PRE({c,phases:c+1>=plan.length-1?[phMv(ph[0]),both(ph[1])]:[phMv(ph[0]),phMv(ph[1]),to]}))}
+    else out.push(PRE({c,phases:[phMv(full),to]}))});
   P._sty.set(key,out);return out}
 /* landing traffic: lands, vacates by a rapid exit, taxis to a free stand */
-function landStory(P){if(P._land!==undefined)return P._land;const G=P.G,s0=sub(P.A,mul(P.u,120)),td=add(P.A,mul(P.u,22));let X=-1,bt=9;
+function landStory(P){if(P._land!==undefined)return P._land;const G=P.G,s0=sub(P.A,mul(P.u,300)),td=add(P.A,mul(P.u,22));let X=-1,bt=9;
   if(G)G.N.forEach((n,i)=>{const pr=projSeg(n,P.A,P.B);if(pr.d>45||pr.t<.45||pr.t>.97||!G.adj[i].length)return;if(P.hp&&dist(n,P.hp.p)<20)return;const sc=Math.abs(pr.t-.68)+(pr.d>12?1:0)+pr.d/100;if(sc<bt){bt=sc;X=i}});
   let st;if(X>=0){const xc=projSeg(G.N[X],P.A,P.B).q,pk=parkPath(P,X,new Set(),0,{pts:[P.pts&&P.pts.length?P.pts[P.pts.length-1]:P.hp?P.hp.p:P.A,P.E||P.A],rad:32,lines:[[P.A,P.B]].concat(P.E?[[P.pts&&P.pts.length?P.pts[P.pts.length-1]:P.hp.p,P.E,P.E2]]:[])}),full=[s0,td,xc].concat(pk?pk.pts:[G.N[X]]).filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),ph=splitAt(full,plen([s0,td,xc,G.N[X]])+45);
-    if(pk)st={phases:[{pts:ph[0],dur:11,ease:'0 0 .35 1'}].concat(ph[1].length>1?[phMv(ph[1])]:[]),park:pk.st,stay:null};
+    if(pk)st={phases:[{pts:ph[0],dur:13,ease:'0 0 .35 1'}].concat(ph[1].length>1?[phMv(ph[1])]:[]),park:pk.st,stay:null};
     else{/* no free stand: it still clears the runway completely and waits off it */const Xp=G.N[X];let dO;if(dist(Xp,xc)>3)dO=nrm(sub(Xp,xc));else{let n2=[-P.u[1],P.u[0]];const bc=P.L.bld&&P.L.bld[0]?P.L.bld[0].p.reduce((a,q)=>[a[0]+q[0]/P.L.bld[0].p.length,a[1]+q[1]/P.L.bld[0].p.length],[0,0]):Xp;if((bc[0]-Xp[0])*n2[0]+(bc[1]-Xp[1])*n2[1]<0)n2=mul(n2,-1);dO=n2}
-      const off=add(Xp,mul(dO,34));st={phases:[{pts:[s0,td,xc,Xp,off].filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),dur:11,ease:'0 0 .35 1'}],park:null,stay:off}}}
-  else st={phases:[{pts:[s0,td,sub(P.B,mul(P.u,10)),add(P.B,mul(P.u,60))],dur:11,ease:'0 0 .35 1',hide:true}]};
+      const off=add(Xp,mul(dO,34));st={phases:[{pts:[s0,td,xc,Xp,off].filter((q,i,a)=>i===0||dist(q,a[i-1])>.5),dur:13,ease:'0 0 .35 1'}],park:null,stay:off}}}
+  else st={phases:[{pts:[s0,td,sub(P.B,mul(P.u,10)),add(P.B,mul(P.u,60))],dur:13,ease:'0 0 .35 1',hide:true}]};
   return P._land=st}
 /* ---------- separation check: no other aircraft may ever pass through yours ---------- */
 function bezY(x1,y1,x2,y2,x){let lo=0,hi=1,t=x;for(let k=0;k<24;k++){t=(lo+hi)/2;const cx=3*x1*t*(1-t)**2+3*x2*t*t*(1-t)+t**3;if(cx<x)lo=t;else hi=t}return 3*y1*t*(1-t)**2+3*y2*t*t*(1-t)+t**3}
 function polyAt(pts,f){const L=plen(pts);let t=f*L;for(let k=1;k<pts.length;k++){const d=dist(pts[k-1],pts[k]);if(t<=d||k===pts.length-1){const r=d?Math.min(1,t/d):0;return add(pts[k-1],mul(sub(pts[k],pts[k-1]),r))}t-=d}return pts[0]}
-function moverPos(m,t){if(m.pts.length<2||!m.dur)return m.pts[0];if(m.hide&&t>=m.dur)return null;let f=Math.min(1,t/m.dur);if(m.kp){const u=f;let j=1;while(j<m.kt.length-1&&m.kt[j]<u)j++;const span=m.kt[j]-m.kt[j-1];f=m.kp[j-1]+(m.kp[j]-m.kp[j-1])*(span?(u-m.kt[j-1])/span:1)}if(m.ease){const k=m.ease.split(/[ ,]+/).map(Number);f=bezY(k[0],k[1],k[2],k[3],f)}return polyAt(m.pts,f)}
+function moverPos(m,t){if(m.delay){if(t<m.delay)return m.pre?m.pre.pts[0]:m.pts[0];return moverPos(Object.assign({},m,{delay:0}),t-m.delay)}if(m.pre){const P0=m.pre.dur+.8;if(t<m.pre.dur)return polyAt(m.pre.pts,Math.max(0,t)/m.pre.dur);if(t<P0)return m.pre.pts[m.pre.pts.length-1];return moverPos(Object.assign({},m,{pre:null}),t-P0)}if(m.pts.length<2||!m.dur)return m.pts[0];if(m.hide&&t>=m.dur)return null;let f=Math.min(1,t/m.dur);if(m.kp){const u=f;let j=1;while(j<m.kt.length-1&&m.kt[j]<u)j++;const span=m.kt[j]-m.kt[j-1];f=m.kp[j-1]+(m.kp[j]-m.kp[j-1])*(span?(u-m.kt[j-1])/span:1)}if(m.ease){const k=m.ease.split(/[ ,]+/).map(Number);f=bezY(k[0],k[1],k[2],k[3],f)}return polyAt(m.pts,f)}
+/* real outline of an aircraft symbol (fuselage, wings, tailplane) so the check is about touching, not centre distance */
+const ACSEG=[[[19,0],[-19,0],2.4],[[1,-2],[-7.5,-17],1.5],[[1,2],[-7.5,17],1.5],[[-15,-1],[-18.5,-7.5],1.1],[[-15,1],[-18.5,7.5],1.1]];
+function segD(a,b,c,d){const den=(b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);if(Math.abs(den)>1e-9){const t=((c[0]-a[0])*(d[1]-c[1])-(c[1]-a[1])*(d[0]-c[0]))/den,u=((c[0]-a[0])*(b[1]-a[1])-(c[1]-a[1])*(b[0]-a[0]))/den;if(t>=0&&t<=1&&u>=0&&u<=1)return 0}
+  return Math.min(projSeg(a,c,d).d,projSeg(b,c,d).d,projSeg(c,a,b).d,projSeg(d,a,b).d)}
+function moverHdg(m,t){if(m.pts.length<2||!m.dur)return m.h||0;if(m.pre){const P0=m.pre.dur+.8;if(t<P0){const pp=m.pre.pts;return angDeg(sub(pp[pp.length-1],pp[0]))+180}}
+  const p=moverPos(m,t);if(!p)return 0;let best=0,bd=1e9;for(let k=1;k<m.pts.length;k++){const d=projSeg(p,m.pts[k-1],m.pts[k]).d;if(d<bd-.01){bd=d;best=k}}return angDeg(sub(m.pts[best],m.pts[best-1]))}
+function acShape(m,t,s){const p=moverPos(m,t);if(!p)return null;const h=moverHdg(m,t)*Math.PI/180,c=Math.cos(h),n=Math.sin(h),T=q=>[p[0]+(q[0]*c-q[1]*n)*s,p[1]+(q[0]*n+q[1]*c)*s];return ACSEG.map(([a,b,r])=>[T(a),T(b),r*s])}
+function shapeGap(a,b,T,s=.5){let mn=1e9;for(let t=0;t<=T;t+=.25){const A=acShape(a,t,s),B=acShape(b,t,s);if(!A||!B)continue;for(const x of A)for(const y of B){const d=segD(x[0],x[1],y[0],y[1])-x[2]-y[2];if(d<mn)mn=d}if(mn<-5)break}return mn}
 function minSep(a,b,T){let mn=1e9;for(let t=0;t<=T;t+=.2){const p=moverPos(a,t),q=moverPos(b,t);if(p&&q){const d=dist(p,q);if(d<mn)mn=d}}return mn}
-function resolveTraffic(g,ac,TRQ,GS,OWNS){
+function resolveTraffic(g,ac,TRQ,GS,OWNS,PARKED){
   let own=OWNS||null;if(!own){const m=ac.match(/class="ac" transform="scale\([^)]*\)"\/><animateMotion ([^>]*)/),dm=m&&/dur="([\d.]+)s"/.exec(m[1]),pm=m&&(/data-poly="([^"]+)"/.exec(m[1])||/ path="([^"]+)"/.exec(m[1]));
     if(dm&&pm){own={dur:+dm[1],pts:pm[1].slice(1).split(/ ?L ?/).map(x=>x.split(',').map(Number))};const ks=/keySplines="([^"]+)"/.exec(m[1]);if(ks)own.ease=ks[1]}
-    else{const s=ac.match(/translate\(([-\d.]+) ([-\d.]+)\)[^>]*>(?:<circle class="halo"[^>]*\/>)?<path d="[^"]*" class="ac"/);if(s)own={pts:[[+s[1],+s[2]]],dur:0}}}
-  const SEP=14,draw=x=>{if(x.pts.length<2||!x.dur)return pl(x.pts[0][0],x.pts[0][1],x.h!==undefined?x.h:0,'tr',GS);const e=x.pts[x.pts.length-1];return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:x.dur,cls:'tr',s:GS,ease:x.ease,hideEnd:x.hide})};
+    else{const s=ac.match(/translate\(([-\d.]+) ([-\d.]+)\)(?: rotate\(([-\d.]+)\))?[^>]*>(?:<circle class="halo"[^>]*\/>)?<path d="[^"]*" class="ac"/);if(s)own={pts:[[+s[1],+s[2]]],dur:0,h:+(s[3]||0)}}}
+  const SEP=14,draw=x=>{if(x.pts.length<2||!x.dur)return pl(x.pts[0][0],x.pts[0][1],x.h!==undefined?x.h:0,'tr',GS);const e=x.pts[x.pts.length-1];
+    if(x.delay&&!x.pre){const T=x.dur+x.delay,d=x.delay,kp=x.kp?[0].concat(x.kp):[0,0,1],kt=x.kp?[0].concat(x.kt.map(v=>(d+v*x.dur)/T)):[0,d/T,1];return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:T,cls:'tr',s:GS,kp,kt,hideEnd:x.hide})}
+    if(x.pre){/* pushback (tail first), a short pause, then it taxis away */const D=x.delay||0,P0=D+x.pre.dur+.8,tot=P0+x.dur,pp=x.pre.pts,pe=pp[pp.length-1];
+      if(RM||ANIM_OFF>=tot)return x.hide?'':pl(e[0],e[1],lastHdg(x.pts),'tr',GS);
+      const b=v=>(v-ANIM_OFF).toFixed(2);
+      if(ANIM_OFF>=P0){const sv=ANIM_OFF;ANIM_OFF=sv-P0;try{return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:x.dur,cls:'tr',s:GS,ease:x.ease,hideEnd:x.hide})}finally{ANIM_OFF=sv}}
+      return `<g><set attributeName="opacity" to="0" begin="${b(P0)}s"/><path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${(D+x.pre.dur).toFixed(2)}s" begin="${b(0)}s" fill="freeze" rotate="auto-reverse" path="${pth(pp)}"${D?` calcMode="linear" keyTimes="0;${(D/(D+x.pre.dur)).toFixed(4)};1" keyPoints="0;0;1"`:''}/></g>`+
+        `<g opacity="0"><set attributeName="opacity" to="1" begin="${b(P0)}s"/>${x.hide?`<set attributeName="opacity" to="0" begin="${b(tot)}s"/>`:''}<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${x.dur.toFixed(2)}s" begin="${b(P0)}s" fill="freeze" rotate="auto" path="${roundD(pth(x.pts),MV_ROUND)}"${x.ease?` calcMode="spline" keyTimes="0;1" keyPoints="0;1" keySplines="${x.ease}"`:''}/></g>`}
+    return mv(pth(x.pts),[e[0],e[1],lastHdg(x.pts)],{dur:x.dur,cls:'tr',s:GS,ease:x.ease,kp:x.kp,kt:x.kt,hideEnd:x.hide})};
   /* parked / waiting aircraft are placed first, then moving ones; nobody may pass through you or through another aircraft */
   const ok=[],out={},order=TRQ.map((q,k)=>k).sort((x,y)=>(TRQ[x].pts.length>1)-(TRQ[y].pts.length>1));
-  const T0=Math.max(own&&own.dur||0,...TRQ.map(q=>q.dur||0),1)+.2;
-  const clear=(m,sp)=>(!own||minSep(m,own,T0)>=sp)&&ok.every(o=>minSep(m,o,T0)>=10);
+  const T0=Math.max(own&&own.dur||0,...TRQ.map(q=>(q.dur||0)+(q.pre?q.pre.dur+.8:0)),1)+.2;
+  const clear=(m,sp)=>(!own||shapeGap(m,own,T0+(m.delay||0),GS)>=.8)&&ok.every(o=>shapeGap(m,o,T0+(m.delay||0),GS)>=.5);
+  (PARKED||[]).forEach(s=>ok.push({pts:[s.p],h:s.h-90}));
   for(const k of order){const q=TRQ[k];const sp=q.sep||SEP;let pick=null;
-    if(clear(q,sp))pick=q;else for(const pt of [q.pts[0],q.pts[q.pts.length-1]]){const w={pts:[pt],h:q.pts.length>1?angDeg(sub(q.pts[1],q.pts[0])):q.h};if(clear(w,sp)){pick=w;break}}
+    if(clear(q,sp))pick=q;
+    if(!pick&&q.pts.length>1&&!q.ease)for(const d of [2,4,7,11]){const w=Object.assign({},q,{delay:d});if(clear(w,sp)){pick=w;break}}
+    if(!pick)for(const pt of [q.pts[0],q.pts[q.pts.length-1]]){const w={pts:[pt],h:q.pts.length>1?angDeg(sub(q.pts[1],q.pts[0])):q.h};if(clear(w,sp)){pick=w;break}}
+    if(window.RTLOG)RTLOG.push({gapOwn:own?+shapeGap(q,own,T0,GS).toFixed(1):null,ownDur:own&&own.dur,sepOwn:own?+minSep(q,own,T0).toFixed(1):null,sepOther:ok.length?+Math.min(...ok.map(o=>minSep(q,o,T0))).toFixed(1):null,k,mv:q.pts.length>1,pick:pick?(pick===q?'as-planned':pick.delay?'delay '+pick.delay:'static'):'dropped',from:q.pts[0].map(Math.round),to:q.pts[q.pts.length-1].map(Math.round)});
     if(pick){ok.push(pick);out[k]=draw(pick)}else out[k]=''}
   return g.replace(/<!--TR(\d+)-->/g,(_,k)=>out[+k]||'')}
 function arrPts(P){return P.ex?splitAt(P.ex.pts,18)[1]:P.pts.slice().reverse()}
@@ -1614,16 +1658,26 @@ function pbxPick(P,R,f0,only){if(!P.G)return null;const L=P.L,TP={f0};parkPath(P
     const dRem=q=>{let m=1e9;for(let k2=1;k2<remain.length;k2++)m=Math.min(m,projSeg(q,remain[k2-1],remain[k2]).d);return m};
     let best=null;L.std.forEach((st2,k)=>{if(k%2!==0||st2===P.st||!standClear(L,st2)||(only&&st2.n!==only))return;const dv=dirH(st2.h);
       /* push back along the lead-in line, but stop clear of your taxi route */
-      let pl2=24;while(pl2>=10&&dRem(sub(st2.p,mul(dv,pl2)))<15)pl2-=2;if(pl2<10)return;const lead=sub(st2.p,mul(dv,pl2));
+      let pl2=24;while(pl2>=8&&dRem(sub(st2.p,mul(dv,pl2)))<20.5*acScale(L)/.5)pl2-=2;if(pl2<8)return;if(pl2<10)return;const lead=sub(st2.p,mul(dv,pl2));
       let bf=-1,bd=1e9;for(let f=TP.f0;f<=1;f+=.01){const d=dist(R.at(f),lead);if(d<bd){bd=d;bf=f}}if(bd>60)return;
       const ln=LN[st2.n];let away=null;if(ln!==undefined&&ln>=0&&!ban.has(ln)&&hpN>=0){const b2=new Set(ban);b2.delete(hpN);const pa=gPathAvoid(G2,ln,hpN,b2,eok);if(pa)away=[lead].concat(pa.slice(1))}
       const wait=bf>TP.f0+40/R.tot&&bf<.97,sc2=(wait?0:5)+bd/60+(away?0:.5);if(!best||sc2<best.sc2)best={st:st2,lead,fC:bf,bd,sc2,wait,away}});
     return best?Object.assign(best,{fs:best.wait?Math.max(TP.f0,best.fC-34/R.tot):-1}):null}
 function padMark(R2,f){const q=R2.at(f),u=dirH(q[2]+90),n=[-u[1],u[0]],c=[q[0],q[1]],P4=[add(add(c,mul(u,16)),mul(n,12)),add(add(c,mul(u,16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,-12)),add(add(c,mul(u,-16)),mul(n,12))];
   return `<polygon class="fap" points="${PTS(P4)}" opacity=".9"/><polygon points="${PTS(P4)}" fill="none" class="fhp" stroke-dasharray="3 2"/><text class="ftlab2" x="${(c[0]+n[0]*18).toFixed(1)}" y="${(c[1]+n[1]*18+3).toFixed(1)}" text-anchor="middle">DE-ICE</text>`}
+/* the aircraft that passes behind you while you are still on your stand: it comes from another stand */
+function standBehind(P){if(P._sbo!==undefined)return P._sbo;P._sbo=null;const G=P.G;if(!G||!P.ok||P.pts.length<3)return null;const n1=gNear(G,P.pts[1]);if(n1<0)return null;
+  const own=nodesOf(G,[P.st.p,P.pb]);own.delete(n1);const org=originStand(P,n1,own,{pts:[P.st.p],rad:18},20);if(!org)return null;
+  const pts=org.pts.concat(P.pts.slice(2)).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5);P._sbo={st:org.st,pts,pre:{pts:[org.st.p,org.lead],dur:5}};return P._sbo}
+/* traffic that has no parked aircraft to come from is already waiting where its story starts, from the first picture on */
+function storyWait(P,R,st){if(st.from)return null;if(st.behind){const E=behindInfo(P,R).E;return E.at(0)}
+  const ph=st.phases&&st.phases[0];if(!ph||ph.kp||ph.pts.length<2)return null;const q=ph.pts[0];return [q[0],q[1],angDeg(sub(ph.pts[1],q))]}
+function upcomingWaits(P,o){if(!GCTX||o.arr)return [];const S=GCTX.steps;let j=GCTX.i+1;while(j<S.length&&S[j].sc&&S[j].sc.t==='ground'&&!S[j].sc.arr&&S[j].sc.ac!=='taxi')j++;
+  const x=S[j]&&S[j].sc;if(!x||x.t!=='ground'||x.arr||x.ac!=='taxi'||!P.ok||P.pts.length<2)return [];const sv=GCTX.i;GCTX.i=j;let out=[];
+  try{const run=gRun(x);if(run){const R=rLine(P.pts),PLAN=gTaxiPlan(P,R,run.run);out=gStories(P,R,PLAN,false).map(st=>storyWait(P,R,st)).filter(Boolean)}}finally{GCTX.i=sv}return out}
 function sGround(o){const sv=MV_ROUND;MV_ROUND=6;try{return sGround0(o)}finally{MV_ROUND=sv}}
 function sGround0(o){
-  const ad=adOf(o),P=groundPlan(ad),L=P.L,v=V(),GS=.5,ua=angDeg(P.u),wdTxt=o.arr?v.AW:v.DW1;
+  const ad=adOf(o),P=groundPlan(ad),L=P.L,v=V(),GS=acScale(P.L),ua=angDeg(P.u),wdTxt=o.arr?v.AW:v.DW1;
   const off=['lineup','roll','rto','remote','landed'].includes(o.ac);
   const st=P.st,pb=P.pb||(st&&st.p)||[300,150];
   const grd=['stand','push','pushed','taxi','hp'].includes(o.ac);
@@ -1633,7 +1687,7 @@ function sGround0(o){
   /* arrival "give way to the aircraft pushing back": pick an occupied stand next to your route; it pushes back while you wait, then taxis off */
   let PBX=null,OWNS=null;const PUSHT=5;
   if(TP&&R&&o.ac==='taxiin'&&o.tt&&o.tt.k==='ahead'&&P.G)PBX=pbxPick(P,R,TP.f0,o.tt.std||null);
-  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,wind:parseFloat(wdTxt),parked:true,skip:PBX?PBX.st.n:null,route:['taxi','pushed'].includes(o.ac)?P.names:[]});
+  let g='';const RFO={own:P.std,hp:P.hp,rw:P.rw,wind:parseFloat(wdTxt),parked:true,route:['taxi','pushed'].includes(o.ac)?P.names:[]};
   SCENE_INFO=`${ad.n} ${ad.i} · RWY ${P.des} · WIND ${wdTxt}°/${MSX()?(o.arr?MSX().wind.as:MSX().wind.s):8} KT`;
   {const hpn=P.hp&&P.hp.n?P.hp.n:'',via=P.names.length?' via '+P.names.join(', '):'';
    const Y={stand:`On stand ${P.std}${o.tug?' · tug connected':''}`,push:`Pushing back from stand ${P.std}`,pushed:o.tug?'Pushed back · tug on · engines off':'Engines running · ready to taxi',
@@ -1647,16 +1701,19 @@ function sGround0(o){
   /* landing traffic keeps its story over the following steps */
   let LANDP=-1;{const S=GCTX&&GCTX.steps,i=GCTX?GCTX.i:0,isG=x=>x&&x.sc&&x.sc.t==='ground'&&!x.sc.arr;
     if(o.traffic==='final'||o.traffic==='landing'){let c=i;if(S)while(c>0&&isG(S[c-1])&&S[c-1].sc.traffic)c--;LANDP=i-c}
-    else if(S&&!o.arr&&['hp','lineup','roll'].includes(o.ac)){let k=i;while(k>0&&isG(S[k-1])&&!S[k-1].sc.traffic&&['hp','lineup','roll'].includes(S[k-1].sc.ac))k--;
+    else if(S&&!o.arr&&['hp','lineup','roll','rto'].includes(o.ac)){let k=i;while(k>0&&isG(S[k-1])&&!S[k-1].sc.traffic&&['hp','lineup','roll','rto'].includes(S[k-1].sc.ac))k--;
       if(k>0&&isG(S[k-1])&&S[k-1].sc.traffic){let c=k-1;while(c>0&&isG(S[c-1])&&S[c-1].sc.traffic)c--;LANDP=i-c}}}
   const own=(x,y,r)=>pl(x,y,r,'ac',GS);
   /* at the holding point: carry on the stories of the taxi steps just before */
   if(['hp','lineup','roll','rto'].includes(o.ac)&&!o.arr&&P.ok&&P.pts.length>1&&GCTX){const S=GCTX.steps;let i=GCTX.i,m=0;const isHp=x=>x&&x.sc&&x.sc.t==='ground'&&['hp','lineup','roll','rto'].includes(x.sc.ac)&&!x.sc.arr;
     while(i>0&&isHp(S[i-1])){i--;m++}const prev=S[i-1];if(prev&&prev.sc&&prev.sc.t==='ground'&&prev.sc.ac==='taxi'&&!prev.sc.arr){const sv=GCTX.i;GCTX.i=i-1;const run=gRun(prev.sc);GCTX.i=sv;
       if(run){R=rLine(P.pts);PLAN=gTaxiPlan(P,R,run.run);RK=run.run.length+m}}}
+  const SKIP=new Set();
+  /* parked aircraft that have already pushed back for their story are no longer on their stands */
+  {const skip=SKIP;if(PBX)skip.add(PBX.st.n);if(GCTX&&!o.arr){for(let k=0;k<=GCTX.i;k++){const x=GCTX.steps[k]&&GCTX.steps[k].sc;if(x&&x.t==='ground'&&!x.arr&&x.ac==='stand'&&x.tt&&x.tt.k==='behind'){const sb=standBehind(P);if(sb)skip.add(sb.st.n);break}}}if(PLAN&&R)gStories(P,R,PLAN,o.ac==='taxiin').forEach(s=>{if(s.from&&RK>=s.c)skip.add(s.from)});g=renderFlat(L,Object.assign({skip},RFO))+g}
   /* traffic is queued, then checked against your own movement before it is drawn */
   const TRQ=[];
-  const trMove=(pts,dur,near,ex={})=>{if(!pts||pts.length<2)return '';const e=pts[pts.length-1];if(!ex.nofp)fp.push(pts[0],near||e);TRQ.push({pts,dur,ease:ex.ease,hide:!!ex.hideEnd,sep:ex.sep});return `<!--TR${TRQ.length-1}-->`};
+  const trMove=(pts,dur,near,ex={})=>{if(!pts||!pts.length)return '';if(pts.length<2||plen(pts)<.5){fp.push(pts[0]);TRQ.push({pts:[pts[0]],h:ex.h||0});return `<!--TR${TRQ.length-1}-->`}const e=pts[pts.length-1];if(!ex.nofp)fp.push(ex.pre?ex.pre.pts[0]:pts[0],near||e);TRQ.push({pts,dur,ease:ex.ease,hide:!!ex.hideEnd,sep:ex.sep,pre:ex.pre||null,kp:ex.kp||null,kt:ex.kt||null});return `<!--TR${TRQ.length-1}-->`};
   const trStatic=(q,h)=>{fp.push(q);TRQ.push({pts:[q],h});return `<!--TR${TRQ.length-1}-->`};
   const parked=st=>{TRQ.push({pts:[st.p],h:st.h-90});return `<!--TR${TRQ.length-1}-->`};
   if(LANDP>=0){const ls=landStory(P),ph=ls.phases[LANDP];
@@ -1671,28 +1728,23 @@ function sGround0(o){
       if(aw){const d2=Math.max(4,plen(aw)/24);g+=grp(`<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${d2.toFixed(2)}s" begin="${(PUSHT+1+b0).toFixed(2)}s" fill="freeze" rotate="auto" path="${pth(aw)}"/>`,PUSHT+1,0)}}}
   /* other aircraft: each one keeps moving logically over the following steps */
   if(PLAN&&R){const stories=gStories(P,R,PLAN,o.ac==='taxiin');
-    stories.forEach(st=>{const p=RK-st.c;if(p<0)return;
+    stories.forEach(st=>{const p=RK-st.c;if(p<0){const w=storyWait(P,R,st);if(w)g+=trStatic(w,w[2]);return}
       if(st.behind){/* it follows you along your route, extended back along the taxiway you came from, so there is always room behind you */
-        const XK='_ext'+R.pts[0].map(Math.round).join('_');if(!P[XK]){let tail=[];const G=P.G,n1=G&&R.pts.length>2?gNear(G,R.pts[1]):-1;if(n1>=0){const fw=nrm(sub(R.pts[2],R.pts[1]));let bk=null,bc=2;G.adj[n1].forEach(e=>{if(e.w<2)return;const v=nrm(sub(G.N[e.j],G.N[n1])),c=v[0]*fw[0]+v[1]*fw[1];if(c<bc){bc=c;bk=e}});const nr=q=>{for(let k=2;k<R.pts.length;k++)if(projSeg(q,R.pts[k-1],R.pts[k]).d<10)return true;return false};if(bk&&bc<-.3&&!nr(G.N[bk.j]))tail=gWalk(G,n1,bk.j,160,nr).reverse()}
-          const ext=tail.length?tail.concat(R.pts.slice(2)):R.pts.slice(),off=tail.length?plen(tail)-plen(R.pts.slice(0,2)):0;P[XK]={E:rLine(ext),off}}
-        const X=P[XK],E=X.E,dOwn=f=>Math.max(0,f*R.tot+X.off),back=f=>{const d0=dOwn(f),q0=R.at(f);let d=d0-50;while(d>0&&dist(E.at(d/E.tot),q0)<30)d-=3;return Math.max(0,d)/E.tot};
-        if(RK<PLAN.length){const a=back(PLAN[RK].f0),b=back(PLAN[RK].f1),q=E.at(b);g+=b-a>.004?trMove(E.part(a,b),Math.max(2.5,(PLAN[RK].f1-PLAN[RK].f0)*R.tot/22)):trStatic(q,q[2])}
+        const BI=behindInfo(P,R),E=BI.E,back=BI.back;
+        if(RK===st.c&&st.org&&RK<PLAN.length){const b=back(PLAN[RK].f1),seg=E.part(Math.min(b,st.org.dN/E.tot),b),pts=st.org.pts.concat(seg.slice(1)).filter((q,i,arr)=>i===0||dist(q,arr[i-1])>.5);g+=trMove(pts,Math.max(2.5,plen(pts)/26),null,{pre:st.org.pre});return}
+        if(RK<PLAN.length){const a=RK===st.c?0:back(PLAN[RK].f0),b=back(PLAN[RK].f1),q=E.at(b);g+=b-a>.004?trMove(E.part(a,b),Math.max(2.5,(PLAN[RK].f1-PLAN[RK].f0)*R.tot/22)):trStatic(q,q[2])}
         else{const q=E.at(back(1));g+=trStatic(q,q[2])}return}
-      if(p<st.phases.length){const ph=st.phases[p];g+=trMove(ph.pts,ph.dur,p===0&&st.c===RK&&PLAN[st.c].J?PLAN[st.c].J.p:(ph.hide?ph.pts[1]:null),{ease:ph.ease,hideEnd:ph.hide})}
+      if(p<st.phases.length){const ph=st.phases[p];g+=trMove(ph.pts,ph.dur,p===0&&st.c===RK&&PLAN[st.c].J?PLAN[st.c].J.p:(ph.hide?ph.pts[1]:null),{ease:ph.ease,hideEnd:ph.hide,pre:ph.pre,kp:ph.kp,kt:ph.kt,h:p>0&&st.phases[p-1].pts.length>1?lastHdg(st.phases[p-1].pts):0})}
       else if(st.park)g+=parked(st.park)})}
-  else if(o.tt&&o.tt.k==='behind'&&o.ac==='stand'&&P.ok&&P.G&&P.pts.length>2){/* on stand: traffic passes on the taxiway behind you on its way to the runway */
-    const G=P.G,n1=gNear(G,P.pts[1]);if(n1>=0){const fw=nrm(sub(P.pts[2],P.pts[1]));let bk=null,bc=2;G.adj[n1].forEach(e=>{if(e.w<2)return;const v=nrm(sub(G.N[e.j],G.N[n1])),c=v[0]*fw[0]+v[1]*fw[1];if(c<bc){bc=c;bk=e}});
-      const inn=bk&&bc<-.3?gWalk(G,n1,bk.j,90).reverse():[P.pts[1]];let full=inn.concat(P.pts.slice(2));
-      /* never through your own aircraft on the stand: if the taxiway passes too close, show it already past you */
-      {let cut=-1;const dense=[];for(let k=1;k<full.length;k++){const a=full[k-1],b=full[k],n=Math.max(1,Math.ceil(dist(a,b)/3));for(let j=0;j<n;j++)dense.push(add(a,mul(sub(b,a),j/n)))}dense.push(full[full.length-1]);
-       dense.forEach((q,k)=>{if(dist(q,st.p)<16||dist(q,pb)<10)cut=k});if(cut>=0){const L0=plen(dense.slice(0,cut+1))+14;full=splitAt(full,L0)[1]}}
-      if(full.length>1&&plen(full)>10)g+=trMove(full,Math.max(6,plen(full)/30),full[Math.min(1,full.length-1)])}}
-  else if(o.ac==='push'&&GCTX&&P.ok&&P.pts.length>2){const pv=GCTX.steps[GCTX.i-1];if(pv&&pv.sc&&pv.sc.ac==='stand'&&pv.sc.tt&&pv.sc.tt.k==='behind'){const e=P.pts[P.pts.length-1];g+=trMove(takeoffPts(P,e),12,null,{ease:'.4 0 .85 .55',hideEnd:true,nofp:true})}}
+  else if(o.tt&&o.tt.k==='behind'&&o.ac==='stand'&&P.ok&&P.G&&P.pts.length>2){/* on stand: a parked aircraft pushes back and passes behind you on its way to the runway */
+    const sb=standBehind(P);if(sb){g+=trMove(sb.pts,Math.max(6,plen(sb.pts)/30),sb.pts[Math.min(2,sb.pts.length-1)],{pre:sb.pre})}}
+  else if(o.ac==='push'&&GCTX&&P.ok&&P.pts.length>2){const pv=GCTX.steps[GCTX.i-1];if(pv&&pv.sc&&pv.sc.ac==='stand'&&pv.sc.tt&&pv.sc.tt.k==='behind'&&standBehind(P)){const e=P.pts[P.pts.length-1];g+=trMove(takeoffPts(P,e),12,null,{ease:'.4 0 .85 .55',hideEnd:true,nofp:true})}}
+  if(['stand','push','pushed','topad','atpad','deice'].includes(o.ac)&&!o.arr)upcomingWaits(P,o).forEach(w=>{g+=trStatic(w,w[2])});
   const ownTaxi=()=>{const {f0,f1}=TP,a=R.at(f0),e=R.at(f1);fp.push(a,e,R.at(Math.min(1,f1+40/R.tot)));
     let s=`<path class="route" d="${roundD(pth(R.part(f0,1)),6)}"/>`;
     if(f1-f0<.004)return s+own(e[0],e[1],e[2]);
     if(PBX&&PBX.fs>f0&&PBX.fs<f1){/* give way: stop short, wait for the pushback to finish and clear, then continue */
-      const seg=R.part(f0,f1),L1=(PBX.fs-f0)*R.tot,L3=(f1-PBX.fs)*R.tot,t1=Math.max(1.5,L1/22),tw=Math.max(t1+.5,PUSHT+3),T=tw+Math.max(1.5,L3/22),ks=L1/(L1+L3);
+      const seg=R.part(f0,f1),L1=(PBX.fs-f0)*R.tot,L3=(f1-PBX.fs)*R.tot,t1=Math.max(1.5,L1/22),tw=Math.max(t1+.5,PUSHT+1+(PBX.away?Math.min(7,plen(PBX.away)/24):2)),T=tw+Math.max(1.5,L3/22),ks=L1/(L1+L3);
       OWNS={pts:seg,dur:T,kp:[0,ks,ks,1],kt:[0,t1/T,tw/T,1]};fp.push(PBX.lead);
       if(RM||ANIM_OFF>=T)return s+own(e[0],e[1],e[2]);
       return s+`<g><circle class="halo" r="${(22*GS).toFixed(1)}"/><path d="${ACP}" class="ac" transform="scale(${GS})"/><animateMotion dur="${T.toFixed(2)}s" begin="${(-ANIM_OFF).toFixed(2)}s" fill="freeze" rotate="auto" path="${pth(seg)}" calcMode="linear" keyPoints="0;${ks.toFixed(4)};${ks.toFixed(4)};1" keyTimes="0;${(t1/T).toFixed(4)};${(tw/T).toFixed(4)};1"/></g>`}
@@ -1730,7 +1782,7 @@ function sGround0(o){
       const pts=pa?[m,...pa.pts,fq]:[m,fq];fp.push(...pts);return `<path class="route" d="${roundD(pth(pts),6)}"/>`+mv(pth(pts),[fq[0],fq[1],lastHdg(pts)],{dur:8,s:GS})+`<text class="wl halo" x="${fq[0].toFixed(0)}" y="${(fq[1]+24).toFixed(0)}" text-anchor="middle">PARK · STAND ${esc(far?far.n:'')}</text>`}
   };
   let ac='',acA='';try{ac=(A[o.ac]||A.stand)();const sv=ANIM_OFF;ANIM_OFF=0;const fl=fp.length;acA=(A[o.ac]||A.stand)();fp.length=fl;ANIM_OFF=sv}catch(e){ac=ac||''}
-  g+=ac;g=resolveTraffic(g,acA||ac,TRQ,GS,OWNS);SCENE_FOCUS=fp.length?bbox(fp,o.ac==='roll'||o.ac==='rto'?22:30):null;
+  g+=ac;g=resolveTraffic(g,acA||ac,TRQ,GS,OWNS,L.std.filter((s,k)=>k%2===0&&s.n!==P.std&&!SKIP.has(s.n)&&standClear(L,s)));SCENE_FOCUS=fp.length?bbox(fp,o.ac==='roll'||o.ac==='rto'?22:30):null;
   return SVG(g,'Aerodrome chart').replace('class="scene"','class="scene flatmap"');
 }
 
@@ -2367,7 +2419,6 @@ function vRadio(){
         <label class="check"><input type="checkbox" id="o-vo" ${S.voice?'checked':''}> Read ATC aloud</label>
         <label class="check"><input type="checkbox" id="o-li" ${S.listen?'checked':''}> Listening mode (hide ATC text)</label>
         <label class="check"><input type="checkbox" id="o-rn" ${S.radioNoise!==false?'checked':''}> Radio sound (squelch and static)</label>
-        <label class="check"><input type="checkbox" id="o-ch" ${S.chatter!==false?'checked':''}> Other aircraft on the frequency</label>
         <span class="lbl">Departure</span><select id="sdep" aria-label="Departure aerodrome">${S.ads.map((a,k)=>`<option value="${k}" ${k===S.dep?'selected':''}>${esc(a.n)}</option>`).join('')}</select>
         <span class="lbl">Destination</span><select id="sdst" aria-label="Destination aerodrome">${S.ads.map((a,k)=>`<option value="${k}" ${k===S.dst?'selected':''}>${esc(a.n)}</option>`).join('')}</select>
         <button class="btn" id="vtest">Test voice</button><span id="vstat" class="muted" style="font-size:.88rem">${canSpeak()?'':'This view has no speech engine. Open the page in Chrome or Safari.'}</span>
@@ -2383,7 +2434,7 @@ function vRadio(){
     $('#csd').oninput=e=>{S.cs.num=e.target.value||'123';save()};
     $('#o-sp').onchange=e=>{S.spoken=e.target.checked;save()};
     $('#o-vo').onchange=e=>{S.voice=e.target.checked;save()};
-    $('#o-rn').onchange=e=>{S.radioNoise=e.target.checked;save()};$('#o-ch').onchange=e=>{S.chatter=e.target.checked;save()};
+    $('#o-rn').onchange=e=>{S.radioNoise=e.target.checked;save()};
     $('#o-li').onchange=e=>{S.listen=e.target.checked;if(S.listen)S.voice=true;save();vRadio()};
     $('#sdep').onchange=e=>{S.dep=+e.target.value;save()};
     $('#sdst').onchange=e=>{S.dst=+e.target.value;save()};
@@ -2649,7 +2700,7 @@ function advance(step,raw,first,miss,warn){
   if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id])S.stats['radio-'+sc.id]=pct;save();if(S.voice)say(spoken(fill(sc.end)))}
   vRadio();if(!RD.done)speakStep();
 }
-function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)),null,{chatter:true})}
+function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)))}
 
 /* ---------- aerodromes ---------- */
 function adPanel(){return `<details class="panel" id="adp" ${S.adOpen?'open':''}><summary class="lbl" style="cursor:pointer">Your aerodromes (${S.ads.length}): add or remove</summary>
@@ -3077,7 +3128,7 @@ function vMatch(){
 /* ---------- home ---------- */
 const MODS=[['radio','Radio practice'],['phrases','Phrases'],['numbers','Numbers'],['letters','Phonetic alphabet'],['metar','METAR'],['taf','TAF'],['match','Match']];
 /* home: a live aerodrome — your aircraft taxis out, holds while traffic lands and vacates, then takes off; loops */
-function heroScene(){try{const ad=S.ads[S.dep]||S.ads[0],P=groundPlan(ad);if(!P||!P.ok||!P.E)return '';const L=P.L,GS=.5;
+function heroScene(){try{const ad=S.ads[S.dep]||S.ads[0],P=groundPlan(ad);if(!P||!P.ok||!P.E)return '';const L=P.L,GS=acScale(L);
   let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,wind:(P.rw?hdgOf(P.B,P.A):0)});
   const taxi=P.pts.slice(),to=takeoffPts(P,taxi[taxi.length-1]).slice(1),full=taxi.concat(to),Lt=plen(taxi),Le=Lt+dist(taxi[taxi.length-1],P.E)+dist(P.E,P.E2),La=plen(full);
   const tT=Math.max(8,Lt/20),T=[0,tT,tT+6,tT+10,tT+11.5,tT+17,tT+21],K=[0,Lt/La,Lt/La,Le/La,Le/La,(Le+(La-Le)*.22)/La,1],TT=T[6]+3;
