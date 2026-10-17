@@ -21,3 +21,12 @@ The workflow also runs by itself every time `index.html` changes.
 ## Website
 
 Settings → Pages → Deploy from a branch → `main` / `(root)`.
+
+## iPhone / iPad
+
+**Quickest (no Apple account needed):** open https://alfatango1.github.io/rt-trainer/ in **Safari**, tap **Share → Add to Home Screen**. It opens full-screen like an app and works offline.
+
+**Native app (.ipa):** Actions → **Build iOS** → Run workflow.
+- Without secrets you get `RT-Trainer-unsigned.ipa` (Releases). Install it with Sideloadly or AltStore on a computer, signing in with your Apple ID (free Apple IDs must re-install every 7 days).
+- With a paid Apple Developer account add these repository secrets to get a signed `RT-Trainer.ipa`:
+  `IOS_CERT_P12_BASE64`, `IOS_CERT_PASSWORD`, `IOS_PROFILE_BASE64`, `IOS_TEAM_ID` (optional: `IOS_BUNDLE_ID`, `IOS_EXPORT_METHOD` = ad-hoc / development / app-store).
