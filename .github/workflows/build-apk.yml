@@ -33,7 +33,8 @@ jobs:
           mkdir -p app/www app/assets
           cp index.html app/www/index.html
           cp icon-192.png icon-512.png app/www/ 2>/dev/null || true
-          cp icon-512.png app/assets/logo.png 2>/dev/null || true
+          cp splash-blank.png app/assets/splash.png 2>/dev/null || true
+          cp splash-blank.png app/assets/splash-dark.png 2>/dev/null || true
           cp icon-1024.png app/assets/icon-only.png 2>/dev/null || true
           cd app
           npm init -y > /dev/null
@@ -73,6 +74,21 @@ jobs:
               s = s.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n android:windowSoftInputMode="adjustResize"', 1)
           open(p, 'w').write(s)
           PY
+          python3 - <<'PY'
+          # no app icon on the launch screen (Android 12+ draws the icon by default): plain dark screen, then the app's own intro
+          import os, re
+          os.makedirs('src/main/res/drawable', exist_ok=True)
+          open('src/main/res/drawable/splash_blank.xml', 'w').write('<shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="#00000000"/></shape>')
+          p = 'src/main/res/values/styles.xml'
+          s = open(p).read()
+          add = ('<item name="windowSplashScreenBackground">#08111A</item>'
+                 '<item name="windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>'
+                 '<item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>')
+          s = re.sub(r'(<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">)', r'\1' + add, s)
+          s = s.replace('<item name="android:background">@drawable/splash</item>', '<item name="android:background">#08111A</item>')
+          open(p, 'w').write(s)
+          print(s)
+          PY
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" build.gradle
           cp -r src/main/res /tmp/res-original
@@ -110,7 +126,7 @@ jobs:
           add_icons() {
             npx --yes @capacitor/assets@3 generate --android \
               --iconBackgroundColor '#000C1A' --iconBackgroundColorDark '#000C1A' \
-              --splashBackgroundColor '#13202A' --splashBackgroundColorDark '#13202A' || echo "Icon generation skipped"
+              --splashBackgroundColor '#08111A' --splashBackgroundColorDark '#08111A' || echo "Icon generation skipped"
           }
           use_fixed_key() {
             [ -f "$GITHUB_WORKSPACE/debug.keystore" ] || return 0

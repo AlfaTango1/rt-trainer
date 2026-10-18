@@ -73,6 +73,11 @@ jobs:
             echo "::warning::Kept the default Capacitor icon."
           fi
 
+      - name: Plain launch screen (the app shows its own intro)
+        run: |
+          SPL=app/ios/App/App/Assets.xcassets/Splash.imageset
+          if [ -d "$SPL" ] && [ -f splash-blank.png ]; then for f in "$SPL"/*.png; do cp splash-blank.png "$f"; done; ls -la "$SPL"; fi
+
       - name: Signing certificate and profile (only when the secrets exist)
         if: env.HAS_SIGNING == 'true'
         env:

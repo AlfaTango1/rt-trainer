@@ -411,6 +411,7 @@ body.noscroll{overflow:hidden}
 .flatmap .ac{fill:#fff;stroke:var(--accent);stroke-width:2.2}
 .flatmap .parked{fill:#F7F8F9;stroke:#8E959C;stroke-width:.9}
 .flatmap .tr{fill:#fff;stroke:var(--tr);stroke-width:2.2}
+.flatmap .hac{fill:#F7F8F9;stroke:#7D868E;stroke-width:1;filter:drop-shadow(2px 3px 0 rgba(0,0,0,.22))}
 .flatmap .ac,.flatmap .tr,.flatmap .parked{filter:drop-shadow(2px 3px 0 rgba(0,0,0,.22))}
 .flatmap .halo{fill:var(--accent);opacity:.16}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .flatmap .flights{filter:drop-shadow(0 0 1.2px #FFE7A0)}}
@@ -3127,21 +3128,38 @@ function vMatch(){
 
 /* ---------- home ---------- */
 const MODS=[['radio','Radio practice'],['phrases','Phrases'],['numbers','Numbers'],['letters','Phonetic alphabet'],['metar','METAR'],['taf','TAF'],['match','Match']];
-/* home: a live aerodrome — your aircraft taxis out, holds while traffic lands and vacates, then takes off; loops */
-function heroScene(){try{const ad=S.ads[S.dep]||S.ads[0],P=groundPlan(ad);if(!P||!P.ok||!P.E)return '';const L=P.L,GS=acScale(L);
-  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,wind:(P.rw?hdgOf(P.B,P.A):0)});
-  const taxi=P.pts.slice(),to=takeoffPts(P,taxi[taxi.length-1]).slice(1),full=taxi.concat(to),Lt=plen(taxi),Le=Lt+dist(taxi[taxi.length-1],P.E)+dist(P.E,P.E2),La=plen(full);
-  const tT=Math.max(8,Lt/20),T=[0,tT,tT+6,tT+10,tT+11.5,tT+17,tT+21],K=[0,Lt/La,Lt/La,Le/La,Le/La,(Le+(La-Le)*.22)/La,1],TT=T[6]+3;
-  const kt=T.map(t=>(t/TT).toFixed(4)).concat(['1']).join(';'),kp=K.map(k=>Math.min(1,k).toFixed(4)).concat(['1']).join(';');
-  const e=P.st.p;
-  if(RM)return SVG(g+pl(P.pb[0],P.pb[1],(P.face||0)-90,'ac',GS),'Aerodrome').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"');
-  g+=`<g><circle class="halo" r="${(22*GS).toFixed(1)}"/><path d="${ACP}" class="ac" transform="scale(${GS})"/><animateMotion dur="${TT.toFixed(2)}s" repeatCount="indefinite" rotate="auto" path="${roundD(pth(full),6)}" calcMode="linear" keyTimes="${kt}" keyPoints="${kp}"/></g>`;
-  /* landing traffic: touches down, rolls out and vacates before you line up */
-  if(P.ex){const a0=sub(P.A,mul(P.u,320)),td=add(P.A,mul(P.u,24)),pts=[a0,td,P.ex.xc,P.ex.X,P.ex.pts[1]||P.ex.X].filter((q,i,a)=>i===0||dist(q,a[i-1])>1),L1=dist(a0,td),L2=plen(pts),t0=Math.max(.5,tT-14);
-    const tl=[0,t0,t0+7,t0+13,t0+15.5,t0+16,TT].map(t=>(t/TT).toFixed(4)).join(';'),kl=[0,0,L1/L2,(L1+dist(td,P.ex.xc))/L2,1,1,1].map(k=>Math.min(1,k).toFixed(4)).join(';');
-    const vis=`<animate attributeName="opacity" dur="${TT.toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${(t0/TT).toFixed(4)};${((t0+16)/TT).toFixed(4)}" values="0;1;0"/>`;
-    g+=`<g opacity="0">${vis}<path d="${ACP}" class="tr" transform="scale(${GS})"/><animateMotion dur="${TT.toFixed(2)}s" repeatCount="indefinite" rotate="auto" path="${roundD(pth(pts),6)}" calcMode="linear" keyTimes="${tl}" keyPoints="${kl}"/></g>`}
-  return SVG(g,'Aerodrome: your aircraft taxis out and takes off').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"')}catch(e){return ''}}
+/* home: a live aerodrome that loops without a seam. A departing aircraft pushes back from stand S, taxis out and holds short;
+   an arriving aircraft lands, the departure lines up behind it, waits for it to vacate and takes off with a long accelerating roll;
+   the arrival taxis in and parks on stand S, which is exactly the picture the loop starts from */
+function heroMotion(segs,TT){const pts=[],cum=[0];let t=0;const keys=[[0,0]];
+  const addPts=q=>{q.forEach(x=>{if(!pts.length||dist(pts[pts.length-1],x)>.5){if(pts.length)cum.push(cum[cum.length-1]+dist(pts[pts.length-1],x));pts.push(x)}})};
+  segs.forEach(s=>{if(s.wait){t+=s.wait;keys.push([t,null]);return}const L0=cum[cum.length-1]||0;addPts(s.pts);const L1=cum[cum.length-1];
+    const sub=s.prof==='acc'?[.2,.4,.6,.8,1].map(u=>[u,u*u]):s.prof==='dec'?[.2,.4,.6,.8,1].map(u=>[u,1-(1-u)*(1-u)]):[[1,1]];
+    sub.forEach(([u,f])=>keys.push([t+u*s.dur,L0+(L1-L0)*f]));t+=s.dur});
+  const Lt=cum[cum.length-1]||1;let last=0;const K=keys.map(([tt,l])=>{if(l!==null)last=l;return [tt,last/Lt]});if(K[K.length-1][0]<TT)K.push([TT,K[K.length-1][1]]);
+  return {path:pth(pts),end:t,kt:K.map(k=>Math.min(1,k[0]/TT).toFixed(4)).join(';'),kp:K.map(k=>Math.min(1,k[1]).toFixed(4)).join(';'),pts}}
+function heroScene(){try{const ad=S.ads[S.dep]||S.ads[0],P=groundPlan(ad);if(!P||!P.ok||!P.E||!P.ex)return '';const L=P.L,GS=acScale(L),st=P.st;
+  let g=renderFlat(L,{own:P.std,hp:P.hp,rw:P.rw,parked:true,skip:new Set([st.n]),wind:(P.rw?hdgOf(P.B,P.A):0)});
+  const AC=`<path d="${ACP}" class="hac" transform="scale(${GS})"/><path d="${ACT}" class="lvt lv1" transform="scale(${GS})"/>`;
+  if(RM)return SVG(g+`<g transform="translate(${st.p[0].toFixed(1)} ${st.p[1].toFixed(1)}) rotate(${(st.h-90).toFixed(1)})">${AC}</g>`,'Aerodrome').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"');
+  const TX=16,full0=P.pts.slice(),hpEnd=full0[full0.length-1],taxi=plen(full0)>40?splitAt(full0,plen(full0)-12)[0]:full0,hold=taxi[taxi.length-1],Lt=plen(taxi);
+  const tPB0=2,tPB1=7,tTaxi0=10,tTaxi1=tTaxi0+Lt/TX;
+  /* arrival timing: touches down 3 s after the departure is holding short */
+  const a0=sub(P.A,mul(P.u,340)),td=add(P.A,mul(P.u,25)),xc=P.ex.xc,ex=P.ex.pts.slice(),Lapp=dist(a0,td),Lroll=dist(td,xc),Lin=plen([xc].concat(ex));
+  const tTD=tTaxi1+3,tApp0=tTD-Lapp/70,tRoll1=tTD+2*Lroll/(60+14),tPark=tRoll1+Lin/TX;
+  /* the departure lines up behind the landing aircraft and rolls once it has left the runway */
+  const tLU0=tTD+2.5,Lline=dist(hold,hpEnd)+dist(hpEnd,P.E)+dist(P.E,P.E2),tLU1=tLU0+Lline/9,tClear=tRoll1+dist(xc,ex[0])/TX+1,tGo=Math.max(tLU1+2,tClear),far=add(P.B,mul(P.u,620)),tAir=tGo+24;
+  const TT=Math.max(tPark,tAir)+4;
+  const A1=heroMotion([{wait:tPB0},{pts:[st.p,P.pb],dur:tPB1-tPB0}],TT);
+  const A2=heroMotion([{wait:tTaxi0},{pts:taxi,dur:tTaxi1-tTaxi0},{wait:tLU0-tTaxi1},{pts:[hold,hpEnd,P.E,P.E2],dur:tLU1-tLU0},{wait:tGo-tLU1},{pts:[P.E2,P.B,far],dur:tAir-tGo,prof:'acc'}],TT);
+  const B=heroMotion([{wait:tApp0},{pts:[a0,td],dur:tTD-tApp0},{pts:[td,xc],dur:tRoll1-tTD,prof:'dec'},{pts:[xc].concat(ex),dur:tPark-tRoll1}],TT);
+  const vis=(on,off)=>`<animate attributeName="opacity" dur="${TT.toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${(on/TT).toFixed(4)};${(off/TT).toFixed(4)}" values="${on>0?'0;1;0':'1;1;0'}"/>`;
+  const el=(m,rot,v)=>`<g>${v}${AC}<animateMotion dur="${TT.toFixed(2)}s" repeatCount="indefinite" rotate="${rot}" path="${roundD(m.path,6)}" calcMode="linear" keyTimes="${m.kt}" keyPoints="${m.kp}"/></g>`;
+  g+=el(B,'auto',`<animate attributeName="opacity" dur="${TT.toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${(tApp0/TT).toFixed(4)}" values="0;1"/>`);
+  g+=el(A1,'auto-reverse',vis(0,tPB1));
+  g+=el(A2,'auto',`<animate attributeName="opacity" dur="${TT.toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${(tPB1/TT).toFixed(4)}" values="0;1"/>`);
+  window.HERO_T={TT,tPB1,tTaxi1,tTD,tLU0,tGo,tPark,tAir};
+  return SVG(g,'Aerodrome: an aircraft taxis out and takes off while another lands and parks').replace('class="scene"','class="scene flatmap hscene" preserveAspectRatio="xMidYMid slice"')}catch(e){return ''}}
 function vHome(){
   const T=k=>TABS.find(t=>t[0]===k)[2];
   const stp=k=>{const x=S.stats[k];return x&&x.t?Math.round(x.r/x.t*100)+'%':''};
