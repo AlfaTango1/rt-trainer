@@ -36,6 +36,8 @@ jobs:
           cp splash-blank.png app/assets/splash.png 2>/dev/null || true
           cp splash-blank.png app/assets/splash-dark.png 2>/dev/null || true
           cp icon-1024.png app/assets/icon-only.png 2>/dev/null || true
+          cp icon-foreground.png app/assets/icon-foreground.png 2>/dev/null || true
+          cp icon-background.png app/assets/icon-background.png 2>/dev/null || true
           cd app
           npm init -y > /dev/null
           npm install --no-audit --no-fund --legacy-peer-deps \
