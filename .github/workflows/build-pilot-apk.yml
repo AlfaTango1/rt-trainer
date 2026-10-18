@@ -1,0 +1,167 @@
+name: Build Pilot APK
+
+# Builds the Android app from the pilot/ folder.
+# Runs automatically when anything in pilot/ changes, or from the Actions tab ("Run workflow").
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['pilot/**', '.github/workflows/build-pilot-apk.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Get the files
+        uses: actions/checkout@v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Create the Android project
+        run: |
+          mkdir -p papp/www papp/assets
+          cp -r pilot/. papp/www/
+          # the website's offline cache is not needed inside the installed app
+          rm -f papp/www/sw.js
+          cp pilot/icon-512.png papp/assets/icon-only.png
+          cp pilot/icon-512.png papp/assets/icon-foreground.png
+          cd papp
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --legacy-peer-deps \
+            @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 \
+            @capacitor/local-notifications@7
+          cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "io.github.alfatango1.pilot",
+            "appName": "Пилот",
+            "webDir": "www",
+            "android": { "adjustMarginsForEdgeToEdge": "auto" },
+            "plugins": { "LocalNotifications": { "iconColor": "#2fae66" } }
+          }
+          JSON
+          npx cap add android
+          npx cap sync android
+
+      - name: Notification permissions and version number
+        run: |
+          cd papp/android/app
+          python3 - <<'PY'
+          p = 'src/main/AndroidManifest.xml'
+          s = open(p).read()
+          add = ''
+          for perm in ['POST_NOTIFICATIONS', 'RECEIVE_BOOT_COMPLETED', 'WAKE_LOCK']:
+              if perm not in s:
+                  add += ' <uses-permission android:name="android.permission.%s" />\n' % perm
+          s = s.replace('</manifest>', add + '</manifest>')
+          open(p, 'w').write(s)
+          print(s)
+          PY
+          python3 - <<'PY'
+          # plain dark launch screen, then the app's own intro
+          import os, re
+          os.makedirs('src/main/res/drawable', exist_ok=True)
+          open('src/main/res/drawable/splash_blank.xml', 'w').write('<shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="#00000000"/></shape>')
+          p = 'src/main/res/values/styles.xml'
+          s = open(p).read()
+          add = ('<item name="windowSplashScreenBackground">#0A1628</item>'
+                 '<item name="windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>'
+                 '<item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>')
+          s = re.sub(r'(<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">)', r'\1' + add, s)
+          s = s.replace('<item name="android:background">@drawable/splash</item>', '<item name="android:background">#0A1628</item>')
+          open(p, 'w').write(s)
+          PY
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" build.gradle
+          cp -r src/main/res /tmp/res-original
+          cp build.gradle /tmp/build.gradle.original
+
+      - name: Build the APK
+        run: |
+          cd papp
+          LOG="$GITHUB_WORKSPACE/gradle.log"
+          NOTE=""
+
+          add_icons() {
+            npx --yes @capacitor/assets@3 generate --android \
+              --iconBackgroundColor '#0A1628' --iconBackgroundColorDark '#0A1628' \
+              --splashBackgroundColor '#0A1628' --splashBackgroundColorDark '#0A1628' || echo "Icon generation skipped"
+          }
+          use_fixed_key() {
+            [ -f "$GITHUB_WORKSPACE/debug.keystore" ] || return 0
+            python3 - <<'PY'
+          import os
+          p = 'android/app/build.gradle'
+          s = open(p).read()
+          ks = os.environ['GITHUB_WORKSPACE'] + '/debug.keystore'
+          block = ('android {\n signingConfigs {\n debug {\n'
+                   ' storeFile file("' + ks + '")\n'
+                   ' storePassword "android"\n keyAlias "androiddebugkey"\n keyPassword "android"\n'
+                   ' }\n }\n')
+          if 'debug.keystore' not in s:
+              s = s.replace('android {', block, 1)
+          open(p, 'w').write(s)
+          PY
+          }
+          build() {
+            echo "===== Build attempt: $1 ====="
+            (cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace) > "$LOG" 2>&1
+            local code=$?
+            tail -40 "$LOG"
+            return $code
+          }
+
+          add_icons
+          use_fixed_key
+          if build "full"; then NOTE="Built normally."
+          else
+            echo "::warning::First attempt failed, retrying with default icons."
+            rm -rf android/app/src/main/res && cp -r /tmp/res-original android/app/src/main/res
+            if build "default icons"; then NOTE="Built with the default Android icon."
+            else
+              echo "::warning::Retrying without the fixed signing key."
+              cp /tmp/build.gradle.original android/app/build.gradle
+              if build "default key"; then NOTE="Built without the fixed signing key: uninstall the old app before installing."
+              else
+                echo "## Build failed" >> "$GITHUB_STEP_SUMMARY"
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                grep -A20 "What went wrong" "$LOG" | head -60 >> "$GITHUB_STEP_SUMMARY" || tail -60 "$LOG" >> "$GITHUB_STEP_SUMMARY"
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                grep -A6 "What went wrong" "$LOG" | head -14 | while IFS= read -r line; do
+                  [ -n "$line" ] && echo "::error title=Gradle::$line"
+                done
+                exit 1
+              fi
+            fi
+          fi
+          cp android/app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Pilot.apk"
+          echo "$NOTE" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "NOTE=$NOTE" >> "$GITHUB_ENV"
+
+      - name: Save the APK (Actions → this run → Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pilot-APK
+          path: Pilot.apk
+
+      - name: Publish the APK (Releases, easy download on a phone)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pilot-v1.0.${{ github.run_number }}
+          name: Pilot 1.0.${{ github.run_number }}
+          make_latest: false
+          body: |
+            Download Pilot.apk below and open it on your Android phone.
+            ${{ env.NOTE }}
+          files: Pilot.apk
