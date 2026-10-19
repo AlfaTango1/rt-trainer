@@ -59,7 +59,7 @@ jobs:
           p = 'src/main/AndroidManifest.xml'
           s = open(p).read()
           add = ''
-          for perm in ['POST_NOTIFICATIONS', 'RECEIVE_BOOT_COMPLETED', 'WAKE_LOCK']:
+          for perm in ['POST_NOTIFICATIONS', 'RECEIVE_BOOT_COMPLETED', 'WAKE_LOCK', 'CAMERA']:
               if perm not in s:
                   add += ' <uses-permission android:name="android.permission.%s" />\n' % perm
           s = s.replace('</manifest>', add + '</manifest>')
