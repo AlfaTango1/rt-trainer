@@ -1,5 +1,5 @@
 // RT Trainer offline support. Change VERSION when you upload a new index.html.
-const VERSION = 'rt-v26';
+const VERSION = 'rt-v27';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './icon.svg', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

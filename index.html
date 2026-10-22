@@ -720,6 +720,25 @@ nav button{display:inline-flex;align-items:center;gap:6px}
   .mgrid{grid-template-columns:1fr 1.3fr}
   .plist div{grid-template-columns:1fr}
 }
+.rpw{border-left:3px dashed var(--muted);padding:4px 0 4px 12px;font-size:.9rem;color:var(--muted)}
+.rpw .who{display:block;font-family:var(--f-disp);font-size:.72rem;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
+.rpw .written[hidden]{display:none}
+.tctl .tbtns.rptb{display:flex;gap:8px}
+.tctl .tbtns.rptb .btn{flex:1 1 0;flex-direction:row;justify-content:center;min-height:46px;font-size:.9rem;padding:8px 6px}
+.tctl .tbtns.rptb .btn.mic{flex:0 0 auto;flex-direction:column;font-size:.7rem;min-width:64px}
+.rpw .written{display:block;font-family:var(--f-mono);color:var(--ink);margin-top:6px}
+.atcnow.rpme{font-size:1.05rem;border-left-width:4px}
+.rpline{display:flex;flex-direction:column;gap:4px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.rpline .model{font-family:var(--f-mono);font-size:.95rem;overflow-wrap:anywhere}
+.rpline .sm{padding:3px 9px;font-size:.8rem}
+.rpchk{margin:4px 0 0 18px;padding:0}
+.rpchk li{margin:1px 0}
+.rpnote{font-size:.9rem}
+.rpjoin input{flex:1;min-width:0}
+.rpcode{font-size:1.4rem;letter-spacing:.04em;margin:2px 0;overflow-wrap:anywhere}
+.rpsheet input{width:100%;font-size:.8rem}
+.rpinv{white-space:nowrap}
+@media (max-width:720px){.rpinv span{display:none}}
 </style>
 
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -844,7 +863,7 @@ const TENS={ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixtee
 function norm(raw){
   let s=' '+raw.toLowerCase()+' ';
   /* spelled abbreviations and joined words, as speech recognisers write them */
-  s=s.replace(/\bair-?force\b/g,'air force').replace(/\b(q\.?\s?n\.?\s?h|q and h|queue and h|cue and h|cuz nh)\b/g,'qnh').replace(/\bi\.?\s?l\.?\s?s\b/g,'ils').replace(/\ba\.?\s?t\.?\s?c\b/g,'atc').replace(/\bv\.?\s?o\.?\s?r\b/g,'vor').replace(/\bd\.?\s?m\.?\s?e\b/g,'dme').replace(/\bn\.?\s?d\.?\s?b\b/g,'ndb').replace(/\br\.?\s?v\.?\s?s\.?\s?m\b/g,'rvsm').replace(/\bt\.?\s?c\.?\s?a\.?\s?s\b|\btee ?cas\b/g,'tcas').replace(/\bc\.?\s?b\b(?=\s|$)/g,'cb').replace(/\bv\.?\s?i\.?\s?p\b/g,'vip');
+  s=s.replace(/\bair-?force\b/g,'air force').replace(/\b(q\.?\s?n\.?\s?h|q and h|queue and h|cue and h|cuz nh)\b/g,'qnh').replace(/\bi\.?\s?l\.?\s?s\b/g,'ils').replace(/\ba\.?\s?t\.?\s?c\b/g,'atc').replace(/\bv\.?\s?o\.?\s?r\b/g,'vor').replace(/\bd\.?\s?m\.?\s?e\b/g,'dme').replace(/\bn\.?\s?d\.?\s?b\b/g,'ndb').replace(/\br\.?\s?v\.?\s?s\.?\s?m\b/g,'rvsm').replace(/\bt\.?\s?c\.?\s?a\.?\s?s\b|\btee[- ]?cas\b/g,'tcas').replace(/\bc\.?\s?b\b(?=\s|$)/g,'cb').replace(/\bv\.?\s?i\.?\s?p\b/g,'vip');
   s=s.replace(/(\d),(?=\d{3}\b)/g,'$1').replace(/[’']/g,'')
    .replace(/\bm\.(\d)/g,'mach .$1')
    .replace(/\bfl\s?(?=\d)/g,'flight level ').replace(/\bfl\b/g,'flight level')
@@ -1117,8 +1136,11 @@ function sProf(o){
       if(why==='vehicle')g+=`<rect class="truckr" x="500" y="255" width="18" height="9" rx="1"/><circle class="lr blink" cx="509" cy="253" r="2"/><text class="warnt blink" x="509" y="244" text-anchor="middle">VEHICLE ON RUNWAY</text>`;
       else if(why==='traffic')g+=pl(505,262,0,'tr',.6,ACS)+`<text class="warnt blink" x="505" y="244" text-anchor="middle">RUNWAY NOT VACATED</text>`;
       else if(why==='birds')g+=[0,1,2,3,4,5].map(k=>`<path class="turbg" d="M${470+k*14},${250-(k%2)*6} q4,-4 8,0 q4,-4 8,0"/>`).join('')+`<text class="warnt blink" x="510" y="234" text-anchor="middle">BIRDS ON RUNWAY</text>`;
-      const st0=fromFinal?`M${X(1)},${gsY(1)}`:`M${X(5)},${Y(1600)}`;
-      g+=mv(`${st0} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L600,${Y(1500)}`,[600,Y(1500),-30],Object.assign({dur:fromFinal?6:8},sd))+banner(300,24,'GOING AROUND · 4000 FT','goodt','middle')}
+      const prvGA=!!(prv&&prv.sc&&prv.sc.t==='profile'&&prv.sc.mode==='goaround'),prvLand=fromFinal&&(prv.sc.p===6||/cleared to land/i.test(prv.atc||''));
+      if(prvGA)g+=pl(588,Y(1500),-30,'ac',sd.s,sd.d);else{
+      const st0=fromFinal?(prvLand?`M${X(1)},${gsY(1)}`:`M${X(2.5)},${gsY(2.5)} L${X(1)},${gsY(1)}`):`M${X(5)},${Y(1600)}`;
+      g+=mv(`${st0} L${X(.8)},${Y(260)} Q${X(.5)},${Y(220)} ${X(.1)},${Y(500)} L588,${Y(1500)}`,[588,Y(1500),-30],Object.assign({dur:fromFinal?(prvLand?6:7):8},sd))}
+      g+=banner(300,24,'GOING AROUND · '+(o.alt||4000)+' FT','goodt','middle')}
     return SVG(g,'Approach profile');
   }
   const L=uniq([o.a,o.b,o.m].filter(Boolean));
@@ -1182,13 +1204,13 @@ function sMay(o){
   g+=`<path class="cont1" d="M380,300 C400,230 470,210 540,220 C600,228 600,300 600,300 Z"/><path class="cont2" d="M450,300 C460,260 510,245 560,252 C600,258 600,300 600,300 Z"/><text class="sl" x="560" y="290" text-anchor="end">TERRAIN 2900 M</text>`;
   g+=`<path class="cont1" d="M0,0 L170,0 C150,40 90,60 0,70 Z"/>`;
   g+=`<circle class="ringc" cx="110" cy="220" r="70"/><text class="sl" x="110" y="146" text-anchor="middle">20 NM</text>`;
-  g+=apt(110,220,true)+`<text class="wl" x="110" y="258" text-anchor="middle">${esc(v.DEP.toUpperCase())}</text>`;
+  g+=apt(110,220,true)+`<text class="wl" x="110" y="258" text-anchor="middle">${esc((o.to||v.DEP).toUpperCase())}</text>`;
   if(o.stage>=1)for(const [x,y] of [[96,232],[124,208],[102,206]])g+=`<circle class="lr blink" cx="${x}" cy="${y}" r="2.4"/>`;
   g+=`<path class="route" d="M110,220 L330,110"/>`;
   const fi=o.fire!==false;
   if(o.stage===0)g+=pl(330,110,50,'ac',.95)+(fi?fire(318,104):'')+tag(360,140,o.tags||['MAYDAY · ENGINE FIRE','FL180  HDG 140'],150);
   if(o.stage===1)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60"/>`+mv('M330,110 Q420,165 440,95 Q445,35 360,60 L210,160',[210,160,146],{dur:9,s:.95})+tag(420,196,o.tags||['SQUAWK 7700','LEFT HDG 320','DESCEND FL100'],130)+(fi?`<g transform="translate(340 260)">${fire()}</g><text class="warnt" x="352" y="265">FIRE</text>`:'');
-  if(o.stage===2)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60 L210,160"/>`+pl(210,160,146,'ac',.95)+banner(300,24,'FIRE OUT · DISTRESS CANCELLED','goodt','middle')+tag(420,196,['RETURNING','TO '+v.DEP.toUpperCase()],140);
+  if(o.stage===2)g+=`<path class="route" d="M330,110 Q420,165 440,95 Q445,35 360,60 L210,160"/>`+pl(210,160,146,'ac',.95)+(o.fireOut!==false&&!o.to?banner(300,24,'FIRE OUT · DISTRESS CANCELLED','goodt','middle'):'')+tag(420,196,o.tags||['RETURNING','TO '+(o.to||v.DEP).toUpperCase()],140);
   g+=northArrow(570,60,0);
   return SVG(g,'Distress chart');
 }
@@ -2160,6 +2182,323 @@ function unitStep(n,k,g,sc,rw,twy){const pool=uPool(g);if(!pool.length)return nu
     return {sit:'Unit phrase · '+sec+': '+ru,task:'Tell ATC in English.',need:key.map(t=>['\\b'+reEsc(t)+'\\b','"'+t+'"']),model:'{CS}, '+e,sc,unit:c.i}}
   const kw=norm(e).trim().split(' ').filter(t=>t.length>=5&&!U_STOP.has(t)&&t!=='zzsep')[0];
   return {atc:'{CS}, '+(/^[A-Z][a-z]/.test(e)?e.charAt(0).toLowerCase()+e.slice(1):e)+(/[?]$/.test(e)?'':'.'),sit:'Перевод: '+ru,task:'Acknowledge the message (Roger / Wilco, or read back).',need:[['roger|wilco|affirm|negative|unable|copied|understood'+(kw?'|'+reEsc(kw):''),'"Roger" / "Wilco"']],model:'Roger, {CS}',sc,unit:c.i}}
+/* ---------- non-routine scenarios ----------
+   Every unit phrase (number = phrase id) is used inside a short, logical exchange at the right moment of the flight,
+   with the right speaker and the right consequence for the rest of the flight:
+   e: ga = go-around, missed-approach instructions and a second approach; lowpass = low pass then a second approach;
+      return = back to the departure aerodrome; divert = to the alternate; offfield = forced landing / ditching;
+      stand = taxi back to the stand, flight cancelled; stay = stays on the stand; tow / evac = stops after landing.
+   Lines: ['P', id | text, situation?] pilot, ['A', id | text] controller; they alternate and the last line is the pilot's. */
+const SCEN=[
+/* ===== ground: at the stand (before pushback) ===== */
+{ph:'gnd.stand',L:[['P',80],['A','{CS}, roger. Advise your intentions.'],['P',81],['A','{CS}, roger, report when ready for pushback.'],['P','Wilco, {CS}']]},
+{ph:'gnd.stand',L:[['P',82],['A','{CS}, roger, report when ready for pushback.'],['P','Wilco, {CS}']]},
+{ph:'gnd.stand',L:[['P',83],['A','{CS}, roger, call me when the new tug is connected.'],['P','Wilco, {CS}']]},
+{ph:'gnd.stand',L:[['P',94],['A','{CS}, roger, report ready for pushback.'],['P','Wilco, {CS}']]},
+{ph:'gnd.stand',L:[['P',88],['A',91],['P','Roger, standing by, {CS}']]},
+{ph:'gnd.stand',L:[['P',90],['A',119],['P','Roger, slot time 09.45, {CS}']]},
+{ph:'gnd.stand',L:[['P',115],['A',25],['P','Roger, standing by, {CS}']]},
+{ph:'gnd.stand',L:[['A',101],['P','Roger, {CS}']]},
+{ph:'gnd.stand',L:[['A',113],['P','Roger, departure time expires at 12:30, {CS}']]},
+{ph:'gnd.stand',L:[['A',77],['P','After the B-747, pushback approved abeam stand B10, {CS}']]},
+{ph:'gnd.stand',e:'stay',L:[['A',118],['P','Roger, we remain on the stand, {CS}']]},
+{ph:'gnd.stand',L:[['A','{CS}, stand by for start-up, departures are restricted.'],['P',87],['A','{CS}, roger, start-up approved.'],['P','Start-up approved, {CS}']]},
+/* ===== ground: pushed back, engines starting ===== */
+{ph:'gnd.pushed',e:'stand',L:[['P',117,'The engine does not start after several attempts.'],['A','{CS}, roger, tow back to stand {STD} approved.'],['P','Tow back to stand {STD}, {CS}']]},
+/* ===== ground: taxiing ===== */
+{ph:'gnd.taxi',L:[['A',0],['P','Roger, rime ice on runway {DR}, {CS}']]},
+{ph:'gnd.taxi',L:[['A',1],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',2],['P','Roger, {CS}. Request braking action.'],['A',3],['P','Roger, runway sprayed with sand, {CS}']]},
+{ph:'gnd.taxi',L:[['A',4],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',5],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',6],['P','Roger, we will taxi with caution, {CS}']]},
+{ph:'gnd.taxi',L:[['A',7],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',8],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',9],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',10],['P','Roger, {CS}. How long will the runway be closed?'],['A','{CS}, about 30 minutes. Hold position, expect further information.'],['P','Holding position, {CS}']]},
+{ph:'gnd.taxi',L:[['A',12],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',13],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',15],['P','Roger, taxiing with caution, {CS}']]},
+{ph:'gnd.taxi',L:[['A',16],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',17],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',18],['P','Roger, braking action medium to poor, {CS}']]},
+{ph:'gnd.taxi',L:[['A',68],['P','Stopping, {CS}'],['A',69],['P','Roger, we will wait, {CS}']]},
+{ph:'gnd.taxi',L:[['A',65],['P','Roger, {CS}'],['A',95],['P','Roger, holding position, {CS}']]},
+{ph:'gnd.taxi',L:[['A',66],['P','Roger, waiting for the follow-me car, {CS}']]},
+{ph:'gnd.taxi',L:[['P',79,'You are not sure of the taxi route.'],['A',92],['P','Second turn on the right, {CS}'],['A',93],['P','Next right turn, {CS}']]},
+{ph:'gnd.taxi',L:[['A',71],['P',89],['A','{CS}, traffic on 5 miles final, expedite to the holding point.'],['P','Expediting, {CS}']]},
+{ph:'gnd.taxi',L:[['A',75],['P','Affirm, moving forward 15 metres, {CS}']]},
+{ph:'gnd.taxi',L:[['A',70],['P','Affirm, moving forward, {CS}']]},
+{ph:'gnd.taxi',L:[['A',76],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['A',78],['P','Pulling in to the right, {CS}']]},
+{ph:'gnd.taxi',L:[['P',84,'An animal is on the taxiway in front of you.'],['A','{CS}, roger, hold position, a vehicle is on the way.'],['P','Holding position, {CS}']]},
+{ph:'gnd.taxi',L:[['A',74],['P','Taxi via taxiway C, backtrack and line up runway {DR}, {CS}']]},
+{ph:'gnd.taxi',L:[['A',105],['P','Keeping right, {CS}']]},
+{ph:'gnd.taxi',L:[['A',100],['P','Roger, {CS}'],['A',106],['P','Roger, single runway operation, {CS}']]},
+{ph:'gnd.taxi',L:[['A',102],['P','Roger, {CS}']]},
+{ph:'gnd.taxi',L:[['P',116,'You want to know the take-off distance available.'],['A',107],['P','Roger, 3000 metres from intersection D, {CS}']]},
+{ph:'gnd.taxi',e:'stand',L:[['P',96,'Approaching the holding point, the brake temperature is too high.'],['A','{CS}, roger, taxi to stand {STD} via {TXR}, the fire service will meet you.'],['P','Taxi to stand {STD} via {TXR}, {CS}']]},
+{ph:'gnd.taxi',e:'evac',L:[['P',323,'A fire warning comes on while you are taxiing.'],['A','{CS}, roger, stop immediately, fire service is on the way.'],['P','Stopping, {CS}, request fire service']]},
+/* ===== ground: at the holding point, before take-off ===== */
+{ph:'gnd.hp',L:[['A',97],['P','Roger, clearance void if not off by 35, {CS}']]},
+{ph:'gnd.hp',L:[['A',98],['P','Holding short runway {DR}, {CS}']]},
+{ph:'gnd.hp',L:[['A',104],['P','Stopping, {CS}']]},
+{ph:'gnd.hp',L:[['A',114],['P','Roger, {CS}. Request the reason.'],['A','{CS}, runway inspection in progress, expect take-off in 10 minutes.'],['P','Roger, {CS}']]},
+{ph:'gnd.hp',L:[['A',126],['P','Roger, {CS}']]},
+{ph:'gnd.hp',L:[['A',28],['P','Roger, holding, {CS}']]},
+{ph:'gnd.hp',L:[['A',67],['P','Turning in the holding bay, first left onto taxiway Juliet, {CS}']]},
+{ph:'gnd.hp',L:[['A',72],['P','Holding in the run-up area, {CS}']]},
+{ph:'gnd.hp',L:[['P',111,'Your ground crew reports chocks left on the runway.'],['A','{CS}, roger, a vehicle is on the way, hold position.'],['P','Holding position, {CS}']]},
+{ph:'gnd.hp',L:[['P',120,'You would like a shorter taxi to the runway.'],['A','{CS}, unable, full length departure only due to work in progress.'],['P','Roger, full length, {CS}']]},
+{ph:'gnd.hp',L:[['P',168,'You would like to turn left after take-off.'],['A','{CS}, unable, follow the standard departure.'],['P','Roger, standard departure, {CS}']]},
+/* ===== rejected take-off (the flight ends on the runway) ===== */
+{ph:'rwy',L:[['P',122]]},
+{ph:'rwy',L:[['P','{CS}, stopping','During the take-off roll you reject the take-off.'],['A',123],['P',121]]},
+{ph:'rwy',L:[['P',246]]},
+/* ===== departure climb ===== */
+{ph:'dep',L:[['A',144],['P','Runway heading for 4 minutes, {CS}']]},
+{ph:'dep',L:[['P',43,'You climbed round a thunderstorm cell.'],['A','{CS}, roger.'],['P','{CS}']]},
+{ph:'dep',e:'return',L:[['P',310,'Just after take-off the aircraft is not climbing normally.'],['A','{CS}, roger, say intentions.'],['P','{CS}, request immediate return to {DEP}']]},
+{ph:'dep',e:'return',L:[['P',261,'After gear retraction you get a fire warning on the main gear.'],['A','{CS}, roger, emergency services alerted. Say intentions.'],['P','{CS}, request immediate return to {DEP}']]},
+{ph:'dep',e:'return',L:[['P',297,'After take-off one engine is vibrating heavily.'],['A','{CS}, roger, say intentions.'],['P','{CS}, request return to {DEP}']]},
+/* ===== en route: weather ===== */
+{ph:'crz',L:[['P',40],['A',19],['P','Roger, {CS}']]},
+{ph:'crz',L:[['P',39],['A','{CS}, it has moved east of {WP3}, your route is clear.'],['P','Roger, {CS}']]},
+{ph:'crz',L:[['P',35,'You want to know the weather at your destination.'],['A','{CS}, negative, visibility 800 metres in fog.'],['P',36],['A',21],['P','Roger, we expect to land before that, {CS}']]},
+{ph:'crz',L:[['A',22],['P',32],['A','{CS}, roger, report if you need to deviate.'],['P','Wilco, {CS}']]},
+{ph:'crz',L:[['A',23],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',29],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',30],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',37],['P','Roger, we will avoid the area, {CS}']]},
+{ph:'crz',L:[['A',24],['P','Roger, we have information Golf, {CS}']]},
+{ph:'crz',L:[['P',41,'There was a flash and a bang: lightning hit the aircraft.'],['A','{CS}, roger, do you require any assistance?'],['P',331]]},
+{ph:'crz',e:'divert',L:[['A','{CS}, {ARR} is closed, you are directed to your alternate {ALT}.'],['P',208],['A',38],['P','Roger, diverting to {ALT}, {CS}']]},
+/* ===== en route: communication and identification ===== */
+{ph:'crz',L:[['A',44],['P',56],['A',47],['P','Roger, changing headset. How do you read now? {CS}'],['A','{CS}, read you five.'],['P','{CS}']]},
+{ph:'crz',L:[['A',45],['P','Wilco wilco, {CS} {CS}']]},
+{ph:'crz',L:[['A',46],['P','{CS}, I say again, maintaining FL{FL}']]},
+{ph:'crz',L:[['A',50],['P','Roger, how do you read now? {CS}'],['A',62],['P','Wilco, {CS}']]},
+{ph:'crz',L:[['A',51],['P',57],['A','{CS}, transmit in full.'],['P','{CS}, maintaining FL{FL}, estimating {WP3} at 45']]},
+{ph:'crz',L:[['A',58],['P','Roger, {CS}'],['A',59],['P','Monitoring 126.8, {CS}']]},
+{ph:'crz',L:[['A',61],['P','Remaining this frequency, {CS}']]},
+{ph:'crz',L:[['P',60,'Your receiver has failed. You transmit blind.'],['A','{CS}, read you five, radio contact re-established, continue as cleared.'],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',52],['P','Squawking standby, {CS}']]},
+{ph:'crz',L:[['A',53],['P','Affirm, squawking {SQ}, {CS}']]},
+{ph:'crz',L:[['A',48],['P','Roger, recycling the transponder, {CS}'],['A',54],['P','{CS}, maintaining FL{FL}']]},
+{ph:'crz',L:[['A',49],['P','Roger, {CS}'],['A',141],['P','Turning right 90 degrees, {CS}'],['A','{CS}, identified.'],['P',194],['A','{CS}, 15 miles north-east of {WP2}.'],['P','Roger, {CS}'],['A',145],['P','Resuming own navigation, {CS}']]},
+{ph:'crz',L:[['P',55,'Your navigation display has failed and you are not sure of your position.'],['A','{CS}, your position is 20 miles south-west of {WP2}.'],['P',172],['A',160],['P','Left heading 160, {CS}']]},
+{ph:'crz',L:[['P',293],['A','{CS}, roger, turn left heading 090 to rejoin the airway.'],['P','Left heading 090, {CS}']]},
+{ph:'crz',L:[['A',64,'Your transponder was off by mistake: the call is for you.'],['P','{CS}, squawking ident']]},
+{ph:'crz',L:[['P',180,'You did not understand the name of the point.'],['A','{CS}, I spell: {WP3S}.'],['P','{WP3}, {CS}']]},
+/* ===== en route: navigation and ATC instructions ===== */
+{ph:'crz',L:[['A',127],['P','Wilco, {CS}']]},
+{ph:'crz',L:[['P','{CS}, request offset 2 miles left of track','You want to fly beside the airway because of turbulence.'],['A',128],['P','Offset 2 miles left, {CS}']]},
+{ph:'crz',L:[['A',129],['P','{CS}, maintaining FL{FL}']]},
+{ph:'crz',L:[['P',235,'Your altimeter system is not RVSM-capable today.'],['A',130],['P','Maintaining FL{FL}, {CS}']]},
+{ph:'crz',L:[['A','{CS}, confirm RVSM approved.'],['P',236],['A','{CS}, roger, descend FL280.'],['P','Descending FL280, {CS}']]},
+{ph:'crz',L:[['A',131],['P','Maintaining FL{FL}, {CS}']]},
+{ph:'crz',L:[['A',132],['P',161]]},
+{ph:'crz',L:[['A',133],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',134],['P','Maintain FL370, proceed to OGODA, hold north-west, inbound radial 288, right turns, {CS}']]},
+{ph:'crz',L:[['A',139],['P','Not above 250 knots, {CS}']]},
+{ph:'crz',L:[['A',140],['P','Orbiting right, {CS}']]},
+{ph:'crz',L:[['P',169],['A',142],['P','Maintaining heading until the FIR boundary, {CS}']]},
+{ph:'crz',L:[['P',146,'There is a build-up on your track.'],['A','{CS}, 10 degrees right approved.'],['P','10 degrees right, {CS}']]},
+{ph:'crz',L:[['P','{CS}, request deviation left of track due weather','There are towering clouds ahead.'],['A',171],['P','Roger, within the route, {CS}']]},
+{ph:'crz',L:[['P',147,'You are in moderate turbulence.'],['A','{CS}, descend FL{FLD}.'],['P','Descending FL{FLD}, {CS}']]},
+{ph:'crz',L:[['P',148,'A sudden jolt of severe turbulence.'],['A',149],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',152],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',157],['P','Roger, request FL350, {CS}'],['A','{CS}, climb FL350.'],['P','Climbing FL350, {CS}']]},
+{ph:'crz',L:[['A',158],['P','Affirm, FL300 is acceptable, {CS}'],['A','{CS}, descend FL300.'],['P','Descending FL300, {CS}']]},
+{ph:'crz',L:[['A',163],['P','{CS}, we will take FL310'],['A','{CS}, roger, FL310.'],['P','FL310, {CS}']]},
+{ph:'crz',L:[['A',162],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',164],['P','Not below FL390 over the hazardous area, {CS}']]},
+{ph:'crz',L:[['P',165,'Severe turbulence at your level.'],['A','{CS}, climb FL{FLU}.'],['P','Climbing FL{FLU}, {CS}']]},
+{ph:'crz',L:[['P',166,'Clear air turbulence at your level.'],['A','{CS}, descend FL{FLD}.'],['P','Descending FL{FLD}, {CS}']]},
+{ph:'crz',L:[['P',167,'You are still climbing to FL300.'],['A','{CS}, roger, stop climb at FL250.'],['P','Stopping climb at FL250, {CS}']]},
+{ph:'crz',L:[['P',170],['A','{CS}, the lowest safe level is FL110.'],['P','Roger, {CS}']]},
+{ph:'crz',L:[['P',173,'You are climbing out of the clouds.'],['A','{CS}, roger.'],['P','{CS}']]},
+{ph:'crz',L:[['A',174],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',175],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',176],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',177],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',179],['P','{CS}, sorry, we passed {WP2} at 25, FL{FL}']]},
+{ph:'crz',L:[['A',178],['P',308],['A','{CS}, roger, descend FL{FLD}, report your intentions.'],['P','Descending FL{FLD}, we will continue to {ARR}, request priority landing, {CS}']]},
+{ph:'crz',L:[['P',309,'The aircraft is too heavy for this level.'],['A','{CS}, descend FL{FLD}.'],['P','Descending FL{FLD}, {CS}']]},
+{ph:'crz',L:[['A',159],['P','Remaining outside controlled airspace, expect clearance at 35, {CS}']]},
+{ph:'crz',L:[['A',190],['P','Losing time to arrive at 50, {CS}']]},
+/* ===== en route: traffic, separation, TCAS ===== */
+{ph:'crz',L:[['A',181],['P','Looking out, {CS}']]},
+{ph:'crz',L:[['A',182],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',183],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',184],['P','Roger, {CS}']]},
+{ph:'crz',L:[['A',185],['P','Roger, looking out, {CS}']]},
+{ph:'crz',L:[['A',186],['P','Traffic in sight, {CS}']]},
+{ph:'crz',L:[['A',187],['P','Looking out, {CS}']]},
+{ph:'crz',L:[['A',189],['P','Negative contact, {CS}']]},
+{ph:'crz',L:[['A',191],['P','Turning left 30 degrees, {CS}'],['A',198],['P','Roger, resuming own navigation, {CS}']]},
+{ph:'crz',L:[['A',192],['P','Reducing speed, {CS}']]},
+{ph:'crz',L:[['A',199],['P','Maintaining 10 minutes separation from the Airbus 320, {CS}']]},
+{ph:'crz',L:[['A','{CS}, climb FL{FLU}.'],['P',196],['A','{CS}, roger.'],['P',197],['A','{CS}, climb FL150.'],['P','Climbing FL150, {CS}']]},
+{ph:'crz',L:[['P',195,'Traffic suddenly appeared on a collision course.'],['A','{CS}, roger, report any injuries.'],['P',281],['A',204],['P','Negative, {CS}']]},
+{ph:'crz',L:[['P',202,'You had to dive to avoid other traffic.'],['A',270],['P',283]]},
+{ph:'crz',L:[['P',200],['A','{CS}, roger, say your intentions.'],['P',201],['A','{CS}, roger, air miss report noted.'],['P','{CS}']]},
+{ph:'crz',L:[['P',203],['A','{CS}, roger, it will be investigated.'],['P','{CS}']]},
+/* ===== en route: passengers ===== */
+{ph:'crz',L:[['P',271],['A','{CS}, roger, you are number one, ambulances will be waiting.'],['P','Thank you, {CS}']]},
+{ph:'crz',L:[['P',272],['A','{CS}, roger, medical service will meet you at the stand.'],['P','Thank you, {CS}']]},
+{ph:'crz',L:[['P',273],['A','{CS}, roger, police will meet you on arrival.'],['P','Thank you, {CS}']]},
+{ph:'crz',L:[['P',274],['A','{CS}, roger, an ambulance will be waiting.'],['P','Thank you, {CS}']]},
+{ph:'crz',L:[['P',275],['A','{CS}, roger, do you wish to divert?'],['P','Negative, we continue to {ARR}, request an ambulance on arrival, {CS}']]},
+{ph:'crz',L:[['P',276],['A','{CS}, roger, it will be arranged.'],['P','Thank you, {CS}']]},
+/* ===== en route: unlawful interference ===== */
+{ph:'crz',L:[['P',259],['A','{CS}, roger, squawk 7500 if able.'],['P',260],['A','{CS}, understand hijack.'],['P',280],['A',278],['P',279],['A','{CS}, roger, your message is passed on.'],['P','{CS}']]},
+{ph:'crz',L:[['P',258,'The hijackers order you to pass a message.'],['A','{CS}, go ahead.'],['P',282],['A',285],['P',284],['A','{CS}, roger, police and emergency services will meet you.'],['P',277],['A','{CS}, roger, ambulances will be waiting.'],['P','{CS}']]},
+{ph:'crz',e:'divert',L:[['P',249],['A','{CS}, roger, say new destination.'],['P','{CS}, they demand to land at {ALT}']]},
+{ph:'crz',e:'divert',L:[['P',266],['A',264],['P',267],['A',265],['P','Roger, {CS}'],['A',232],['P','Wilco, {CS}'],['A','{CS}, follow the interceptor, you are to land at {ALT}.'],['P','Following the interceptor to {ALT}, {CS}']]},
+/* ===== en route: emergencies (some end the flight early) ===== */
+{ph:'crz',L:[['A',231],['P',262],['A',257],['P',253,'A few minutes later the fire is out.'],['A','{CS}, roger, distress cancelled, continue as cleared.'],['P','{CS}']]},
+{ph:'crz',e:'return',L:[['P',233,'Fire warning on the left engine.'],['A',63],['P','Squawking 7700, {CS}']]},
+{ph:'crz',e:'divert',L:[['A',234],['P','{CS}, roger, request landing at the nearest aerodrome']]},
+{ph:'crz',L:[['P',237,'One engine is losing power.'],['A','{CS}, roger, report your intentions.'],['P',316],['A','{CS}, roger.'],['P','{CS}, we continue to {ARR}']]},
+{ph:'crz',e:'return',L:[['P',238],['A','{CS}, roger, say intentions.'],['P','{CS}, request immediate descent and return to {DEP}']]},
+{ph:'crz',e:'return',L:[['P',240],['A',325],['P','Roger, {CS}']]},
+{ph:'crz',e:'return',L:[['P',241]]},
+{ph:'crz',L:[['P',242,'You hear a Mayday from another aircraft that ATC cannot hear.'],['A','{CS}, roger, Mayday relay received.'],['P','{CS}']]},
+{ph:'crz',L:[['P',254],['A','{CS}, descend FL100.'],['P','Descending FL100, {CS}']]},
+{ph:'crz',e:'divert',L:[['P',243],['A','{CS}, roger, descend FL100, cleared direct {ALT}.'],['P','Descending FL100, direct {ALT}, {CS}']]},
+{ph:'crz',e:'offfield',L:[['P',250],['A','{CS}, roger Mayday, nearest aerodrome {ALT}, 60 miles.'],['P',244]]},
+{ph:'crz',e:'divert',L:[['P',245],['A','{CS}, roger, squawk 7700, cleared direct {ALT}.'],['P','Squawking 7700, direct {ALT}, {CS}']]},
+{ph:'crz',L:[['P',248],['A','{CS}, roger, do you require assistance?'],['P',247],['A','{CS}, roger, fire brigade will be standing by.'],['P','{CS}']]},
+{ph:'crz',L:[['P',256],['A','{CS}, roger, state your problem.'],['P',300],['A','{CS}, roger, your ground speed is 450 knots.'],['P','{CS}']]},
+{ph:'crz',L:[['P',252,'You have a hydraulic failure.'],['A','{CS}, roger, say nature of emergency and intentions.'],['P','{CS}, hydraulic failure, we continue to {ARR}, request priority landing']]},
+{ph:'crz',L:[['P',268],['A','{CS}, roger, do you need assistance?'],['P','Negative, we have control, request priority landing at {ARR}, {CS}']]},
+{ph:'crz',L:[['A',269],['P','{CS}, 126 persons on board']]},
+{ph:'crz',e:'return',L:[['P',291],['A','{CS}, roger, say intentions.'],['P','{CS}, request immediate return to {DEP}']]},
+{ph:'crz',e:'return',L:[['P',307],['A','{CS}, roger, fuel dumping approved 20 miles north of {DEP} at FL100.'],['P','Dumping fuel 20 miles north of {DEP} at FL100, {CS}']]},
+{ph:'crz',e:'divert',L:[['P',255]]},
+/* ===== en route: aircraft technical issues ===== */
+{ph:'crz',L:[['P',315],['A','{CS}, roger, report your intentions.'],['P',289],['A','{CS}, roger.'],['P',331]]},
+{ph:'crz',L:[['P',290],['A','{CS}, roger, say intentions.'],['P','{CS}, we continue to {ARR}, request descent']]},
+{ph:'crz',e:'offfield',L:[['P',312],['A','{CS}, roger, say your fuel endurance.'],['P',294]]},
+{ph:'crz',e:'offfield',L:[['P',311],['A','{CS}, roger, say intentions.'],['P',322]]},
+{ph:'crz',L:[['P',321],['A','{CS}, roger, cleared direct {ARR}, no delay expected.'],['P','Direct {ARR}, {CS}']]},
+{ph:'crz',e:'divert',L:[['P',295],['A','{CS}, roger, say intentions.'],['P',313],['A','{CS}, roger, nearest aerodrome is {ALT}.'],['P','{CS}, request diversion to {ALT}']]},
+{ph:'crz',L:[['P',296],['A','{CS}, roger.'],['P','{CS}, we continue to {ARR}']]},
+{ph:'crz',L:[['P',298],['A','{CS}, roger, your level shows FL{FL} on radar.'],['P','{CS}']]},
+{ph:'crz',L:[['P',314],['A','{CS}, roger, report when able.'],['P',302,'The restart is successful.'],['A','{CS}, roger, urgency cancelled.'],['P','{CS}']]},
+{ph:'crz',L:[['P',305],['A','{CS}, roger, say intentions.'],['P','{CS}, engine shut down, we continue to {ARR}, request priority landing']]},
+{ph:'crz',L:[['P',326],['A','{CS}, roger, do you require assistance?'],['P','Negative, we continue to {ARR}, {CS}']]},
+{ph:'crz',L:[['P',303],['A','{CS}, roger, descend FL{FLD}, {ARR} runway {AR} in use.'],['P','Descending FL{FLD}, runway {AR}, {CS}']]},
+{ph:'crz',L:[['P',304],['A','{CS}, roger, hold over {HOLD} at FL{FLD}.'],['P','Holding over {HOLD} at FL{FLD}, {CS}']]},
+{ph:'crz',L:[['P',306],['A','{CS}, roger.'],['P','{CS}']]},
+{ph:'crz',L:[['P',320],['A','{CS}, roger, your company will be informed.'],['P','Thank you, {CS}']]},
+{ph:'crz',L:[['P',324],['A','{CS}, roger, do you require descent?'],['P','Affirm, request FL{FLD}, {CS}'],['A','{CS}, descend FL{FLD}.'],['P','Descending FL{FLD}, {CS}']]},
+{ph:'crz',L:[['P',217,'You want the destination runway condition.'],['A','{CS}, runway {AR} wet, braking action good.'],['P','Roger, {CS}']]},
+/* ===== descent ===== */
+{ph:'des',L:[['A',156],['P','{CS}, heading {HDG}, descending FL190']]},
+{ph:'des',L:[['A',207],['P','Roger, {CS}']]},
+{ph:'des',L:[['P',216],['A','{CS}, expect approach clearance at 45, delay 10 minutes.'],['P','Expect approach clearance at 45, {CS}']]},
+/* ===== approach (with Approach, before the ILS) ===== */
+{ph:'app.early',L:[['A',227],['P','Roger, request VOR approach runway {AR}, {CS}'],['A',150],['P','Roger, {CS}, request visual approach'],['A','{CS}, roger, expect visual approach runway {AR}.'],['P','Expect visual approach runway {AR}, {CS}']]},
+{ph:'app.early',L:[['A',210],['P','Affirm, {CS}']]},
+{ph:'app.early',L:[['A',135],['P','Heading 340, {CS}'],['A',136],['P','Right heading 240, {CS}']]},
+{ph:'app.early',L:[['A',137],['P','Affirm, {CS}']]},
+{ph:'app.early',L:[['A',138],['P','Affirm, {CS}']]},
+{ph:'app.early',L:[['A',143],['P','Reducing to approach speed, {CS}']]},
+{ph:'app.early',L:[['A',228],['P','Reducing speed, {CS}']]},
+{ph:'app.early',L:[['A',229],['P','One right hand orbit, leaving heading 180, {CS}']]},
+{ph:'app.early',L:[['P',239,'Your fuel is low.'],['A','{CS}, affirm, straight-in approach approved, expect ILS runway {AR}.'],['P','Straight-in approach, ILS runway {AR}, {CS}']]},
+{ph:'app.early',L:[['P',219],['A','{CS}, intercept the glide slope at 2500 feet.'],['P','Roger, 2500 feet, {CS}']]},
+{ph:'app.early',L:[['A',211],['P','In case of go-around runway heading, 1300 feet, {CS}']]},
+{ph:'app.early',L:[['A',209],['P',205]]},
+{ph:'app.early',L:[['A',206],['P','{CS}']]},
+{ph:'app.early',L:[['A',188],['P','Traffic in sight, {CS}']]},
+/* ===== approach (with Tower, on final) ===== */
+{ph:'app.twr',L:[['A',20],['P','Negative, {CS}']]},
+{ph:'app.twr',L:[['A',26],['P','Roger, {CS}']]},
+{ph:'app.twr',L:[['A',27],['P','Affirm, we can accept, {CS}']]},
+{ph:'app.twr',L:[['A',42],['P','Roger, we continue the approach, {CS}']]},
+{ph:'app.twr',L:[['A',153],['P',218]]},
+{ph:'app.twr',L:[['A',154],['P','Wilco, {CS}']]},
+{ph:'app.twr',L:[['A',155],['P','Roger, visual approach runway {AR}, {CS}']]},
+{ph:'app.twr',L:[['A',193],['P','Cleared to land after the preceding aircraft, {CS}']]},
+{ph:'app.twr',norw:1,L:[['A',110],['P','Cleared ILS approach runway 09 left, sidestep to runway 09 right, {CS}']]},
+{ph:'app.twr',L:[['A',214],['P','Circling to land, {CS}']]},
+{ph:'app.twr',L:[['A',230],['P','Blinking landing lights, {CS}']]},
+{ph:'app.twr',L:[['P',222,'The approach lights are too weak for you.'],['A','{CS}, approach lights 100 per cent.'],['P','{CS}']]},
+{ph:'app.twr',L:[['P',112,'The approach lights are dazzling you.'],['A','{CS}, approach lights 50 per cent.'],['P','{CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',14],['P','Going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',73],['P','Going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',151],['P','Going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',213],['P','Going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',225],['P','Making missed approach, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',226],['P','Going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['A',31],['P','Roger, going around, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['P',33,'Strong wind shear on short final: you go around.'],['A','{CS}, roger, thank you.'],['P','{CS}']]},
+{ph:'app.twr',e:'ga',L:[['P','{CS}, going around','You are too high on final.'],['A',224],['P',220]]},
+{ph:'app.twr',e:'ga',L:[['P',287],['A','{CS}, roger, say intentions.'],['P',288],['A','{CS}, approved, high speed approach runway {AR}.'],['P','High speed approach runway {AR}, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['P',299],['A',325],['P','Roger, {CS}']]},
+{ph:'app.twr',e:'ga',L:[['P',215],['A','{CS}, touch and go approved, runway {AR}.'],['P','Touch and go runway {AR}, {CS}']]},
+{ph:'app.twr',e:'divert',L:[['A',223],['P','Going around, {CS}'],['A','{CS}, climb straight ahead 4000 feet. Say your intentions.'],['P','Climbing straight ahead 4000 feet, request diversion to {ALT}, {CS}']]},
+{ph:'app.twr',e:'divert',L:[['A',34],['P','{CS}, request diversion to {ALT}']]},
+{ph:'app.twr',e:'lowpass',L:[['P',292],['A','{CS}, cleared low pass runway {AR}, not below 200 feet.'],['P','Cleared low pass runway {AR}, {CS}'],['A',329,'After the low pass.'],['P','Roger, {CS}']]},
+{ph:'app.twr',e:'lowpass',L:[['P',327],['A',212],['P','Cleared low pass, 165 feet, runway heading 4000 feet, 119.4 at 660 feet, {CS}']]},
+{ph:'app.twr',e:'lowpass',L:[['P',328],['A','{CS}, cleared low pass runway {AR}, not below 200 feet.'],['P','Cleared low pass, {CS}'],['A','{CS}, your left main gear is not fully extended.'],['P',221],['A',11],['P','Roger, {CS}']]},
+/* ===== after landing ===== */
+{ph:'arr',L:[['A',99],['P','Vacating via the high-speed taxiway, {CS}']]},
+{ph:'arr',L:[['A',103],['P','First convenient turn off, then right into taxiway Bravo, {CS}']]},
+{ph:'arr',L:[['A',109],['P','U-turn, backtrack and vacate via taxiway 2, {CS}']]},
+{ph:'arr',L:[['P',108,'The sequence flashers are still on.'],['A','{CS}, sequence flashers off.'],['P','{CS}']]},
+{ph:'arr',L:[['P',301,'You landed firmly.'],['A','{CS}, roger, do you need assistance?'],['P','Negative, {CS}']]},
+{ph:'arr',L:[['P',319,'You used only idle reverse.'],['A','{CS}, roger.'],['P','{CS}']]},
+{ph:'arr',e:'tow',L:[['P',124],['A','{CS}, roger, hold position, a tug is on the way.'],['P','Holding position, {CS}']]},
+{ph:'arr',e:'evac',L:[['P',125],['A','{CS}, roger, hold position, emergency services are on the way.'],['P','{CS}'],['P',251,'Smoke from the gear: you evacuate.']]},
+{ph:'arr.taxi',e:'evac',L:[['P',263]]},
+{ph:'arr.taxi',e:'tow',L:[['P',317],['A','{CS}, roger, a tractor is on the way.'],['P',318]]},
+{ph:'arr.taxi',L:[['P',330],['A','{CS}, roger, the fire service will cool your wheels on the stand.'],['P','Thank you, {CS}']]},
+{ph:'arr.stand',L:[['A',85],['P','Affirm, we need a ladder at the front left door, {CS}'],['A',86],['P','Roger, door-open time 45, {CS}']]},
+{ph:'arr.stand',L:[['A',286],['P','The VIP will get off through the front left door, {CS}']]}
+];
+/* which mission gets which scenario: spread evenly over the missions that fly that part of the flight; a scenario that ends
+   the flight early is the last one of its mission, and that mission gets no scenarios for the later parts of the flight */
+const SC_PH=['gnd.stand','gnd.pushed','gnd.taxi','gnd.hp','rwy','dep','crz','des','app.early','app.twr','arr','arr.taxi','arr.stand'];
+const SC_TERM=new Set(['stand','stay','evac','tow','return','divert','offfield']);
+const scElig=(ph,kd,n)=>ph==='rwy'?(kd==='dep'&&n%20===0):ph.startsWith('gnd')||ph==='dep'?(kd==='full'||kd==='dep'):ph==='crz'?(kd==='full'||kd==='enr'):(kd==='full'||kd==='arr');
+let SC_PLAN=null;
+function scPlan(){if(SC_PLAN)return SC_PLAN;const plan={},ended=new Set();for(let n=1;n<=100;n++)plan[n]={};
+  for(const ph of SC_PH){const items=SCEN.map((s,i)=>i).filter(i=>SCEN[i].ph===ph);if(!items.length)continue;
+    const E=[];for(let n=1;n<=100;n++){if(ended.has(n)||!scElig(ph,mKind(n),n))continue;if(ph!=='rwy'&&mKind(n)==='dep'&&n%20===0&&!['gnd.stand','gnd.pushed','gnd.taxi','gnd.hp'].includes(ph))continue;E.push(n)}
+    if(!E.length)continue;
+    /* mix the categories so neighbouring missions do not get the same kind of situation */
+    const mixed=items.map((x,k)=>[x,(k*37)%items.length]).sort((p,q)=>p[1]-q[1]).map(p=>p[0]);
+    mixed.forEach((si,k)=>{let j=Math.floor(k*E.length/mixed.length),guard=0;const term=SC_TERM.has(SCEN[si].e)||ph==='rwy';
+      while(guard++<E.length){const n=E[j%E.length],L=plan[n][ph]||(plan[n][ph]=[]);const hasTerm=L.some(x=>SC_TERM.has(SCEN[x].e)||ph==='rwy');if(!(term&&hasTerm)&&!(ph==='rwy'&&L.length)){L.push(si);break}j++}});
+    for(const n of E){const L=plan[n][ph];if(!L)continue;L.sort((x,y)=>(SC_TERM.has(SCEN[x].e)?1:0)-(SC_TERM.has(SCEN[y].e)?1:0));if(L.some(x=>SC_TERM.has(SCEN[x].e))||ph==='rwy')ended.add(n)}}
+  return SC_PLAN=plan}
+/* the English and Russian of a unit phrase, with the runway / taxiway of this flight */
+function uPhrase(id,rw,twy){const c=PCL.find(x=>x.i===id);let e=uClean(c.c).replace(/[.!]+$/,''),ru=PHR[id].r;const sec=PHR[id].s;
+  if(twy){const m=e.match(/\bTWY\s+([A-Z]?\d*[A-Z]?\d*)\b/);if(m&&m[1]&&m[1]!==twy){const rx=new RegExp('\\b'+m[1]+'\\b','g');e=e.replace('TWY '+m[1],'TWY '+twy);ru=String(ru).replace(rx,twy)}}
+  if(rw){const ds=uniq([...e.matchAll(/\b(?:RWY|runway)\s*(\d{2}[LRC]?)\b/gi)].map(m=>m[1].toUpperCase()));if(ds.length===1&&ds[0]!==String(rw).toUpperCase()&&!/\b(left|right)\b.*\b(left|right)\b/i.test(e)){const d0=ds[0],rx=new RegExp('\\b'+d0+'\\b','gi');e=e.replace(rx,rw);ru=String(ru).replace(rx,rw)}}
+  return {e,ru,sec,q:/\?$/.test(c.c.trim())}}
+function sayKeys(t){const toks=uniq(norm(String(t).replace(/\{CS\}/g,' ')).trim().split(' ').filter(x=>x&&x!=='zzsep'));
+  const key=toks.filter(x=>/^\d/.test(x)).slice(0,3).concat(toks.filter(x=>x.length>=5&&!U_STOP.has(x)&&!/^\d/.test(x)).slice(0,3));if(!key.length)key.push(...toks.filter(x=>x.length>=3).slice(0,2));
+  return key.map(x=>[/^\d+$/.test(x)?x.split('').join('\\s?'):'\\b'+reEsc(x)+'\\b','"'+x+'"'])}
+/* scenario -> radio steps (an ATC line and the pilot's answer make one step; a pilot call with nothing before it is a step of its own) */
+function scenSteps(si,X,scene){const sc=SCEN[si],out=[];const rw=sc.norw?null:X.rw,sub=t=>String(t).replace(/\{(\w+)\}/g,(m,k)=>k==='CS'?m:(X[k]!==undefined?X[k]:m));
+  const line=l=>{if(typeof l[1]==='number'){const u=uPhrase(l[1],rw,X.twy);let t=u.e;
+      t=t.replace(/\bTashkent Tower,\s*/g,'').replace(/\bTKT VOR\b/g,X.WP2+'').replace(/\bTashkent\b/g,X.ARR);
+      if(l[1]===211&&X.GAALT){t=t.replace(/\b1300\b/g,X.GAALT);u.ru=String(u.ru).replace(/\b1300\b/g,X.GAALT)}
+      if(l[0]==='P'&&/\bUZB ?\d+\b/.test(t)){t=t.replace(/\bUZB ?\d+\b/,'{CS}').replace(/\bUZB ?\d+\b/g,'{CS}');return {who:'P',t,u:l[1],ru:u.ru,sec:u.sec,sit:l[2]?sub(l[2]):''}}if(l[0]==='A')t='{CS}, '+(/^[A-Z][a-z]/.test(t)?t.charAt(0).toLowerCase()+t.slice(1):t)+(/[?]$/.test(t)?'':'.');else t='{CS}, '+t;return {who:l[0],t,u:l[1],ru:u.ru,sec:u.sec,sit:l[2]?sub(l[2]):''}}
+    return {who:l[0],t:sub(l[1]),sit:l[2]?sub(l[2]):''}};
+  const Ls=sc.L.map(line);
+  const pStep=(p,a)=>{const ack=/^(roger|wilco|thank|affirm|negative)/i.test(p.t)&&p.u===undefined,cs=p.t.trim()==='{CS}';
+    const sit=[a&&a.u!==undefined?'Перевод: '+a.ru:'',a&&a.sit?a.sit:'',p.u!==undefined?'Unit phrase · '+p.sec+': '+p.ru:'',p.sit].filter(Boolean).join(' · ');
+    const task=p.u!==undefined?(a?'Answer in English.':'Tell ATC in English.'):cs?'Acknowledge with your call sign only.':ack?(/^(roger|wilco|thank)/i.test(p.t)?'Acknowledge.':'Answer.'):a?'Read back / reply.':'Tell ATC.';
+    const need=cs?[]:(p.u===undefined&&/^(roger|wilco|thank)/i.test(p.t)&&p.t.split(/[ ,]+/).length<=4)?[['roger|wilco|copied|understood|thank','"Roger" / "Wilco"']]:sayKeys(p.t);
+    const st={sit,task,need,model:p.t,sc:Object.assign({},scene)};if(a)st.atc=a.t;const us=[a&&a.u,p.u].filter(x=>x!=null);if(us.length){st.unit=us[0];st.units=us}return st};
+  for(let k=0;k<Ls.length;k++){const l=Ls[k];if(l.who==='A'){const p=Ls[k+1]&&Ls[k+1].who==='P'?Ls[k+1]:{who:'P',t:'{CS}',sit:''};out.push(pStep(p,l));if(Ls[k+1]&&Ls[k+1].who==='P')k++}else out.push(pStep(l,null))}
+  return out}
 function genMission(n){
   const r=mRng(n*7919+13);const ads=S.ads.length>=2?S.ads:[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'}];
   let di=mInt(r,0,ads.length-1),ai=mInt(r,0,ads.length-2);if(ai>=di)ai++;
@@ -2181,6 +2520,35 @@ function genMission(n){
   const st=(stn,f)=>stn+'|'+f;
   const steps=[];let endMsg=null;const S_=(o)=>{steps.push(o);return o};
   const tags=[];
+  /* non-routine scenarios of this mission (chosen without using the random stream, so the routine part stays the same) */
+  const PL=scPlan()[n]||{};const altAd=ads.find((x,i)=>i!==di&&i!==ai)||null,altN=altAd?altAd.n:depN,altR=altAd?String(altAd.r||'09').toUpperCase():DR;
+  const spellW=w=>String(w).toUpperCase().split('').map(c=>PHON[c]||c).join(' ');
+  const scX=()=>({DEP:depN,ARR:arrN,ALT:altN,DR,AR,STD:PD.std,TXR:PD.txr||'the apron',FL:crz,FLU:crz+20,FLD:crz-20,WP2:wps[2],WP3:wps[3],WP3S:spellW(wps[3]),HOLD:wps[4],SQ:sq,GAALT:gaAltV,HDG:pad(((n*37)%36+1)*10,3),rw:null,twy:null});
+  let gaFn=null,scGA=false,gaAltV=4000;
+  const divSteps=(e,si)=>{const txt=SCEN[si].L.map(l=>typeof l[1]==='number'?PCL.find(c=>c.i===l[1]).c:l[1]).join(' ');const em=/fire|smoke|mayday|engine|bomb|decompress|pressuri|electrical|fuel|explosion|damage|7700|burning|undercarriage|speed and height/i.test(txt),pol=/armed|intercept|hijack/i.test(txt);
+    const tgt=e==='return'?{n:depN,r:DR,w:windStr(wDep,sDep)}:/Newbridge/.test(txt)?{n:'Newbridge',r:'09',w:windStr(wArr,sArr)}:{n:altN,r:altR,w:windStr(wArr,sArr)};
+    const fl=100,lr=n%2?'left':'right',h=pad(((n*53)%36+1)*10,3),fqX=['119.8','120.2','124.3','125.25'][n%4],fqXT=['118.25','119.1','119.9','118.9'][(n+1)%4],tX=nameRe(tgt.n),help=em?', emergency services alerted':pol?', police alerted':'';
+    const mz=k=>({t:'mayday',stage:k,fire:false,fireOut:false,to:tgt.n,tags:k===1?['DIRECT '+tgt.n.toUpperCase(),'DESCEND FL'+fl]:['INBOUND','TO '+tgt.n.toUpperCase()],p:4});
+    S_({atc:`{CS}, roger, turn ${lr} heading ${h}, descend FL${fl}, cleared direct ${tgt.n}${help}.`,task:'Read back.',need:[[lr+' heading 0*'+(+h),lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+h],['flight level '+fl,'FL'+fl],['direct','"direct"'],[tX,tgt.n]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${h}, descending FL${fl}, direct ${tgt.n}, {CS}`,sc:mz(1)});
+    S_({atc:`{CS}, contact ${tgt.n} Approach ${fqX}.`,task:'Read back the frequency.',need:[[fqRx(fqX),'Frequency '+fqX]],model:`${fqX}, {CS}`,sc:mz(1)});
+    S_({st:st(tgt.n+' Approach',fqX),sit:`You are inbound to ${tgt.n}, descending to FL${fl}.`,task:`Make first contact with ${tgt.n} Approach.`,need:[[tX+' approach',`Station "${tgt.n} Approach"`],['flight level '+fl,'FL'+fl]],model:`${tgt.n} Approach, {CS}, descending FL${fl}, inbound ${tgt.n}`,sc:mz(2)});
+    S_({atc:`{CS}, ${tgt.n} Approach, identified, descend 3000 feet, cleared ILS approach runway ${tgt.r}${em?', emergency services are standing by':pol?', police and emergency services are standing by':''}.`,task:'Read back.',need:[['3000','3000 feet'],['cleared( for)? ils( approach)?','"cleared ILS approach"'],[rwyRe(tgt.r),'Runway '+tgt.r]],model:`Descending 3000 feet, cleared ILS approach runway ${tgt.r}, {CS}`,sc:{t:'profile',mode:'descent',a:fl,b:30,p:5}});
+    S_({atc:`{CS}, contact ${tgt.n} Tower ${fqXT}.`,task:'Read back the frequency.',need:[[fqRx(fqXT),'Frequency '+fqXT]],model:`${fqXT}, {CS}`,sc:{t:'profile',mode:'descent',a:fl,b:30,p:5}});
+    S_({st:st(tgt.n+' Tower',fqXT),sit:'6 miles final on the ILS.',task:'Call Tower.',need:[[tX+' tower',`Station "${tgt.n} Tower"`],['established','"Established"'],[rwyRe(tgt.r),'Runway '+tgt.r]],model:`${tgt.n} Tower, {CS}, established ILS runway ${tgt.r}`,sc:{t:'profile',mode:'final',p:5}});
+    S_({atc:`{CS}, ${tgt.n} Tower, runway ${tgt.r}, cleared to land, wind ${tgt.w}.`,task:'Read back.',need:[[rwyRe(tgt.r),'Runway '+tgt.r],['cleared to land','"cleared to land"']],model:`Runway ${tgt.r}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
+    tags.push(e==='return'?'return to departure':'diversion');endMsg=`{CS}, welcome to ${tgt.n}.`};
+  const offSteps=()=>{const nm=10+(n%4)*5,dr=['north','south','east','west'][n%4],pob=90+(n*13)%90;
+    S_({atc:'{CS}, roger Mayday, squawk 7700, report your position and persons on board.',sit:`You are ${nm} miles ${dr} of ${wps[3]} with ${pob} persons on board.`,task:'Read back and give position and persons on board.',need:[['7\\s?7\\s?0\\s?0','Squawk 7700'],[String(nm).split('').join('\\s?'),nm+' miles'],[dr,dr],[wpRx(wps[3]),wps[3]],[String(pob).split('').join('\\s?'),pob+' persons on board']],model:`Squawking 7700, {CS}, ${nm} miles ${dr} of ${wps[3]}, ${pob} persons on board`,sc:{t:'mayday',stage:0,fire:false,tags:['MAYDAY','FORCED LANDING'],p:4}});
+    S_({atc:'{CS}, roger, search and rescue alerted, emergency services are on the way. Report on the ground when able.',task:'Acknowledge.',need:[['wilco|roger','"Wilco"']],model:'Wilco, {CS}',sc:{t:'mayday',stage:0,fire:false,tags:['SEARCH AND RESCUE','ALERTED'],p:4}});
+    tags.push('forced landing');endMsg='{CS}, roger, search and rescue are on their way.'};
+  /* puts the scenarios of one part of the flight into the mission; 'end' means the flight stops here */
+  const SC=(ph,scene)=>{for(const si of (PL[ph]||[])){const X=scX();X.rw=ph.startsWith('gnd')||ph==='rwy'?DR:AR;X.twy=ph.startsWith('gnd')?(PD.names&&PD.names[0])||null:null;
+      scenSteps(si,X,scene).forEach(s=>S_(s));tags.push('non-routine');const e=SCEN[si].e;
+      if(e==='ga'||e==='lowpass'){scGA=true;if(gaFn)gaFn(SCEN[si].L.some(l=>l[1]===212));tags.push(e==='ga'?'go-around':'low pass')}
+      else if(e==='return'||e==='divert'){divSteps(e,si);return 'end'}
+      else if(e==='offfield'){offSteps();return 'end'}
+      else if(e){endMsg={stand:'{CS}, roger, contact your company.',stay:'{CS}, roger.',evac:'{CS}, roger, the fire brigade is with you.',tow:'{CS}, roger, the tug is on its way.'}[e]||endMsg;tags.push(e==='stand'||e==='stay'?'flight cancelled':'emergency on the ground');return 'end'}}
+    return null};
   const G_=(ac,p,x={})=>Object.assign({t:'ground',ac,p},x);
   let firstSit='';
   /* ---------------- departure ---------------- */
@@ -2194,6 +2562,7 @@ function genMission(n){
     if(r()<.5){S_({atc:`{CS}, cleared to ${arrN} via ${sidName} departure, flight planned route, climb to altitude ${initAlt} feet initially, squawk ${sq}.`,task:'Read back the clearance.',need:[[arrX,'Clearance limit '+arrN],[procRx(wps[0],sidD,sidL),'Departure '+sidName],['flight planned route','"flight planned route"'],[String(initAlt),initAlt+' feet'],[String(sq),'Squawk '+sq]],model:`Cleared to ${arrN} via ${sidName} departure, flight planned route, ${initAlt} feet, squawk ${sq}, {CS}`,sc:G_('stand',0)})}
     else S_({atc:`{CS}, cleared to ${arrN}, ${sidName} departure, climb via SID to altitude ${initAlt} feet, squawk ${sq}, departure frequency ${fqD}.`,task:'Read back the clearance.',need:[[arrX,'Clearance limit '+arrN],[procRx(wps[0],sidD,sidL),'Departure '+sidName],['climb(ing)? via sid','"climb via SID"'],[String(initAlt),initAlt+' feet'],[String(sq),'Squawk '+sq],[fqRx(fqD),'Departure '+fqD]],model:`Cleared to ${arrN}, ${sidName} departure, climb via SID to ${initAlt} feet, squawk ${sq}, ${fqD}, {CS}`,sc:G_('stand',0)});
     ms.sq0='----';
+    if(SC('gnd.stand',G_('stand',0))==='end')return finish();
     // pushback
     const pv=r();
     if(pv<.25){S_({atc:'{CS}, readback correct.',sit:'Doors closed, the tug is connected.',task:'Request pushback. Give your stand.',need:[['request push ?back','"request pushback"'],['stand '+reEsc(norm(String(PD.std)).trim()),'Stand '+PD.std]],model:`{CS}, stand ${PD.std}, request pushback`,sc:G_('stand',0,{tug:true})});
@@ -2209,6 +2578,7 @@ function genMission(n){
       S_({atc:'{CS}, start-up approved.',task:'Read back.',need:[['start ?up approved','"Start-up approved"']],model:'Start-up approved, {CS}',sc:G_('pushed',0,{tug:true})})}
     else if(sv<.35)S_({atc:'{CS}, start-up at own discretion.',task:'Read back.',need:[['start ?up','"Start-up"'],['own discretion','"at own discretion"']],model:'Start-up at own discretion, {CS}',sc:G_('pushed',0,{tug:true})});
     else S_({atc:'{CS}, start-up approved.',task:'Read back.',need:[['start ?up approved','"Start-up approved"']],model:'Start-up approved, {CS}',sc:G_('pushed',0,{tug:true})});
+    if(SC('gnd.pushed',G_('pushed',0))==='end')return finish();
     // de-icing (cold weather)
     if(tmp<=3){const pad_=mInt(r,1,4),fqI=mPick(r,['131.85','130.65','122.35']),tIce=pad(mInt(r,6,22))+pad(mInt(r,0,5)*10+mInt(r,0,9)),fl=mPick(r,['1','2','4']);const flN={'1':'Type 1','2':'Type 2','4':'Type 4'}[fl];
       S_({sit:`Temperature ${tmp}°C, ${mPick(r,['light snow','freezing fog','frost on the wings'])}. The aircraft needs de-icing.`,task:'Request de-icing.',need:[['de ?icing','"request de-icing"']],model:'{CS}, request de-icing',sc:G_('pushed',0)});
@@ -2232,10 +2602,11 @@ function genMission(n){
       S_({sit:`You are clear of runway ${other}.`,task:'Report vacated.',need:[[rwyRe(other),'Runway '+other],['vacated','"vacated"']],model:`{CS}, runway ${other} vacated`,sc:G_('taxi',0)});tags.push('runway crossing')}
     else if(gv<.82){S_({atc:`{CS}, expedite taxi, ${T1} behind you.`,task:'Read back.',need:[['expedit','"Expediting"']],model:'Expediting, {CS}',sc:G_('taxi',0,{tt:{k:'behind',t:T1}})});tags.push('expedite')}
     else{S_({atc:`{CS}, caution, ${mPick(r,['work in progress on the left side of the taxiway','birds reported near the holding point','taxiway lights unserviceable'])}.`,task:'Acknowledge.',need:[['roger|wilco|caution','"Roger"']],model:'Roger, {CS}',sc:G_('taxi',0)});tags.push('caution')}
-    for(let k=0;k<uSlots(kind,'gnd',n);k++){const u=unitStep(n,k,'gnd',G_('taxi',0),DR);if(u){S_(u);tags.push('unit phrases')}}
+    if(SC('gnd.taxi',G_('taxi',0))==='end')return finish();
     // holding point & tower
     S_({atc:`{CS}, contact ${depN} Tower ${fqT}.`,task:'Read back the frequency.',need:[[fqRx(fqT),'Frequency '+fqT]],model:`${fqT}, {CS}`,sc:G_('hp',0)});
     S_({st:st(depN+' Tower',fqT),sit:`At holding point ${hpn||''} runway ${DR}, checks complete.`,task:'Call Tower, ready for departure.',need:[[depX+' tower',`Station "${depN} Tower"`],['ready','"ready for departure"']],model:`${depN} Tower, {CS}, holding point ${hpn||''} runway ${DR}, ready for departure`,sc:G_('hp',0)});
+    if(SC('gnd.hp',G_('hp',0))==='end')return finish();
     const tv=r();const tw=windStr(wDep,sDep);
     if(tv<.25){S_({atc:`{CS}, ${depN} Tower, behind the landing ${T2} on short final, line up runway ${DR} behind.`,task:'Read back the conditional clearance.',need:[['^\\s*behind','Start with "Behind…"'],[mTypeRx(T2),'Traffic '+T2],['(line|lining) up','"lining up"'],['behind.*(line|lining) up.*behind','"behind" again at the end']],model:`Behind the landing ${T2}, lining up runway ${DR} behind, {CS}`,sc:G_('hp',1,{traffic:'final'})});
       S_({atc:`{CS}, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('conditional line-up')}
@@ -2250,9 +2621,9 @@ function genMission(n){
       S_({atc:'{CS}, hold position, cancel take-off, I say again cancel take-off, vehicle on the runway.',task:'Read back.',need:[['holding','"Holding"'],['cancel','"cancelling take-off"']],model:'Holding, cancelling take-off, {CS}',sc:G_('lineup',1)});
       S_({atc:`{CS}, runway clear, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)});tags.push('take-off cancelled')}
     else{S_({atc:`{CS}, ${depN} Tower, runway ${DR}, cleared for take-off, wind ${tw}.`,task:'Read back.',need:[[DRX,'Runway '+DR],['cleared for take ?off','"cleared for take-off"']],model:`Runway ${DR}, cleared for take-off, {CS}`,sc:G_('lineup',1)})}
-    if(uSlots(kind,'rwy',n)){const u=unitStep(n,0,'rwy',G_('rto',1,{txt:'TAKE-OFF REJECTED',roll:true}),DR);if(u){
+    if(PL.rwy&&PL.rwy.length){{const X=scX();X.rw=DR;const us=scenSteps(PL.rwy[0],X,G_('rto',1,{txt:'TAKE-OFF REJECTED',roll:true}));
       const lt=steps[steps.length-1];lt.sc=G_('lineup',1,{noRoll:true});/* the take-off starts, then is rejected */
-      u.sit=(u.atc?'During the take-off roll you rejected the take-off and stopped on the runway.':'During the take-off roll you reject the take-off. '+u.sit.replace(/^Unit phrase · [^:]*: /,'Unit phrase: '));S_(u);
+      if(!/reject/i.test(us[0].sit))us[0].sit='During the take-off roll you reject the take-off. '+us[0].sit;us.forEach(u=>S_(u));
       S_({atc:`{CS}, roger, hold position, emergency services are on the way.`,task:'Read back.',need:[['holding','"Holding position"']],model:'Holding position, {CS}',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
       S_({sit:'The fire crew reports no fire. The aircraft can taxi.',task:'Request to vacate the runway and return to the stand.',need:[['vacat|return','"vacate" / "return to stand"'],['stand','"stand"']],model:'{CS}, request to vacate the runway and return to stand',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
       tags.push('rejected take-off');endMsg=`{CS}, vacate when able, taxi to stand ${PD.std} via ${PD.txr||'the apron'}, contact Ground ${fqG}.`;return finish()}}
@@ -2265,6 +2636,7 @@ function genMission(n){
     if(dv<.35)S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, proceed direct ${wps[1]}.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['direct','"direct"'],[wpRx(wps[1]),'Point '+wps[1]]],model:`Climbing FL${fl1}, direct ${wps[1]}, {CS}`,sc:{t:'route',pos:.6,lvl:'FL'+fl1+' ↑',p:2}});
     else if(dv<.7){const h=mInt(r,1,36)*10,lr=mPick(r,['left','right']);S_({atc:`{CS}, ${depN} Departure, identified, turn ${lr} heading ${pad(h,3)}, climb FL${fl1}.`,task:'Read back.',need:[[lr+' heading 0*'+h,lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+pad(h,3)],['flight level '+fl1,'FL'+fl1]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${pad(h,3)}, climbing FL${fl1}, {CS}`,sc:{t:'route',pos:.55,lvl:'FL'+fl1+' ↑',p:2}})}
     else S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, no speed restriction.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['no speed restriction','"No speed restriction"']],model:`Climbing FL${fl1}, no speed restriction, {CS}`,sc:{t:'profile',mode:'climb',a:Math.round(initAlt/100),b:fl1,p:2}});
+    if(SC('dep',{t:'route',pos:.7,lvl:'FL'+fl1+' ↑',p:2})==='end')return finish();
     if(kind==='dep'){S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}})}
     else S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}});
   }
@@ -2294,7 +2666,7 @@ function genMission(n){
     const pickN=kind==='enr'?5:3;const EVP=[1.1,1.6,1.35,2,.95,2.2,.9,1.85,3];/* events happen in the order the aircraft reaches them along the route */const order=[...ev.keys()].sort(()=>r()-.5).slice(0,pickN).sort((x,y)=>EVP[x]-EVP[y]);
     S_({sit:`You are now level at FL${crz}.`,task:'Report reaching.',need:[['(reaching|maintaining|level) flight level '+crz,'"Reaching FL'+crz+'"']],model:`{CS}, reaching FL${crz}`,sc:{t:'profile',mode:'level',a:crz,p:3}});
     order.forEach(i=>ev[i]());
-    for(let k=0;k<uSlots(kind,'crz',n);k++){const u=unitStep(n,k,'crz',{t:'route',pos:2.5,lvl:'FL'+crz,p:3},AR);if(u){S_(u);tags.push('unit phrases')}}
+    if(SC('crz',{t:'route',pos:2.5,lvl:'FL'+crz,p:3})==='end')return finish();
     S_({atc:`{CS}, contact ${arrN} Control ${fqC2}.`,task:'Read back.',need:[[fqRx(fqC2),'Frequency '+fqC2]],model:`${fqC2}, {CS}`,sc:{t:'route',pos:2.6,lvl:'FL'+crz,p:3}});
   }
   /* ---------------- arrival ---------------- */
@@ -2303,9 +2675,20 @@ function genMission(n){
     if(kind==='arr'){ms.sq0=sq;firstSit=`Mission ${n}: arriving at ${arrN}. Runway ${AR} in use, wind ${pad(wArr,3)}/${sArr}. ATIS information ${atisW}, QNH ${qnhA}.`}
     S_({st:st(arrN+' Control',fqC2),sit:(kind==='arr'?firstSit+' ':'')+`Level FL${fromFL}, approaching ${wps[3]}.`,task:`Make first contact with ${arrN} Control.`,need:[[arrX+' control',`Station "${arrN} Control"`],['flight level '+fromFL,'FL'+fromFL]],model:`${arrN} Control, {CS}, FL${fromFL}`,sc:{t:'route',pos:2.7,lvl:'FL'+fromFL,p:3}});
     S_({atc:`{CS}, ${arrN} Control, identified, descend FL${desFL}, ${starName} arrival, runway ${AR}.`,task:'Read back.',need:[['flight level '+desFL,'FL'+desFL],[procRx(wps[3],starD,starL),'Arrival '+starName],[ARX,'Runway '+AR]],model:`Descending FL${desFL}, ${starName} arrival, runway ${AR}, {CS}`,sc:{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4}});
+    if(SC('des',{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4})==='end')return finish();
     S_({atc:`{CS}, contact ${arrN} Approach ${fqA}.`,task:'Read back.',need:[[fqRx(fqA),'Frequency '+fqA]],model:`${fqA}, {CS}`,sc:{t:'route',pos:3.2,lvl:'FL'+desFL+' ↓',p:4}});
     S_({st:st(arrN+' Approach',fqA),sit:`Descending to FL${desFL}. You have ATIS information ${atisW}.`,task:'Make first contact with Approach.',need:[[arrX+' approach',`Station "${arrN} Approach"`],['flight level '+desFL,'FL'+desFL],['information '+phonRx(atis),'Information '+atisW]],model:`${arrN} Approach, {CS}, descending FL${desFL}, information ${atisW}`,sc:{t:'route',pos:3.4,lvl:'FL'+desFL+' ↓',p:4}});
-    const av=r();const alt1=mPick(r,[4000,5000,6000]),alt2=mPick(r,[2500,3000,3500].filter(x=>x<alt1));
+    const av=r();const alt1=mPick(r,[4000,5000,6000]),alt2=mPick(r,[2500,3000,3500].filter(x=>x<alt1));gaAltV=alt1;
+    /* go-around: missed-approach instructions, back to Approach, a second ILS approach, back to Tower */
+    gaFn=(noClimb)=>{const ga={t:'profile',mode:'goaround',why:'unit',alt:noClimb?4000:alt1,p:5};
+      if(!noClimb)S_({atc:`{CS}, climb straight ahead ${alt1} feet, contact ${arrN} Approach ${fqA}.`,task:'Read back the missed-approach instructions.',need:[['straight ahead','Straight ahead'],['\\b'+alt1+'\\b',alt1+' feet'],[fqRx(fqA),'Approach '+fqA]],model:`Climbing straight ahead ${alt1} feet, ${fqA}, {CS}`,sc:ga});
+      S_({st:st(arrN+' Approach',fqA),sit:`You are climbing to ${noClimb?4000:alt1} feet after the missed approach.`,task:'Call Approach.',need:[[arrX+' approach',`Station "${arrN} Approach"`],['\\b'+(noClimb?4000:alt1)+'\\b',(noClimb?4000:alt1)+' feet']],model:`${arrN} Approach, {CS}, missed approach, climbing ${noClimb?4000:alt1} feet`,sc:ga});
+      const vs=ms.vside||1,crsA=((parseInt(AR)||36)*10)%360||360,h2=pad(((((crsA+30*vs)%360)+360)%360)||360,3),lr=vs>0?'left':'right';
+      S_({atc:`{CS}, turn ${lr} heading ${h2}, descend 3000 feet, cleared ILS approach runway ${AR}, report established.`,task:'Read back.',need:[[lr+' heading 0*'+(+h2),lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+h2],['3000','3000 feet'],['cleared( for)? ils( approach)? '+ARX,'Cleared ILS approach runway '+AR]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${h2}, descending 3000 feet, cleared ILS approach runway ${AR}, wilco, {CS}`,sc:{t:'vector',stage:1,hdg:h2,alt:3000,p:5}});
+      S_({sit:'The localizer is captured again.',task:'Report established.',need:[['established','"Established"']],model:`{CS}, established on the localizer runway ${AR}`,sc:{t:'vector',stage:2,p:5}});
+      S_({atc:`{CS}, contact ${arrN} Tower ${fqTa}.`,task:'Read back.',need:[[fqRx(fqTa),'Frequency '+fqTa]],model:`${fqTa}, {CS}`,sc:{t:'vector',stage:2,p:5}});
+      S_({st:st(arrN+' Tower',fqTa),sit:'6 miles final on the ILS, second approach.',task:'Call Tower.',need:[[arrX+' tower',`Station "${arrN} Tower"`],['established','"Established"'],[ARX,'Runway '+AR]],model:`${arrN} Tower, {CS}, established ILS runway ${AR}`,sc:{t:'profile',mode:'final',p:5}})};
+    if(SC('app.early',{t:'route',pos:3.5,lvl:'FL'+desFL+' ↓',p:4})==='end')return finish();
     if(av<.35){const it=mInt(r,1,36)*10,lr=mPick(r,['right','left']),eat=mInt(r,10,55);ms.holdInfo={fix:wps[4],fl:desFL,it,lr,eat};
       S_({atc:`{CS}, hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}.`,task:'Read back the holding clearance.',need:[[wpRx(wps[4]),'Fix '+wps[4]],['flight level '+desFL,'FL'+desFL],['\\b0*'+it+'\\b','Inbound '+pad(it,3)],[lr,lr.charAt(0).toUpperCase()+lr.slice(1)+' hand'],['\\b'+eat+'\\b','Expect approach at '+eat]],model:`Hold at ${wps[4]}, FL${desFL}, inbound track ${pad(it,3)} degrees, ${lr} hand pattern, expect approach clearance at ${eat}, {CS}`,sc:{t:'hold',p:5}});
       if(r()<.5)S_({sit:`While holding, your fuel is getting low. You can accept only a little more delay.`,task:'Advise ATC.',need:[['minimum fuel','"Minimum fuel"']],model:'{CS}, minimum fuel',sc:{t:'hold',fuel:true,p:5}});
@@ -2318,27 +2701,23 @@ function genMission(n){
     const h2=hN(crsA+30*vs),lr2=vs>0?'left':'right';
     S_({atc:`{CS}, turn ${lr2} heading ${pad(h2,3)}, descend ${alt2} feet, cleared ILS approach runway ${AR}, report established.`,task:'Read back.',need:[[lr2+' heading 0*'+h2,lr2.charAt(0).toUpperCase()+lr2.slice(1)+' heading '+pad(h2,3)],['\\b'+alt2+'\\b',alt2+' feet'],['cleared( for)? ils( approach)? '+ARX,'Cleared ILS approach runway '+AR],['report(ing)? established|wilco','Will report established']],model:`${lr2.charAt(0).toUpperCase()+lr2.slice(1)} heading ${pad(h2,3)}, descending ${alt2} feet, cleared ILS approach runway ${AR}, wilco, {CS}`,sc:{t:'vector',stage:1,p:5,hdg:pad(h2,3),alt:alt2}});
     S_({sit:'The localizer is captured.',task:'Report.',need:[['established','"Established"']],model:'{CS}, established on the localizer',sc:{t:'vector',stage:2,p:5}});
-    for(let k=0;k<uSlots(kind,'app',n);k++){const u=unitStep(n,k,'app',{t:'vector',stage:2,p:5},AR);if(u){
-      /* a phrase that ends the approach (go-around, missed approach, low pass) is shown as one, and a second approach follows */
-      const en=PHR[u.unit]?PCL.find(c=>c.i===u.unit).c:'';const lp=/low pass|undercarriage|landing gear (down|seems)|observe wheels/i.test(en),ga=!lp&&!/in case of/i.test(en)&&/go around|going around|missed approach|unable to land|landing on the wrong|will not hit rwy/i.test(en);
-      if(lp||ga){u.sc=lp?{t:'profile',mode:'lowpass',p:5}:{t:'profile',mode:'goaround',why:'unit',p:5};S_(u);
-        const h2=pad(((((parseInt(AR)||36)*10+30*(ms.vside||1))%360)+360)%360||360,3);S_({sit:lp?'After the low pass you are vectored for a normal ILS approach.':'After the missed approach you are vectored for a second ILS approach.',atc:'{CS}, turn '+((ms.vside||1)>0?'left':'right')+' heading '+h2+', descend 3000 feet, cleared ILS approach runway '+AR+', report established.',task:'Read back.',need:[['heading','Heading'],['3000','3000 feet'],['cleared ils','"cleared ILS approach"'],[ARX,'Runway '+AR]],model:'Heading, descending 3000 feet, cleared ILS approach runway '+AR+', wilco, {CS}',sc:{t:'vector',stage:1,hdg:h2,alt:3000,p:5}});
-        steps[steps.length-1].model=steps[steps.length-1].atc.replace('{CS}, ','').replace('turn ','').replace(', report established.','')+', wilco, {CS}';
-        S_({sit:'The localizer is captured again.',task:'Report established.',need:[['established','"Established"']],model:'{CS}, established localizer runway '+AR,sc:{t:'vector',stage:2,p:5}})}
-      else S_(u);tags.push('unit phrases')}}
     S_({atc:`{CS}, contact ${arrN} Tower ${fqTa}.`,task:'Read back.',need:[[fqRx(fqTa),'Frequency '+fqTa]],model:`${fqTa}, {CS}`,sc:{t:'vector',stage:2,p:5}});
     S_({st:st(arrN+' Tower',fqTa),sit:'6 miles final on the ILS.',task:'Call Tower.',need:[[arrX+' tower',`Station "${arrN} Tower"`],['established','"Established"'],[ARX,'Runway '+AR]],model:`${arrN} Tower, {CS}, established ILS runway ${AR}`,sc:{t:'profile',mode:'final',p:5}});
-    const lw=windStr(wArr,sArr),lv=r();
-    if(lv<.25){S_({atc:`{CS}, ${arrN} Tower, continue approach, number 2, traffic ${T2} on 3 miles final.`,task:'Read back.',need:[['continu','"Continue approach"'],['number 2','"Number 2"']],model:'Continue approach, number 2, {CS}',sc:{t:'profile',mode:'final',p:5}});
+    const lw=windStr(wArr,sArr),lv0=r();
+    const nT0=steps.length;if(SC('app.twr',{t:'profile',mode:'final',p:5})==='end')return finish();
+    const scLand=!scGA&&steps.slice(nT0).some(st=>/cleared to land/i.test(st.atc||''));/* the situation already gave the landing clearance */
+    const lv=scGA&&lv0>=.25&&lv0<.38?.9:lv0;/* after a go-around the second approach ends in a landing */
+    if(scLand){const last=steps[steps.length-1];last.sc={t:'profile',mode:'final',p:6}}
+    else if(lv<.25){S_({atc:`{CS}, ${arrN} Tower, continue approach, number 2, traffic ${T2} on 3 miles final.`,task:'Read back.',need:[['continu','"Continue approach"'],['number 2','"Number 2"']],model:'Continue approach, number 2, {CS}',sc:{t:'profile',mode:'final',p:5}});
       S_({atc:`{CS}, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('landing sequence')}
     else if(lv<.38){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
-      {const why=mPick(r,['vehicle','traffic','birds']);S_({atc:`{CS}, go around, I say again go around, ${({vehicle:'vehicle on the runway',traffic:'preceding traffic not vacated',birds:'birds on the runway'})[why]}.`,task:'Comply and reply.',need:[['going around','"Going around"']],model:'Going around, {CS}',sc:{t:'profile',mode:'goaround',why,p:6}});
-      S_({atc:`{CS}, climb straight ahead ${alt1} feet, contact Approach ${fqA}.`,task:'Read back.',need:[['straight ahead','Straight ahead'],['\\b'+alt1+'\\b',alt1+' feet'],[fqRx(fqA),fqA]],model:`Climbing straight ahead ${alt1} feet, ${fqA}, {CS}`,sc:Object.assign({},steps[steps.length-1].sc)});tags.push('go-around')}
-      return finish()}
+      {const why=mPick(r,['vehicle','traffic','birds']);S_({atc:`{CS}, go around, I say again go around, ${({vehicle:'vehicle on the runway',traffic:'preceding traffic not vacated',birds:'birds on the runway'})[why]}.`,task:'Comply and reply.',need:[['going around','"Going around"']],model:'Going around, {CS}',sc:{t:'profile',mode:'goaround',why,alt:alt1,p:6}});
+      tags.push('go-around')}
+      gaFn(false);S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}})}
     else if(lv<.5){S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}, caution wake turbulence, preceding landing ${T2}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});tags.push('wake turbulence')}
     else S_({atc:`{CS}, ${arrN} Tower, runway ${AR}, cleared to land, wind ${lw}.`,task:'Read back.',need:[[ARX,'Runway '+AR],['cleared to land','"cleared to land"']],model:`Runway ${AR}, cleared to land, {CS}`,sc:{t:'profile',mode:'final',p:6}});
     const exT=PA.ex&&PA.ex.name?PA.ex.name:PA.hp&&PA.hp.n?PA.hp.n:mPick(r,['B2','C3','A4','D1']),exRx=nameRx(exT),lr3=PA.ex?PA.ex.side:mPick(r,['left','right']);
-    for(let k=0;k<uSlots(kind,'arr',n);k++){const u=unitStep(n,k,'arr',G_('landed',6,{arr:true}),AR,exT);if(u){S_(u);tags.push('unit phrases')}}
+    if(SC('arr',G_('landed',6,{arr:true}))==='end')return finish();
     {const pu=steps[steps.length-1],gaveVac=pu&&pu.unit!==undefined&&pu.atc&&/vacate|turn off/i.test(pu.atc);
      if(gaveVac)S_({atc:`{CS}, contact Ground ${fqGa}.`,task:'Read back the frequency.',need:[[fqRx(fqGa),'Frequency '+fqGa]],model:`${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});
      else S_({atc:`{CS}, vacate ${lr3} via ${nameSpk(exT)}, contact Ground ${fqGa}.`,task:'Read back.',need:[['vacat','"Vacating"'],[exRx,'Taxiway '+exT],[fqRx(fqGa),'Frequency '+fqGa]],model:`Vacating ${lr3} via ${nameSpk(exT)}, ${fqGa}, {CS}`,sc:G_('landed',6,{arr:true})});}
@@ -2346,6 +2725,8 @@ function genMission(n){
     const sdA=PA.std||'4',txA=PA.ex?PA.ex.txr:(PA.txr||'the apron');
     const gw=r()<.4,pbS=gw&&PA.ok?pbxPick(PA,rLine(arrPts(PA)),0):null;S_({atc:`{CS}, taxi to stand ${sdA} via ${txA}${pbS?', give way to the '+T3+' pushing back from stand '+pbS.st.n:''}.`,task:'Read back.',need:[['taxi','"Taxi"'],['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA],...((PA.ex?PA.ex.txrx:PA.txrx)?[[PA.ex?PA.ex.txrx:PA.txrx,'Route: '+txA]]:[])],model:`Taxi to stand ${sdA} via ${txA}, {CS}`,sc:G_('taxiin',6,{arr:true})});
     if(/give way/.test(steps[steps.length-1].atc)){steps[steps.length-1].need.push(['giv(e|ing) way','"Giving way"'],[mTypeRx(T3),'Traffic '+T3]);steps[steps.length-1].model=`Taxi to stand ${sdA} via ${txA}, giving way to the ${T3}, {CS}`;steps[steps.length-1].sc.tt={k:'ahead',t:T3,std:pbS?pbS.st.n:null}}
+    if(SC('arr.taxi',G_('taxiin',6,{arr:true}))==='end')return finish();
+    if((PL['arr.stand']||[]).length){S_({sit:`You are on stand ${sdA}, parking brake set, engines shut down.`,task:'Report on stand.',need:[['stand '+reEsc(norm(String(sdA)).trim()),'Stand '+sdA]],model:`{CS}, on stand ${sdA}`,sc:G_('stand',6,{arr:true})});SC('arr.stand',G_('stand',6,{arr:true}))}
   }
   return finish();
   function finish(){
@@ -2412,6 +2793,7 @@ function vRadio(){
         <div class="seg" role="group" aria-label="Mission type">${[['all','All'],['full','Full flight'],['dep','Departure'],['enr','En route'],['arr','Arrival']].map(([k,l])=>`<button data-mf="${k}" aria-pressed="${(S.mf||'all')===k}">${l}</button>`).join('')}</div>
         <div class="mgridn">${Array.from({length:MISSION_N},(_,i)=>i+1).filter(n=>(S.mf||'all')==='all'||mKind(n)===S.mf).map(n=>`<button class="mn k-${mKind(n)} ${S.stats['radio-m'+n]!==undefined?'done':''}" data-mn="${n}" title="Mission ${n} · ${({full:'Full flight',dep:'Departure',enr:'En route',arr:'Arrival'})[mKind(n)]}"><b>${n}</b><i>${({full:'FULL',dep:'DEP',enr:'ENR',arr:'ARR'})[mKind(n)]}</i></button>`).join('')}</div>
       </div>
+      ${rpPanel()}
       <div class="panel settings">
         <span class="lbl">Call sign</span>
         <input type="text" id="csn" value="${esc(S.cs.name)}" aria-label="Call sign name">
@@ -2442,21 +2824,21 @@ function vRadio(){
     $('#vtest').onclick=()=>testVoice($('#vstat'));
     bindAd(vRadio);
     $$('[data-sc]').forEach(b=>b.onclick=()=>{RD={sc:SCN[+b.dataset.sc],i:0,log:[],tries:0,res:[],fb:'',done:false,st:SCN[+b.dataset.sc].steps[0].st};vRadio();speakStep()});
-    $$('[data-mn]').forEach(b=>b.onclick=()=>startMission(+b.dataset.mn));
+    $$('[data-mn]').forEach(b=>b.onclick=()=>startMission(+b.dataset.mn,S.rpRole||null));rpPanelBind();
     $$('[data-mf]').forEach(b=>b.onclick=()=>{S.mf=b.dataset.mf;save();vRadio()});
-    $('#mrand').onclick=()=>{const pool=Array.from({length:MISSION_N},(_,i)=>i+1).filter(n=>(S.mf||'all')==='all'||mKind(n)===S.mf);const fresh=pool.filter(n=>S.stats['radio-m'+n]===undefined);startMission(pick(fresh.length?fresh:pool))};
+    $('#mrand').onclick=()=>{const pool=Array.from({length:MISSION_N},(_,i)=>i+1).filter(n=>(S.mf||'all')==='all'||mKind(n)===S.mf);const fresh=pool.filter(n=>S.stats['radio-m'+n]===undefined);startMission(pick(fresh.length?fresh:pool),S.rpRole||null)};
     return;
   }
   const sc=RD.sc;
   if(RD.done){
     const ok=RD.res.filter(r=>r.first).length,pct=Math.round(ok/sc.steps.length*100);
     view.innerHTML=`<div class="stack">${phaseBar(sc.steps[sc.steps.length-1].sc.p)}<div class="radio">${comBar('Complete')}<div class="log" id="log">${logHtml()}</div>
-      <div class="turn"><div class="atcnow">${esc(showAtc(sc.end))}</div></div></div>
-      <div class="panel stack"><div><span class="lbl">Flight complete</span><h2>${ok} of ${sc.steps.length} transmissions correct first time (${pct}%)</h2></div>
-      ${RD.res.filter(r=>!r.first).length?`<div class="dtab"><table><tbody>${RD.res.filter(r=>!r.first).map(r=>`<tr><td>${esc(r.task)}</td><td><span class="muted">You said:</span> ${esc(r.said)}<br><span class="muted">Missing:</span> ${esc(r.miss.join('; '))}<br><span class="muted">Model:</span> <span class="mono">${esc(spoken(fill(r.model)))}</span></td></tr>`).join('')}</tbody></table></div>`:'<p>Every transmission was complete on the first try.</p>'}
+      <div class="turn"><div class="atcnow">${RD.rp==='pilot'?'<span class="who">ATC · your partner</span>The controller closes the flight.':RD.rp==='atc'?'<span class="who">Your last transmission</span>'+esc(showAtc(sc.end)):esc(showAtc(sc.end))}</div></div></div>
+      <div class="panel stack"><div><span class="lbl">Flight complete</span><h2>${RD.rp==='atc'?`Your partner was correct in ${ok} of ${sc.steps.length} transmissions (${pct}%)`:`${ok} of ${sc.steps.length} transmissions correct first time (${pct}%)`}</h2>${RD.rp?`<p class="muted">Role play · you were ${rpRoleName(RD.rp)}</p>`:''}</div>
+      ${RD.rp==='atc'?'':RD.res.filter(r=>!r.first).length?`<div class="dtab"><table><tbody>${RD.res.filter(r=>!r.first).map(r=>`<tr><td>${esc(r.task)}</td><td><span class="muted">You said:</span> ${esc(r.said)}<br><span class="muted">Missing:</span> ${esc(r.miss.join('; '))}<br><span class="muted">Model:</span> <span class="mono">${esc(spoken(fill(r.model)))}</span></td></tr>`).join('')}</tbody></table></div>`:'<p>Every transmission was complete on the first try.</p>'}
       <div class="row"><button class="btn pri" id="again">Fly it again</button><button class="btn" id="back">${RD.from==='emergency'?'Choose another emergency':'Choose another flight'}</button>${sc.ms?`<button class="btn pri" id="mnext">Next mission →</button>`:''}</div></div></div>`;
-    $('#again').onclick=()=>{RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,from:RD.from};vRadio();speakStep()};
-    $('#back').onclick=leave;if($('#mnext'))$('#mnext').onclick=()=>startMission(sc.ms.n%MISSION_N+1);
+    $('#again').onclick=()=>{RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,from:RD.from,rp:RD.rp,rpPh:0};vRadio();speakStep()};
+    $('#back').onclick=leave;if($('#mnext'))$('#mnext').onclick=()=>startMission(sc.ms.n%MISSION_N+1,RD.rp);
     scrollLog();return;
   }
   const step=sc.steps[RD.i];
@@ -2467,19 +2849,19 @@ function vRadio(){
   document.body.classList.add('flying');
   const logBtn=`<button class="clog" id="logbtn" type="button">Log${RD.log.length?' '+RD.log.length:''}</button>`;
   view.innerHTML=`<div class="flight">
-  <div class="fhead">${phaseBar(ph)}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
+  <div class="fhead">${phaseBar(ph)}${RD.rp&&sc.ms?`<button class="btn ghost fquit rpinv" id="rpinv" type="button">Invite<span> partner</span></button>`:''}<button class="btn ghost fquit" id="quit" type="button" aria-label="Leave flight">✕<span> Leave</span></button></div>
   <div class="rgrid">
     <div class="rleft ${S.compact?'compact':''} ${step.sc&&step.sc.t==='ground'?'tall':''}" id="rleft"><figure class="scenebox sc" id="sfig">${(()=>{SCENE_FOCUS=null;SCENE_INFO='';SCENE_CAP=null;const so=step.sc?Object.assign({},step.sc,{ban:null}):null;const sid=(sc.id||sc.title)+'#'+RD.i,now=performance.now();if(!STEP_T||STEP_T.sid!==sid||STEP_T.rd!==RD)STEP_T={sid,rd:RD,t:now};ANIM_OFF=(now-STEP_T.t)/1000;GCTX={steps:sc.steps,i:RD.i};if(sameAsPrev(sc.steps,RD.i))ANIM_OFF=999;else if(shouldHold(step)&&!RM)ANIM_OFF=0;/* waiting for the readback: always start position */let s;try{s=scene(so)}finally{ANIM_OFF=0;GCTX=null}const cap=sceneCap(step.sc)||{},f=flightData(sc,RD.i,step),ban=step.sc&&step.sc.ban;
         return zoomCtl(true,!!SCENE_FOCUS,true)+`<button class="ibx" id="ibx" aria-expanded="${!!S.infoOpen}" aria-controls="ipanel"><span class="ii">i</span><span class="il">${esc(SCAP[step.sc&&step.sc.t]||'Info')}</span></button>
         <div class="ipanel" id="ipanel" ${S.infoOpen?'':'hidden'}>${SCENE_INFO?`<span class="full">${esc(SCENE_INFO)}</span>`:''}<i>COM</i><span>${f.com}</span><i>Squawk</i><span>${f.sq}</span><i>Alt</i><span>${esc(f.alt)}</span><i>Phase</i><span>${PHN[ph]}</span></div>`+s+
         `<span class="hintap">tap for info</span><div class="scap">${ban||f.em?`<div class="em"><span>${esc(ban||'SQUAWK '+f.sq)}${ban&&f.em&&!/SQUAWK/.test(ban)?' · SQK '+f.sq:''}</span></div>`:''}${cap.you?`<div class="you"><span class="k">YOU</span><span>${esc(cap.you)}</span>${shouldHold(step)&&!RM?'<span class="k arb" style="margin-left:6px;opacity:.8">· AFTER READBACK</span>':''}</div>`:''}${cap.tr?`<div class="trf"><span class="k">TRAFFIC</span><span>${esc(cap.tr)}</span></div>`:''}</div>`})()}</figure>
       <div class="radio logbox" id="logd"><div class="lbl" style="padding:10px 14px 0">${esc(sc.title)} · transcript</div><div class="log" id="log">${RD.log.length?logHtml():'<p class="muted" style="font-size:.85rem">Your exchanges with ATC appear here.</p>'}</div></div></div>
-    <div class="rright"><div class="radio rr">${comBar('Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc).replace(/<\/div>$/,logBtn+'</div>')}
+    <div class="rright"><div class="radio rr">${comBar((RD.rp?rpRoleName(RD.rp)+' · ':'')+'Step '+(RD.i+1)+' / '+sc.steps.length,!!step.atc&&!(RD.rp==='atc'&&!RD.rpPh)).replace(/<\/div>$/,logBtn+'</div>')}
     <div class="turn" id="turn">
-      ${step.sit?`<div class="sit"><b>Situation</b>${esc(fill(step.sit))}</div>`:''}
-      ${step.atc?(S.listen?`<div class="row"><button class="btn" id="play">▶ Play ATC transmission</button><button class="btn ghost" id="reveal">Show text</button></div><div class="atcnow" id="atxt" hidden>${esc(atcTxt)}</div>`
+      ${rpSit(step)?`<div class="sit"><b>${RD.rp==='atc'?'Translation':'Situation'}</b>${esc(fill(rpSit(step)))}</div>`:''}
+      ${RD.rp?rpTurnHtml(step,atcTxt):step.atc?(S.listen?`<div class="row"><button class="btn" id="play">▶ Play ATC transmission</button><button class="btn ghost" id="reveal">Show text</button></div><div class="atcnow" id="atxt" hidden>${esc(atcTxt)}</div>`
         :`<div class="atcnow"><span class="who">ATC</span>${esc(atcTxt)}${S.spoken?`<span class="written">${esc(fill(step.atc))}</span>`:''}<span class="row" style="gap:6px;margin-top:6px"><button class="btn ghost sm" id="play" aria-label="Listen to ATC" style="margin-top:0">▶ Listen</button><button class="btn ghost sm" id="autov" aria-pressed="${!!S.voice}" style="margin-top:0">${S.voice?'🔊 Auto-play on':'🔈 Auto-play off'}</button></span></div>`):''}
-      <p class="task"><span class="lbl">Your call</span> ${esc(fill(step.task))}</p>
+      ${RD.rp==='atc'?'':`<p class="task"><span class="lbl">Your call</span> ${esc(fill(step.task))}</p>`}${RD.rp==='pilot'?rpMyLine(step):''}
       <div id="fb">${RD.fb}</div>
     </div>
     <div class="tctl">
@@ -2515,6 +2897,7 @@ function vRadio(){
   $('#hint').onclick=()=>{$('#fb').innerHTML=`<div class="fb wa">Include: <ul><li>Your full call sign</li>${step.need.map(n=>`<li>${esc(fill(n[1]))}</li>`).join('')}</ul></div>`};
   $('#model').onclick=()=>{RD.tries++;$('#fb').innerHTML=`<div class="fb wa">Model answer:<span class="model">${esc(spoken(fill(step.model)))}</span></div>`};
   $('#skip').onclick=()=>advance(step,'(skipped)',false,['skipped']);
+  if(RD.rp){rpBind(step);if(RD.rp==='atc')return}
   function sendVoice(cands){
     let best=null;cands.forEach(c=>{const r=checkTx(step,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});
     tx.value=best.c;tx.dataset.voice='1';if(!best.r.miss.length){send(true);return}
@@ -2665,10 +3048,98 @@ function voiceSheet(o){closeSheet();
   document.body.appendChild(d);
   const fire=f=>()=>{closeSheet();f&&f()};
   d.querySelector('.vs-ok').onclick=fire(o.onAccept);d.querySelector('.vs-go').onclick=fire(o.onContinue);d.querySelector('.vs-mic').onclick=fire(o.onAgain);}
-function startMission(n){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st};vRadio();speakStep();window.scrollTo(0,0)}
+/* ---------- role play: two people fly one mission together, one as the pilot and one as the controller ---------- */
+const RP_URL='https://alfatango1.github.io/rt-trainer/';
+const RP_DEF=[{n:'Northfield',i:'XNFD',r:'08L'},{n:'Riverside',i:'XRSD',r:'18'},{n:'Lakeview',i:'XLKV',r:'27'}];
+function b64u(u8){let s='';for(let i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64u(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const s=atob(t),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a}
+async function rpZip(u8,un){if(typeof CompressionStream==='undefined')return null;const st=un?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw');return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(st)).arrayBuffer())}
+/* the aerodromes of this device: library airports by code, anything else in full */
+function rpAds(){return S.ads.map(a=>{const p=APL.find(x=>x.i===a.i);if(p&&a.lay){try{if(JSON.stringify(a.lay)===JSON.stringify(buildLibLayout(p)))return {L:a.i}}catch(e){}}return a.lay?{n:a.n,i:a.i,r:a.r,lay:a.lay}:{n:a.n,i:a.i,r:a.r}})}
+function rpIsDef(){return S.ads.length===3&&S.ads.every((a,k)=>!a.lay&&a.i===RP_DEF[k].i&&a.r===RP_DEF[k].r&&a.n===RP_DEF[k].n)}
+function rpCustom(){return S.ads.some(a=>a.lay&&!(rpAds().find(x=>x.L===a.i)))}
+/* short code for the built-in aerodromes: mission, partner's role, departure, destination, call sign */
+function rpShort(n,role){if(!rpIsDef()||!/^[A-Za-z ]+$/.test(S.cs.name)||!/^[A-Za-z0-9]+$/.test(S.cs.num))return '';return n+(role==='atc'?'A':'P')+S.dep+S.dst+'-'+S.cs.name.trim().replace(/\s+/g,'.')+'-'+S.cs.num}
+async function rpCode(n,role){const o={v:1,n,r:role,cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds()};const u=new TextEncoder().encode(JSON.stringify(o));let z=null;try{z=await rpZip(u)}catch(e){}return z&&z.length<u.length?'z'+b64u(z):'j'+b64u(u)}
+async function rpParse(code){code=String(code||'').trim();const m=code.match(/rp=([A-Za-z0-9_.-]+)/);if(m)code=m[1];
+  const sh=code.match(/^(\d{1,3})([PA])(\d)(\d)-([A-Za-z.]+)-([A-Za-z0-9]+)$/i);
+  if(sh){const n=+sh[1],r=sh[2].toUpperCase()==='A'?'atc':'pilot',d=+sh[3],a=+sh[4];if(!(n>=1&&n<=MISSION_N)||d>2||a>2||d===a)throw new Error('bad');return {v:1,n,r,d,a,cs:[sh[5].replace(/\./g,' '),sh[6]],ads:RP_DEF.map(x=>Object.assign({},x))}}
+  const t=code.charAt(0);let u=unb64u(code.slice(1));if(t==='z')u=await rpZip(u,true);else if(t!=='j')throw new Error('bad');
+  const o=JSON.parse(new TextDecoder().decode(u));if(!o||o.v!==1||!(o.n>=1&&o.n<=MISSION_N)||!['pilot','atc'].includes(o.r)||!Array.isArray(o.ads)||o.ads.length<2)throw new Error('bad');return o}
+/* join a partner's flight: this device takes the partner's aerodromes and call sign until the role play ends */
+async function rpJoin(code,msgEl){let o;try{o=await rpParse(code)}catch(e){if(msgEl)msgEl.innerHTML='<div class="fb no">This link or code is not valid. Ask your partner to send it again.</div>';return false}
+  const ads=o.ads.map(a=>{if(a&&a.L){const p=APL.find(x=>x.i===a.L);return p?{n:p.n,i:p.i,r:p.r,lay:buildLibLayout(p)}:null}return a&&a.n&&a.i&&a.r?a:null}).filter(Boolean);
+  if(ads.length<2||!(o.d<ads.length)||!(o.a<ads.length)){if(msgEl)msgEl.innerHTML='<div class="fb no">The aerodromes in this invitation could not be read.</div>';return false}
+  if(!S.rpPrev)S.rpPrev={ads:S.ads,dep:S.dep,dst:S.dst,cs:S.cs};
+  S.ads=ads;S.dep=o.d;S.dst=o.a;S.cs={name:String(o.cs[0]||'Air Force'),num:String(o.cs[1]||'123')};S.rpRole=o.r;save();
+  go('radio');startMission(o.n,o.r);return true}
+function rpRestore(){if(S.rpPrev){const p=S.rpPrev;delete S.rpPrev;Object.assign(S,p);save()}}
+/* what each role may see of the situation: the pilot does not get the translation of the ATC words, ATC gets only that */
+function rpSit(step){const s=step.sit||'';if(!RD.rp)return s;const parts=s.split(' · ');
+  if(RD.rp==='pilot')return step.atc&&/^Перевод:/.test(parts[0])?parts.slice(1).join(' · '):s;
+  return step.atc&&!RD.rpPh&&/^Перевод:/.test(parts[0])?parts[0]:''}
+function rpRoleName(r){return r==='atc'?'ATC':'Pilot'}
+function rpTurnHtml(step,atcTxt){
+  if(RD.rp==='pilot'){if(!step.atc)return `<div class="rpw"><span class="who">You call first</span>The controller is waiting for your call.</div>`;
+    return `<div class="atcnow rpw"><span class="who">ATC · your partner</span>Listen to the controller.<span class="row" style="gap:6px;margin-top:6px"><button class="btn ghost sm" id="reveal" style="margin-top:0">Say again? Show text</button></span><span class="written" id="atxt" hidden>${esc(atcTxt)}</span></div>`}
+  if(step.atc&&!RD.rpPh)return `<div class="atcnow rpme"><span class="who">You · ${esc(fill((RD.st||'ATC|').split('|')[0]))}</span>${esc(atcTxt)}${S.spoken?`<span class="written">${esc(fill(step.atc))}</span>`:''}</div>
+    <p class="task"><span class="lbl">Your call</span> Say this to the pilot. Then listen to the reply.</p>`;
+  const chk=step.atc?[csText()].concat(step.need.map(n=>fill(n[1]))):[];
+  return `<div class="atcnow rpw"><span class="who">Pilot · your partner</span>${step.atc?'The pilot reads back now. Listen.':'The pilot calls you now. Listen.'}</div>
+    ${chk.length?`<div class="sit"><b>Check the readback for</b><ul class="rpchk">${chk.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+    <p class="task"><span class="lbl">Your call</span> ${step.atc?'Was the readback complete and correct?':'Did the pilot make the call clearly?'}</p>`}
+function rpMyLine(step){const t=spoken(fill(step.model));
+  return S.rpHide?`<div class="rpline"><span class="lbl">Your line</span><button class="btn ghost sm" id="rpshow">Show my line</button></div>`
+    :`<div class="rpline"><span class="lbl">Your line</span><span class="model">${esc(t)}</span><button class="btn ghost sm" id="rphide">Hide my lines (harder)</button></div>`}
+function rpBind(step){
+  if($('#rpinv'))$('#rpinv').onclick=rpInvite;
+  if($('#rphide'))$('#rphide').onclick=()=>{S.rpHide=true;save();vRadio()};
+  if($('#rpshow'))$('#rpshow').onclick=()=>{S.rpHide=false;save();vRadio()};
+  if(RD.rp!=='atc')return;
+  const tc=document.querySelector('.tctl');if(!tc)return;
+  const micB=`<button class="btn mic" id="mic" aria-label="Speak your transmission"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Speak</span></button>`;
+  if(step.atc&&!RD.rpPh){
+    tc.innerHTML=`<textarea id="tx" rows="2" placeholder="Type or tap Speak to check your words (optional)" aria-label="Your transmission" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+      <div class="tbtns rptb">${micB}<button class="btn" id="send" aria-label="Check"><b>Check</b></button><button class="btn pri" id="rpsaid"><b>Transmitted ▶</b></button></div>`;
+    const chk={need:sayKeys(step.atc),model:step.atc,task:''},tx=$('#tx');
+    const ok=()=>{RD.rpPh=1;RD.fb='';vRadio()};
+    const test=cands=>{let best=null;cands.forEach(c=>{const r=checkTx(chk,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});tx.value=best.c;
+      if(!best.r.miss.length){$('#fb').innerHTML='<div class="fb ok">Clear and complete. Tap Transmitted when the pilot is ready.</div>';return}
+      $('#fb').innerHTML=`<div class="fb no">Check your words. Missing:<ul>${best.r.miss.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`};
+    tx.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(tx.value.trim())test([tx.value.trim()])}};
+    $('#send').onclick=()=>{if(tx.value.trim())test([tx.value.trim()])};
+    $('#mic').onclick=()=>startMic(tx,$('#mic'),$('#fb'),c=>test(c));
+    $('#rpsaid').onclick=ok;return}
+  tc.innerHTML=`<div class="tbtns rptb"><button class="btn pri" id="rpok"><b>✔ ${step.atc?'Correct':'Call received'}</b></button><button class="btn" id="rpno"><b>✘ ${step.atc?'Not correct':'Incomplete'}</b></button></div>`;
+  $('#rpok').onclick=()=>advanceAfterMotion(step,step.atc?'(readback correct)':'(call received)',true,[],[]);
+  $('#rpno').onclick=()=>advanceAfterMotion(step,step.atc?'(readback not correct)':'(call incomplete)',false,['Pilot transmission'],[]);
+  scrollLog()}
+async function rpInvite(){const n=RD.sc&&RD.sc.ms?RD.sc.ms.n:null;if(!n)return;const other=RD.rp==='atc'?'pilot':'atc';
+  const code=await rpCode(n,other),url=RP_URL+'#rp='+code,sh=rpShort(n,other);
+  closeSheet();const d=document.createElement('div');d.className='vsheet logsheet rpsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Invite your partner');
+  d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Invite your partner</b><button class="btn" type="button" id="rpx">Close</button></div>
+    <p>Your partner flies <b>mission ${n}</b> as <b>${rpRoleName(other)}</b>. They open the link, or type the code in Radio → Role play → Join.</p>
+    ${sh?`<p class="rpcode mono">${esc(sh)}</p>`:''}
+    <input class="mono" id="rpurl" readonly value="${esc(url)}" aria-label="Invitation link">
+    <div class="row">${navigator.share?'<button class="btn pri" id="rpsh">Share link</button>':''}<button class="btn" id="rpcp">Copy link</button>${sh?'<button class="btn" id="rpcc">Copy code</button>':''}</div>
+    ${rpCustom()?'<p class="muted" style="font-size:.85rem">Your own drawn aerodrome layout goes inside the link, so the link is long. Send the link, not the code.</p>':''}
+    <p class="muted" style="font-size:.85rem">Both screens show the same step number. Go step by step together: the controller speaks first, the pilot answers.</p><div id="rpcm"></div></div>`;
+  document.body.appendChild(d);
+  const cp=t=>{const done=()=>{d.querySelector('#rpcm').innerHTML='<div class="fb ok">Copied.</div>'};try{navigator.clipboard.writeText(t).then(done,()=>{const i=d.querySelector('#rpurl');i.value=t;i.select();document.execCommand('copy');done()})}catch(e){const i=d.querySelector('#rpurl');i.select();try{document.execCommand('copy');done()}catch(_){}}};
+  d.querySelector('#rpx').onclick=closeSheet;
+  if(d.querySelector('#rpsh'))d.querySelector('#rpsh').onclick=()=>{navigator.share({title:'RT Trainer role play',text:`Fly mission ${n} with me as ${rpRoleName(other)}${sh?' (code '+sh+')':''}`,url}).catch(()=>{})};
+  d.querySelector('#rpcp').onclick=()=>cp(url);if(d.querySelector('#rpcc'))d.querySelector('#rpcc').onclick=()=>cp(sh)}
+function rpPanel(){const r=S.rpRole||'';return `<div class="panel stack rpp" style="gap:10px"><div><span class="lbl">Role play</span><h2 style="margin-top:2px">Fly a mission with a partner</h2>
+    <p class="muted" style="font-size:.9rem;margin-top:4px;max-width:62ch">One of you is the pilot, the other is the controller. You both fly the same mission: the pilot's screen shows only the pilot's words and the controller's screen only the ATC words. Talk to each other as on a real frequency.</p></div>
+    <div class="seg" role="group" aria-label="Your role">${[['','Solo'],['pilot','I am the pilot'],['atc','I am ATC']].map(([k,l])=>`<button data-rp="${k}" aria-pressed="${r===k}">${l}</button>`).join('')}</div>
+    ${S.rpPrev?`<p class="rpnote">You are using your partner's aerodromes and call sign (${esc(csText())}). Tap <b>Solo</b> to go back to your own.</p>`:''}${r?`<p class="rpnote">Tap a mission number above to start it as <b>${rpRoleName(r)}</b>, then tap <b>Invite partner</b> on the flight screen.</p>`:''}
+    <div class="row rpjoin"><input type="text" id="rpcode" placeholder="Partner's link or code" aria-label="Partner's link or code" autocapitalize="off" autocomplete="off" spellcheck="false"><button class="btn" id="rpjoin">Join</button></div><div id="rpmsg"></div></div>`}
+function rpPanelBind(){$$('[data-rp]').forEach(b=>b.onclick=()=>{S.rpRole=b.dataset.rp||'';if(!S.rpRole)rpRestore();save();vRadio()});
+  const j=()=>{const v=$('#rpcode').value.trim();if(v)rpJoin(v,$('#rpmsg'))};if($('#rpjoin'))$('#rpjoin').onclick=j;if($('#rpcode'))$('#rpcode').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();j()}}}
+function startMission(n,rp){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,rp:rp||null,rpPh:0};vRadio();speakStep();window.scrollTo(0,0)}
 function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
-function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
+function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${RD.rp==='atc'?(m.w==='atc'?'You · '+esc(m.st||'ATC'):'Pilot'):m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
 function scrollLog(){const f=()=>{const l=$('#log');if(l)l.scrollTop=l.scrollHeight};f();requestAnimationFrame(f)}
 /* ---------- the aircraft moves only after the pilot has read back ----------
    On a step where ATC gives an instruction, your aircraft waits where it is; after a correct readback it carries it out, then the next step follows. */
@@ -2695,13 +3166,13 @@ function advance(step,raw,first,miss,warn){
   if(step.atc)RD.log.push({w:'atc',t:showAtc(step.atc),st:fill((RD.st||'').split('|')[0])});
   RD.log.push({w:'you',t:raw});
   RD.res.push({first,task:fill(step.task),said:RD.firstSaid||raw,miss:miss||[],model:step.model});
-  stat('radio',first,first?null:spoken(fill(step.model)));
-  RD.fb=first?`<div class="fb ok">Correct.${warn&&warn.length?'<br>'+warn.map(esc).join('<br>'):''}</div>`:(raw==='(skipped)'?'':`<div class="fb ok">Correct now. It took more than one try, so it is noted in your review.</div>`);
+  if(RD.rp!=='atc')stat('radio',first,first?null:spoken(fill(step.model)));
+  RD.rpPh=0;RD.fb=RD.rp==='atc'?'':first?`<div class="fb ok">Correct.${warn&&warn.length?'<br>'+warn.map(esc).join('<br>'):''}</div>`:(raw==='(skipped)'?'':`<div class="fb ok">Correct now. It took more than one try, so it is noted in your review.</div>`);
   RD.i++;RD.adv=true;RD.tries=0;RD.firstMiss=null;RD.firstSaid=null;
-  if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id])S.stats['radio-'+sc.id]=pct;save();if(S.voice)say(spoken(fill(sc.end)))}
+  if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(RD.rp!=='atc'&&(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id]))S.stats['radio-'+sc.id]=pct;save();if(S.voice&&!RD.rp)say(spoken(fill(sc.end)))}
   vRadio();if(!RD.done)speakStep();
 }
-function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc)sayATC(spoken(fill(s.atc)))}
+function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc&&!RD.rp)sayATC(spoken(fill(s.atc)))}
 
 /* ---------- aerodromes ---------- */
 function adPanel(){return `<details class="panel" id="adp" ${S.adOpen?'open':''}><summary class="lbl" style="cursor:pointer">Your aerodromes (${S.ads.length}): add or remove</summary>
@@ -3204,8 +3675,8 @@ function applyTheme(){const t=S.theme||'auto',r=document.documentElement;if(t===
 document.getElementById('thm').onclick=()=>{const i=THEMES.findIndex(q=>q[0]===(S.theme||'auto'));S.theme=THEMES[(i+1)%3][0];save();applyTheme()};
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
 applyTheme();
-go((location.hash||'').slice(1));
+if(/rp=/.test(location.hash||'')){const h=location.hash;go('radio');rpJoin(h)}else go((location.hash||'').slice(1));
+addEventListener('hashchange',()=>{if(/rp=/.test(location.hash||''))rpJoin(location.hash)});
 </script>
-
 <script>if("serviceWorker" in navigator&&!window.Capacitor&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
 </html>
