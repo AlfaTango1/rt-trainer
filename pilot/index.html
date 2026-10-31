@@ -183,6 +183,11 @@ select{width:100%;font-size:16px;padding:13px;border-radius:14px;border:0;backgr
 .icp button{border:2px solid transparent;border-radius:14px;background:var(--inp);height:50px;color:var(--tx);padding:0;display:flex;align-items:center;justify-content:center}
 .icp button svg{width:26px;height:26px}
 .icp button.on{border-color:var(--g);color:var(--g)}
+.acp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acp button{border:2px solid transparent;border-radius:16px;background:var(--inp);padding:8px 8px 6px;color:var(--tx);font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+.acp button .yak{width:100%;height:auto;display:block}
+.acp button b{font-size:15px}
+.acp button.on{border-color:var(--g);color:var(--g)}
 .mvg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .mvg button{border:2px solid transparent;border-radius:14px;background:var(--inp);height:54px;font:inherit;font-size:20px;font-weight:700;color:var(--tx)}
 .mvg button.on{border-color:var(--g);color:var(--g)}
@@ -218,6 +223,8 @@ select{width:100%;font-size:16px;padding:13px;border-radius:14px;border:0;backgr
 <linearGradient id="y5w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2f3f5"/><stop offset="1" stop-color="#9aa1aa"/></linearGradient>
 <clipPath id="y5f"><path d="M22 121Q22 103 40 103L440 103C470 103 488 98 504 72L560 72 562 108 562 140 548 143C450 160 360 176 300 183 220 192 140 192 90 191L40 191Q22 189 22 172Z"/></clipPath>
 <clipPath id="y5t"><path d="M440 103C470 101 492 86 510 48 520 24 532 12 550 12 582 12 606 46 606 82 606 106 600 126 590 140L548 147 548 108Z"/></clipPath>
+<clipPath id="l3f"><path d="M649.9 138.8L644.3 138L638.6 137.2L632.9 136.4L627.3 135.7L621.6 135L615.9 134.3L610.2 133.7L604.5 133.1L598.9 132.5L593.2 131.9L587.5 131.4L581.8 130.9L576.1 130.4L570.4 129.9L564.7 129.5L559 129.1L553.3 128.7L547.5 128.3L541.8 127.9L536.1 127.6L530.4 127.3L524.7 127L519 126.7L513.3 126.5L507.6 126.2L501.8 126L496.1 125.8L490.4 125.6L484.7 125.4L479 125.2L473.3 125L467.5 124.9L461.8 124.7L456.1 124.6L450.4 124.4L444.7 124.3L439 124.2L433.2 124.1L427.5 124L421.8 123.9L416.1 123.8L410.4 123.7L404.6 123.6L398.9 123.5L393.2 123.4L387.5 123.3L381.8 123.2L376 123.1L370.3 123L364.6 122.9L358.9 122.7L353.2 122.6L347.4 122.5L341.7 122.4L336 122.2L330.3 122.1L324.6 121.9L318.9 121.8L313.1 121.6L307.4 121.5L301.7 121.3L296 121.1L290.3 120.9L284.6 120.8L278.8 120.7L273.1 120.6L267.4 120.5L261.7 120.5L256 120.5L250.2 120.6L244.5 120.8L238.8 121L233.1 121.3L227.4 121.8L221.7 122.3L216 123L210.3 123.7L204.7 124.6L199.1 125.7L193.5 126.9L187.9 128.2L182.4 129.7L176.9 131.3L171.5 133.2L166.1 135.2L160.9 137.4L155.6 139.7L150.5 142.2L145.5 144.9L140.5 147.8L135.7 150.9L130.9 154.1L126.3 157.4L121.5 160.2L115.9 161.6L110.4 163L104.8 164.4L99.3 165.8L93.7 167.2L88.2 168.6L82.6 170L77.1 171.5L71.6 172.9L66 174.4L60.5 176L55 177.5L49.5 179.1L44.1 180.8L38.6 182.4L33.1 184.2L27.7 186L22.3 188L17 190L11.8 192.3L6.7 194.9L2.1 198.3L0.8 203.5L5.5 206.6L11.1 207.6L16.8 207.8L22.6 207.9L28.3 208L34 208.1L39.7 208.3L45.4 208.4L51.1 208.5L56.9 208.7L62.6 208.8L68.3 209L74 209.1L79.7 209.2L85.5 209.4L91.2 209.5L96.9 209.6L102.6 209.8L108.3 209.9L114 210L119.8 210.1L125.5 210.3L131.2 210.4L136.9 210.5L142.6 210.6L148.4 210.7L154.1 210.8L159.8 211L165.5 211.1L171.2 211.2L177 211.3L182.7 211.4L188.4 211.5L194.1 211.6L199.8 211.6L205.6 211.7L211.3 211.8L217 211.9L222.7 211.9L228.4 212L234.2 212.1L239.9 212.1L245.6 212.2L251.3 212.2L257 212.3L262.7 212.3L268.5 212.3L274.2 212.4L279.9 212.4L285.6 212.4L291.3 212.4L297.1 212.4L302.8 212.4L308.5 212.4L314.2 212.4L319.9 212.4L325.7 212.3L331.4 212.3L337.1 212.3L342.8 212.2L348.5 212.2L354.3 212.1L360 212L365.7 211.9L371.4 211.8L377.1 211.7L382.9 211.6L388.6 211.5L394.3 211.4L400 211.2L405.7 211.1L411.5 210.9L417.2 210.7L422.9 210.5L428.6 210.3L434.3 210.1L440 209.9L445.8 209.7L451.5 209.4L457.2 209.1L462.9 208.9L468.6 208.6L474.3 208.3L480 207.9L485.7 207.6L491.4 207.2L497.2 206.8L502.9 206.4L508.6 206L514.3 205.5L520 205.1L525.7 204.6L531.4 204L537.1 203.5L542.7 202.9L548.4 202.3L554.1 201.6L559.8 200.9L565.5 200.2L571.1 199.5L576.8 198.7L582.5 197.8L588.1 196.9L593.7 195.9L599.4 194.9L605 193.8L610.6 192.7L616.2 191.4L621.7 190.1L627.3 188.7L632.8 187.1L638.2 185.5L643.7 183.6L649 181.6L651.4 177.7L651.2 172L651.7 166.3L653.1 160.8L655.4 155.6L658.7 150.9L662.8 146.9L667.5 143.6L671.8 140.8L666.8 138L661.6 135.5L656.3 133.4L650.8 131.8L645.2 130.8L639.5 130.2L633.8 129.4L630.6 126.8L632 121.2L633.4 115.7Z"/></clipPath>
+<clipPath id="l3t"><path d="M485 125.2L490.2 124.9L495.2 123.7L500.1 122L504.8 119.7L509.4 117.2L513.8 114.4L518 111.5L522.2 108.4L526.4 105.2L530.4 102L534.2 98.5L537.9 94.8L541.6 91.1L545.2 87.4L548.9 83.7L552.6 80.1L556.3 76.4L559.9 72.7L563.6 69L567.3 65.3L570.9 61.6L574.6 58L578.3 54.3L581.9 50.6L585.6 46.9L589.3 43.2L593 39.5L596.6 35.9L600.3 32.2L604 28.5L607.6 24.8L611.3 21.1L615 17.4L619.1 14.2L623.8 12.2L629 11.9L634.2 11.6L639.4 11.6L644.6 11.6L649.8 11.6L655 11.6L660.2 11.6L665.4 11.6L670.6 11.6L675.8 11.6L675.8 15.3L674.2 20.2L672.5 25.2L670.9 30.1L669.2 35L667.6 40L665.9 44.9L664.3 49.8L662.7 54.8L661 59.7L659.4 64.6L657.7 69.6L656.1 74.5L654.4 79.4L652.8 84.4L651.1 89.3L649.5 94.2L647.9 99.2L646.2 104.1L644.6 109L642.9 114L641.3 118.9L639.6 123.8L638 128.8L485 125.2Z"/></clipPath>
 </defs></svg>
 <div class="uv" id="uv"><div class="uh"><button class="round" id="ub" aria-label="Назад">‹</button><h1 id="uT"></h1></div><div class="ul" id="ul"></div><div class="bot"><button class="btn" id="au" data-l="addUser">Добавить пользователя</button></div></div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
@@ -389,18 +396,19 @@ function renderUsers(){
       '<div class="ph"><div class="pi">'+planeIc(u.ic)+'</div><div class="pt"><div class="pn"><span>'+esc(l1)+'</span><span>'+(l2?esc(l2):"&nbsp;")+'</span></div><div class="pst">'+sub+'</div>'+
       (u.remote?'<div class="rb">☁️ @'+esc(u.uname)+'</div>':'')+'</div></div>'+
       (u.remote?'':'<button class="um" data-um="'+id+'" aria-label="✎">✎</button>')+
-      YAK+
+      acSvg(u)+
       '<div class="pb"><div class="cs'+(cs?'':' no')+'">'+(cs?esc(cs):esc(L("noCall")))+'</div>'+
       (!u.remote&&S.users.length>1?'<button class="mv" data-mv="'+id+'" aria-label="'+esc(L("moveT"))+'">'+SORT_IC+'</button>':'')+'</div></div>';
   }).join("");
 }
-function readUx(){var e=document.getElementById("ucs");return{call:e?e.value.trim().slice(0,20):"",ic:editIc}}
+function readUx(){var e=document.getElementById("ucs");return{call:e?e.value.trim().slice(0,20):"",ic:editIc,ac:editAc}}
 function openUser(id){
   editU=id;var u=id==="new"?{fio:"",call:"",ic:0}:S.users.filter(function(x){return x.id===id})[0];
-  editIc=+u.ic||0;
+  editIc=+u.ic||0;editAc=u.ac==="l39"?"l39":"yak52";
   document.getElementById("sheet").innerHTML='<h2>'+(id==="new"?L("newUser"):L("user"))+'</h2><label>'+L("fio")+'</label><input id="uf" value="'+esc(u.fio)+'" placeholder="'+L("fioEx")+'">'+
   (id==="new"?'<label>'+L("unL")+'</label><input id="uun" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" placeholder="@username"><p class="note" style="text-align:left;margin:6px 2px 0">'+L("unHint")+'</p>':'')+
   '<label>'+L("callL")+'</label><input id="ucs" maxlength="20" autocapitalize="none" value="'+esc(u.call||"")+'" placeholder="'+L("callEx")+'">'+
+  '<label>'+L("acL")+'</label><div class="acp" id="acp">'+AC.map(function(a){return '<button type="button" data-ac="'+a.id+'" class="'+(a.id===editAc?'on':'')+'">'+a.svg+'<b>'+a.name+'</b></button>'}).join("")+'</div>'+
   '<label>'+L("iconL")+'</label><div class="icp" id="icp">'+ICONS.map(function(s,i){return '<button type="button" data-ic="'+i+'" class="'+(i===editIc?'on':'')+'" aria-label="'+(i+1)+'">'+s+'</button>'}).join("")+'</div>'+
   '<button class="btn" id="us">'+L("save")+'</button>'+(id!=="new"&&S.users.length>1?'<button class="btn del" id="ud">'+L("delUser")+'</button>':'')+'<button class="btn sec" id="uc">'+L("close")+'</button>';
   document.getElementById("ov").classList.add("on");
@@ -430,8 +438,8 @@ document.addEventListener("click",function(e){
   else if(id==="us"){var f=document.getElementById("uf").value.trim(),un=editU==="new"?val("uun").trim():"";
     if(un){addByUsername(un);return}
     if(!f){document.getElementById("uf").focus();return}
-    if(editU==="new"){var ux=readUx();var nu={id:"u"+Date.now(),fio:f,call:ux.call,ic:ux.ic,items:defItems()};S.users.push(nu);S.active=nu.id;save();render();close();showUsers(false)}
-    else{var ux=readUx();S.users.forEach(function(x){if(x.id===editU){x.fio=f;x.call=ux.call;x.ic=ux.ic}});save();render();renderUsers();close()}}
+    if(editU==="new"){var ux=readUx();var nu={id:"u"+Date.now(),fio:f,call:ux.call,ic:ux.ic,ac:ux.ac,items:defItems()};S.users.push(nu);S.active=nu.id;save();render();close();showUsers(false)}
+    else{var ux=readUx();S.users.forEach(function(x){if(x.id===editU){x.fio=f;x.call=ux.call;x.ic=ux.ic;x.ac=ux.ac}});save();render();renderUsers();close()}}
   else if(id==="ud"){var du=editU;ask(L("delUserQ"),L("delUser"),function(){S.users=S.users.filter(function(x){return x.id!==du});if(S.active===du)S.active=S.users[0].id;save();render();renderUsers()})}
 });
 function pad(n){return String(n).padStart(2,"0")}
@@ -612,11 +620,80 @@ var YAK='<svg class="yak" viewBox="0 4 614 236" role="img" aria-label="Як-52" 
 '<path d="M15 44C16 41 19 41 20 44L20.4 52H14.6Z M14.6 220H20.4L20 228C19 232 16 232 15 228Z" fill="#f2c230"/>'+
 '</svg>';
 var editIc=0;
+/* Aero L-39 Albatros side view, traced from the public-domain (PD-USGov) Wikimedia
+   "Aero L-39 Albatross 3-view line drawing": 1 drawing unit = 2.6 px, length 12.13 m = 674 px (55.6 px/m).
+   Landing gear is not in the drawing (shown retracted); it is placed from the real data:
+   height 4.77 m -> ground at y 274.5, wheelbase 4.39 m (nose x 158, main x 400),
+   tyres 610 mm main (r 17) and 430 mm nose (r 12). Gradients/clip paths live in the hidden <defs>. */
+var L39P={
+body:"M649.9 138.8L644.3 138L638.6 137.2L632.9 136.4L627.3 135.7L621.6 135L615.9 134.3L610.2 133.7L604.5 133.1L598.9 132.5L593.2 131.9L587.5 131.4L581.8 130.9L576.1 130.4L570.4 129.9L564.7 129.5L559 129.1L553.3 128.7L547.5 128.3L541.8 127.9L536.1 127.6L530.4 127.3L524.7 127L519 126.7L513.3 126.5L507.6 126.2L501.8 126L496.1 125.8L490.4 125.6L484.7 125.4L479 125.2L473.3 125L467.5 124.9L461.8 124.7L456.1 124.6L450.4 124.4L444.7 124.3L439 124.2L433.2 124.1L427.5 124L421.8 123.9L416.1 123.8L410.4 123.7L404.6 123.6L398.9 123.5L393.2 123.4L387.5 123.3L381.8 123.2L376 123.1L370.3 123L364.6 122.9L358.9 122.7L353.2 122.6L347.4 122.5L341.7 122.4L336 122.2L330.3 122.1L324.6 121.9L318.9 121.8L313.1 121.6L307.4 121.5L301.7 121.3L296 121.1L290.3 120.9L284.6 120.8L278.8 120.7L273.1 120.6L267.4 120.5L261.7 120.5L256 120.5L250.2 120.6L244.5 120.8L238.8 121L233.1 121.3L227.4 121.8L221.7 122.3L216 123L210.3 123.7L204.7 124.6L199.1 125.7L193.5 126.9L187.9 128.2L182.4 129.7L176.9 131.3L171.5 133.2L166.1 135.2L160.9 137.4L155.6 139.7L150.5 142.2L145.5 144.9L140.5 147.8L135.7 150.9L130.9 154.1L126.3 157.4L121.5 160.2L115.9 161.6L110.4 163L104.8 164.4L99.3 165.8L93.7 167.2L88.2 168.6L82.6 170L77.1 171.5L71.6 172.9L66 174.4L60.5 176L55 177.5L49.5 179.1L44.1 180.8L38.6 182.4L33.1 184.2L27.7 186L22.3 188L17 190L11.8 192.3L6.7 194.9L2.1 198.3L0.8 203.5L5.5 206.6L11.1 207.6L16.8 207.8L22.6 207.9L28.3 208L34 208.1L39.7 208.3L45.4 208.4L51.1 208.5L56.9 208.7L62.6 208.8L68.3 209L74 209.1L79.7 209.2L85.5 209.4L91.2 209.5L96.9 209.6L102.6 209.8L108.3 209.9L114 210L119.8 210.1L125.5 210.3L131.2 210.4L136.9 210.5L142.6 210.6L148.4 210.7L154.1 210.8L159.8 211L165.5 211.1L171.2 211.2L177 211.3L182.7 211.4L188.4 211.5L194.1 211.6L199.8 211.6L205.6 211.7L211.3 211.8L217 211.9L222.7 211.9L228.4 212L234.2 212.1L239.9 212.1L245.6 212.2L251.3 212.2L257 212.3L262.7 212.3L268.5 212.3L274.2 212.4L279.9 212.4L285.6 212.4L291.3 212.4L297.1 212.4L302.8 212.4L308.5 212.4L314.2 212.4L319.9 212.4L325.7 212.3L331.4 212.3L337.1 212.3L342.8 212.2L348.5 212.2L354.3 212.1L360 212L365.7 211.9L371.4 211.8L377.1 211.7L382.9 211.6L388.6 211.5L394.3 211.4L400 211.2L405.7 211.1L411.5 210.9L417.2 210.7L422.9 210.5L428.6 210.3L434.3 210.1L440 209.9L445.8 209.7L451.5 209.4L457.2 209.1L462.9 208.9L468.6 208.6L474.3 208.3L480 207.9L485.7 207.6L491.4 207.2L497.2 206.8L502.9 206.4L508.6 206L514.3 205.5L520 205.1L525.7 204.6L531.4 204L537.1 203.5L542.7 202.9L548.4 202.3L554.1 201.6L559.8 200.9L565.5 200.2L571.1 199.5L576.8 198.7L582.5 197.8L588.1 196.9L593.7 195.9L599.4 194.9L605 193.8L610.6 192.7L616.2 191.4L621.7 190.1L627.3 188.7L632.8 187.1L638.2 185.5L643.7 183.6L649 181.6L651.4 177.7L651.2 172L651.7 166.3L653.1 160.8L655.4 155.6L658.7 150.9L662.8 146.9L667.5 143.6L671.8 140.8L666.8 138L661.6 135.5L656.3 133.4L650.8 131.8L645.2 130.8L639.5 130.2L633.8 129.4L630.6 126.8L632 121.2L633.4 115.7Z",
+tail:"M656.1 152.4L650.4 151.8L644.7 151.3L639 150.9L633.3 150.5L627.6 150.2L621.8 149.9L616.1 149.5L610.4 149.2L604.7 148.9L599 148.6L593.3 148.2L587.6 147.9L581.9 147.5L576.2 147L570.5 146.5L564.8 145.8L559.1 145L553.6 143.7L548.6 141.1L552.5 138.4L558.2 137.7L563.9 137.2L569.6 136.9L575.3 136.7L581 136.5L586.7 136.4L592.5 136.3L598.2 136.3L603.9 136.4L609.6 136.5L615.3 136.6L621.1 136.9L626.8 137.2L632.5 137.5L638.2 137.9L643.9 138.4L649.6 139L655.3 139.7Z",
+fin:"M485 125.2L490.2 124.9L495.2 123.7L500.1 122L504.8 119.7L509.4 117.2L513.8 114.4L518 111.5L522.2 108.4L526.4 105.2L530.4 102L534.2 98.5L537.9 94.8L541.6 91.1L545.2 87.4L548.9 83.7L552.6 80.1L556.3 76.4L559.9 72.7L563.6 69L567.3 65.3L570.9 61.6L574.6 58L578.3 54.3L581.9 50.6L585.6 46.9L589.3 43.2L593 39.5L596.6 35.9L600.3 32.2L604 28.5L607.6 24.8L611.3 21.1L615 17.4L619.1 14.2L623.8 12.2L629 11.9L634.2 11.6L639.4 11.6L644.6 11.6L649.8 11.6L655 11.6L660.2 11.6L665.4 11.6L670.6 11.6L675.8 11.6L675.8 15.3L674.2 20.2L672.5 25.2L670.9 30.1L669.2 35L667.6 40L665.9 44.9L664.3 49.8L662.7 54.8L661 59.7L659.4 64.6L657.7 69.6L656.1 74.5L654.4 79.4L652.8 84.4L651.1 89.3L649.5 94.2L647.9 99.2L646.2 104.1L644.6 109L642.9 114L641.3 118.9L639.6 123.8L638 128.8L485 125.2Z",
+canopy:"M167.4 134.9L170.3 137.9L172.9 141.1L175.2 144.6L177.2 148.2L178.8 152.1L180.1 156L182.3 158.5L186.4 157.8L190.5 157.1L194.6 156.4L198.7 155.7L202.8 155L206.9 154.3L211 153.6L215.1 152.9L219.2 152.2L223.3 151.5L227.4 150.8L230.5 149L231.5 144.9L232.5 140.9L233.5 136.9L234.5 132.8L235.4 128.8L237.4 125.9L241.5 125.9L243 129.4L244.2 133.4L245.3 137.5L246.4 141.5L247.5 145.5L249.9 147.5L254 146.8L258.1 146.2L262.2 145.6L266.4 145L270.5 144.5L274.6 144L278.8 143.5L282.9 143.1L287 142.7L291.2 142.3L295.3 142L299.5 141.7L301.8 138.5L303.8 134.9L305.8 131.2L307.5 127.4L308.9 123.5L307.1 121.7L302.9 121.7L298.7 121.6L294.6 121.6L290.4 121.5L286.3 121.5L282.1 121.4L277.9 121.4L273.8 121.4L269.6 121.4L265.5 121.4L261.3 121.5L257.1 121.6L253 121.7L248.8 121.8L244.7 122L240.5 122.2L236.4 122.4L232.2 122.7L228.1 123L223.9 123.4L219.8 123.8L215.7 124.3L211.5 124.8L207.4 125.4L203.3 126L199.2 126.7L195.1 127.5L191 128.4L187 129.3L182.9 130.3L178.9 131.4L174.9 132.5L171 133.7Z",
+wind:"M175.7 159.3L174.1 155.5L172.6 151.6L170.8 147.8L168.8 144.2L166.3 140.9L163.4 137.9L159.8 138L156.1 139.9L152.4 141.7L148.7 143.6L145 145.6L141.4 147.6L137.8 149.7L134.3 151.9L130.8 154.2L127.4 156.7L129.8 158.1L133.8 159.1L137.9 159.8L142 160.4L146.1 160.8L150.3 161.1L154.5 161.2L158.6 161.1L162.8 160.9L166.9 160.6L171 160.1L175.2 159.4Z",
+sill:"M121.8 159.5L125.9 162.6L130.8 164.2L135.9 165L141.1 165.5L146.3 165.8L151.5 165.9L156.7 165.8L161.9 165.7L167.1 165.5L172.3 165.3L177.5 164.9L182.7 164.5L187.8 164.1L193 163.5L198.2 163L203.4 162.4L208.5 161.8L213.7 161.1L218.8 160.4L224 159.7L229.1 159L234.3 158.2L239.4 157.4L244.6 156.7L249.7 155.9L254.8 155.2L260 154.4L265.1 153.7L270.3 153L275.5 152.3L280.6 151.7L285.8 151.1L290.9 150.5L296.1 150.1L301.3 149.6L304.6 145.7L307.2 141.2L309.4 136.5L311.1 131.6L312.5 126.6",
+tank:"M293.8 183.6L296.3 180.5L300.1 178.9L304.2 177.8L308.2 176.9L312.3 176.3L316.5 175.7L320.6 175.3L324.7 174.9L328.9 174.6L333 174.3L337.2 174L341.3 173.8L345.5 173.7L349.7 173.6L353.8 173.5L358 173.4L362.1 173.3L366.3 173.3L370.5 173.3L374.6 173.3L378.8 173.3L382.9 173.4L387.1 173.5L391.3 173.6L395.4 173.7L399.6 173.9L403.7 174L407.9 174.2L412 174.5L416.2 174.7L420.3 175L424.5 175.3L428.6 175.7L432.8 176.1L436.9 176.5L441 177.1L445.1 177.7L449.2 178.6L453.1 179.9L452.3 182.2L448.7 184.3L445.1 186.3L441.2 188L437.3 189.2L433.2 190.1L429.1 190.8L425 191.4L420.8 191.8L416.7 192.1L412.5 192.4L408.4 192.6L404.2 192.7L400.1 192.8L395.9 192.8L391.7 192.9L387.6 192.9L383.4 192.9L379.3 193L375.1 193L370.9 193.1L366.8 193.1L362.6 193.2L358.5 193.2L354.3 193.2L350.1 193.2L346 193.2L341.8 193.2L337.7 193.2L333.5 193.1L329.3 193L325.2 192.9L321 192.8L316.9 192.6L312.7 192.4L308.6 192.1L304.5 191.4L300.5 190.3L296.7 188.5L294.1 185.4Z",
+lip1:"M319.4 174.9L319.7 132L321.1 129.2L323.6 126.3L325.4 122.9",
+lip2:"M326.5 175.2L326.6 136.2L328.1 132.7L331 130L334.5 128.4L338.2 127.3L342 126.5L345.8 125.5L349.5 124.1",
+fair:"M332.8 192.5L329.6 196.6L326.5 200.8L323.4 205L320.3 209.1L318.9 212.4L324.1 212.2L329.3 212.1L334.5 212.1L339.7 212.1L344.9 212.2L350.1 212.3L355.3 212.4L360.5 212.5L365.7 212.6L370.9 212.7L376.1 212.7L381.3 212.6L386.5 212.4L391.7 212.2L396.9 211.8L402.1 211.3L407.2 210.6L412.3 209.7L417.4 208.7L420.9 206.9L417.3 203.2L413.6 199.5L410 195.7",
+nose:"M41.8 182.9L49.9 200.4L116.2 200.7L118.2 198.6L118.2 163.5",
+r1:"M644 112.2L618 113.4L612.9 113L607.9 111.5L604.1 108.1L605.4 103.5L647 25.5",
+r2:"M611.9 111.9L651 26.9",
+fintop:"M608.2 23.6L670.6 23.6",
+lines:"M532 203.5V133.3M608.8 149.3V188.3M373.3 172.6V125.8M446.8 178H540.4"
+};
+var L39=(function(P){
+  var S='stroke="#7d848d" stroke-width="1.5" stroke-linejoin="round"';
+  return '<svg class="yak" viewBox="-4 0 684 282" role="img" aria-label="Л-39" xmlns="http://www.w3.org/2000/svg">'+
+  '<ellipse cx="338" cy="276" rx="330" ry="4.5" fill="#000" opacity=".14"/>'+
+  /* fin with rudder, red tip cap and star */
+  '<path d="'+P.fin+'" fill="url(#y5b)"/>'+
+  '<g clip-path="url(#l3t)"><path d="M480 0H690V23.6H480Z" fill="#c62f2b"/></g>'+
+  '<path d="'+P.fin+'" fill="none" '+S+'/>'+
+  '<path d="'+P.r1+'M'+P.r2.slice(1)+'M'+P.fintop.slice(1)+'" fill="none" stroke="#8c939c" stroke-width="1.2"/>'+
+  '<polygon points="625,52 629.3,63.2 641.4,63.6 631.9,71 635.2,82.6 625,76 614.8,82.6 618.1,71 608.6,63.6 620.7,63.2" fill="#c62f2b"/>'+
+  /* fuselage */
+  '<path d="'+P.body+'" fill="url(#y5b)"/>'+
+  '<g clip-path="url(#l3f)">'+
+    '<path d="M-10 193L690 151 690 158 -10 201Z" fill="#c62f2b"/>'+
+    '<path d="M60 176L121 160 124 168 64 184Z" fill="#3a3f45"/>'+
+    '<path d="M649 181.6 651.4 177.7 651.2 172 651.7 166.3 653.1 160.8 655.4 155.6 658.7 150.9 662.8 146.9 667.5 143.6 671.8 140.8 690 140 690 190Z" fill="#4a5058"/>'+
+  '</g>'+
+  '<path d="'+P.nose+P.lines+'" fill="none" stroke="#a9b0b8" stroke-width="1"/>'+
+  '<path d="'+P.body+'" fill="none" '+S+'/>'+
+  /* side air intake: lip and duct */
+  '<path d="'+P.lip1+'L326.5 175.2L326.6 136.2L328.1 132.7L331 130L334.5 128.4L338.2 127.3L342 126.5L345.8 125.5L349.5 124.1L325.4 122.9Z" fill="#2b2f36"/>'+
+  '<path d="'+P.lip2+'L373.3 125.8L373.3 172.6L326.5 175.2Z" fill="#000" opacity=".08"/>'+
+  '<path d="'+P.lip1+'M'+P.lip2.slice(1)+'" fill="none" stroke="#59616b" stroke-width="1.4"/>'+
+  /* crew, then the two-section canopy and windscreen */
+  '<circle cx="207" cy="141" r="9" fill="#3c4148"/><circle cx="276" cy="134" r="9" fill="#3c4148"/>'+
+  '<path d="'+P.wind+'" fill="url(#y5g)" fill-opacity=".9" '+S.replace('#7d848d','#59616b')+'/>'+
+  '<path d="'+P.canopy+'" fill="url(#y5g)" fill-opacity=".82" stroke="#59616b" stroke-width="1.8" stroke-linejoin="round"/>'+
+  '<path d="'+P.sill+'" fill="none" stroke="#59616b" stroke-width="2"/>'+
+  '<path d="M172 136C182 132 200 129 222 126L224 131C204 134 186 137 175 141Z M250 124C268 122.5 285 122.5 300 123L299 128C284 127.5 268 127.5 251 129Z" fill="#fff" opacity=".35"/>'+
+  /* wing root fairing, wing edge-on and the wingtip tank beyond it */
+  '<path d="'+P.fair+'Z" fill="url(#y5w)" '+S+'/>'+
+  '<path d="'+P.tank+'" fill="url(#y5w)" '+S+'/>'+
+  '<path d="M293.8 183.6L296.3 180.5L300.1 178.9L304.2 177.8L308.2 176.9L312 176.4V192.5L308.6 192.1L304.5 191.4L300.5 190.3L296.7 188.5L294.1 185.4Z" fill="#c62f2b"/>'+
+  /* horizontal tail */
+  '<path d="'+P.tail+'" fill="url(#y5w)" '+S+'/>'+
+  /* landing gear from the real data: wheelbase 4.39 m, ground 4.77 m below the fin tip */
+  '<path d="M158 211V256M400 211V251" stroke="#4a5058" stroke-width="5.5" stroke-linecap="round"/>'+
+  '<path d="M150 213H166M390 212.5H410" stroke="#7d848d" stroke-width="3"/>'+
+  '<path d="M158 228 166 244M400 226 409 242" stroke="#4a5058" stroke-width="2.5"/>'+
+  '<circle cx="158" cy="262.5" r="12" fill="#25282c"/><circle cx="158" cy="262.5" r="4.5" fill="#9aa1aa"/>'+
+  '<circle cx="400" cy="257.5" r="17" fill="#25282c"/><circle cx="400" cy="257.5" r="6.5" fill="#9aa1aa"/><circle cx="400" cy="257.5" r="2.2" fill="#25282c"/>'+
+  '</svg>';
+})(L39P);
+/* aircraft types a pilot can fly; the card shows the chosen one */
+var AC=[{id:"yak52",name:"Як-52",svg:YAK},{id:"l39",name:"Л-39",svg:L39}],editAc="yak52";
+function acSvg(u){return u.ac==="l39"?L39:YAK}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-ac]");if(!b)return;editAc=b.getAttribute("data-ac");[].forEach.call(document.querySelectorAll("#acp button"),function(x){x.classList.toggle("on",x.getAttribute("data-ac")===editAc)})});
 var SORT_IC='<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><rect x="3" y="6" width="18" height="2.4" rx="1.2"/><rect x="3" y="11" width="13" height="2.4" rx="1.2"/><rect x="3" y="16" width="8" height="2.4" rx="1.2"/></svg>';
 
-Object.assign(I18N.ru,{allUsers:"Все пилоты ({n})",addUser:"Добавить пилота",newUser:"Новый пилот",user:"Пилот",callL:"Позывной",callEx:"например, Беркут-21",iconL:"Иконка",noCall:"Позывной не задан",pilotsBtn:"Пилоты",delUser:"Удалить пилота",delUserQ:"Удалить этого пилота?",moveT:"Переместить пилота",moveP:"выберите позицию в списке",cancelB:"Отмена",resetCloudErr:"Не удалось удалить данные в облаке. Проверьте интернет и попробуйте ещё раз — на телефоне пока ничего не удалено.",delB:"Удалить",unL:"Или добавить по username",unHint:"Если у человека есть аккаунт в приложении, введите его username. Ему придёт запрос, и после подтверждения его профиль появится в списке пилотов.",needLogin:"Чтобы добавлять по username, войдите в аккаунт: Настройки → Аккаунт.",selfUser:"Это ваш собственный username.",reqSentU:"Запрос отправлен @{u}. Когда он подтвердит, его профиль появится в списке пилотов.",calcHist:"История",calcErr:"Ошибка: так считать нельзя"});
-Object.assign(I18N.en,{allUsers:"All pilots ({n})",addUser:"Add pilot",newUser:"New pilot",user:"Pilot",callL:"Call sign",callEx:"e.g. Berkut-21",iconL:"Icon",noCall:"No call sign",pilotsBtn:"Pilots",delUser:"Delete pilot",delUserQ:"Delete this pilot?",moveT:"Move pilot",moveP:"choose a position in the list",cancelB:"Cancel",resetCloudErr:"Could not delete your cloud data. Check the connection and try again — nothing on this phone was deleted yet.",delB:"Delete",unL:"Or add by username",unHint:"If the person has an account in the app, enter their username. They get a request, and once they accept, their profile appears in the pilots list.",needLogin:"To add by username, sign in first: Settings → Account.",selfUser:"That is your own username.",reqSentU:"Request sent to @{u}. Once they accept, their profile appears in the pilots list.",calcHist:"History",calcErr:"Error: can’t calculate that"});
-Object.assign(I18N.uz,{allUsers:"Barcha uchuvchilar ({n})",addUser:"Uchuvchi qo’shish",newUser:"Yangi uchuvchi",user:"Uchuvchi",callL:"Chaqiriq belgisi",callEx:"masalan, Berkut-21",iconL:"Belgi",noCall:"Chaqiriq belgisi yo’q",pilotsBtn:"Uchuvchilar",delUser:"Uchuvchini o’chirish",delUserQ:"Bu uchuvchi o’chirilsinmi?",moveT:"Uchuvchini ko’chirish",moveP:"ro’yxatdagi o’rinni tanlang",cancelB:"Bekor qilish",resetCloudErr:"Bulutdagi ma’lumotlarni o’chirib bo’lmadi. Internetni tekshirib, qayta urinib ko’ring — telefonda hali hech narsa o’chirilmadi.",delB:"O’chirish",unL:"Yoki username orqali qo’shish",unHint:"Agar odamning ilovada akkaunti bo’lsa, uning username’ini kiriting. Unga so’rov boradi, tasdiqlagandan so’ng uning profili uchuvchilar ro’yxatida paydo bo’ladi.",needLogin:"Username orqali qo’shish uchun akkauntga kiring: Sozlamalar → Akkaunt.",selfUser:"Bu sizning username’ingiz.",reqSentU:"@{u} ga so’rov yuborildi. U tasdiqlagach, profili uchuvchilar ro’yxatida paydo bo’ladi.",calcHist:"Tarix",calcErr:"Xato: bunday hisoblab bo’lmaydi"});
+Object.assign(I18N.ru,{allUsers:"Все пилоты ({n})",addUser:"Добавить пилота",newUser:"Новый пилот",user:"Пилот",callL:"Позывной",callEx:"например, Беркут-21",iconL:"Иконка",noCall:"Позывной не задан",pilotsBtn:"Пилоты",delUser:"Удалить пилота",delUserQ:"Удалить этого пилота?",moveT:"Переместить пилота",moveP:"выберите позицию в списке",cancelB:"Отмена",acL:"Тип ЛА",resetCloudErr:"Не удалось удалить данные в облаке. Проверьте интернет и попробуйте ещё раз — на телефоне пока ничего не удалено.",delB:"Удалить",unL:"Или добавить по username",unHint:"Если у человека есть аккаунт в приложении, введите его username. Ему придёт запрос, и после подтверждения его профиль появится в списке пилотов.",needLogin:"Чтобы добавлять по username, войдите в аккаунт: Настройки → Аккаунт.",selfUser:"Это ваш собственный username.",reqSentU:"Запрос отправлен @{u}. Когда он подтвердит, его профиль появится в списке пилотов.",calcHist:"История",calcErr:"Ошибка: так считать нельзя"});
+Object.assign(I18N.en,{allUsers:"All pilots ({n})",addUser:"Add pilot",newUser:"New pilot",user:"Pilot",callL:"Call sign",callEx:"e.g. Berkut-21",iconL:"Icon",noCall:"No call sign",pilotsBtn:"Pilots",delUser:"Delete pilot",delUserQ:"Delete this pilot?",moveT:"Move pilot",moveP:"choose a position in the list",cancelB:"Cancel",acL:"Aircraft type",resetCloudErr:"Could not delete your cloud data. Check the connection and try again — nothing on this phone was deleted yet.",delB:"Delete",unL:"Or add by username",unHint:"If the person has an account in the app, enter their username. They get a request, and once they accept, their profile appears in the pilots list.",needLogin:"To add by username, sign in first: Settings → Account.",selfUser:"That is your own username.",reqSentU:"Request sent to @{u}. Once they accept, their profile appears in the pilots list.",calcHist:"History",calcErr:"Error: can’t calculate that"});
+Object.assign(I18N.uz,{allUsers:"Barcha uchuvchilar ({n})",addUser:"Uchuvchi qo’shish",newUser:"Yangi uchuvchi",user:"Uchuvchi",callL:"Chaqiriq belgisi",callEx:"masalan, Berkut-21",iconL:"Belgi",noCall:"Chaqiriq belgisi yo’q",pilotsBtn:"Uchuvchilar",delUser:"Uchuvchini o’chirish",delUserQ:"Bu uchuvchi o’chirilsinmi?",moveT:"Uchuvchini ko’chirish",moveP:"ro’yxatdagi o’rinni tanlang",cancelB:"Bekor qilish",acL:"Uchish apparati turi",resetCloudErr:"Bulutdagi ma’lumotlarni o’chirib bo’lmadi. Internetni tekshirib, qayta urinib ko’ring — telefonda hali hech narsa o’chirilmadi.",delB:"O’chirish",unL:"Yoki username orqali qo’shish",unHint:"Agar odamning ilovada akkaunti bo’lsa, uning username’ini kiriting. Unga so’rov boradi, tasdiqlagandan so’ng uning profili uchuvchilar ro’yxatida paydo bo’ladi.",needLogin:"Username orqali qo’shish uchun akkauntga kiring: Sozlamalar → Akkaunt.",selfUser:"Bu sizning username’ingiz.",reqSentU:"@{u} ga so’rov yuborildi. U tasdiqlagach, profili uchuvchilar ro’yxatida paydo bo’ladi.",calcHist:"Tarix",calcErr:"Xato: bunday hisoblab bo’lmaydi"});
 document.getElementById("ul").addEventListener("click",function(e){
   var b=e.target.closest("[data-mv]");
   if(b){e.stopPropagation();openMove(b.getAttribute("data-mv"))}
@@ -704,7 +781,7 @@ function sendRemoteItem(today){
 }
 /* what other accounts see of us: pilots with checks and flights, no settings */
 function pubData(){
-  return{v:1,pilots:S.users.map(function(u){return{id:u.id,fio:u.fio,call:u.call||"",ic:+u.ic||0,
+  return{v:1,pilots:S.users.map(function(u){return{id:u.id,fio:u.fio,call:u.call||"",ic:+u.ic||0,ac:u.ac==="l39"?"l39":"yak52",
     items:u.items.map(function(it){return{id:it.id,name:it.name,icon:it.icon||"",months:+it.months||6,date:it.date||""}}),
     flights:(u.flights||[]).slice(-1000)}})};
 }
@@ -732,7 +809,7 @@ function cleanR(owner,p){
   var fl=(Array.isArray(p.flights)?p.flights:[]).slice(-1000).filter(function(f){return f&&okDate(f.date)&&Number.isInteger(f.min)&&f.min>0&&f.min<=1440}).map(function(f){
     var o={date:f.date,min:f.min};if(/^\d\d:\d\d$/.test(f.off||"")&&/^\d\d:\d\d$/.test(f.on||"")){o.off=f.off;o.on=f.on}return o});
   return{id:"r:"+owner+":"+p.id.slice(0,40),remote:true,owner:owner,uname:nm(owner),pid:p.id.slice(0,40),
-    fio:str(p.fio,80)||"?",call:str(p.call,20),ic:Math.max(0,Math.min(ICONS.length-1,Math.round(+p.ic)||0)),items:items,flights:fl};
+    fio:str(p.fio,80)||"?",call:str(p.call,20),ic:Math.max(0,Math.min(ICONS.length-1,Math.round(+p.ic)||0)),ac:p.ac==="l39"?"l39":"yak52",items:items,flights:fl};
 }
 function setRM(rm){
   if(JSON.stringify(rm)===JSON.stringify(RM))return;
