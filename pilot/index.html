@@ -332,6 +332,18 @@ function openSheet(i){
   document.getElementById("ov").classList.add("on");
 }
 function close(){document.getElementById("ov").classList.remove("on")}
+/* in-app yes/no sheet: native confirm() is blocked (answers "no" at once) in some app webviews */
+var askYes=null;
+function ask(msg,yes,onYes){
+  askYes=onYes;
+  document.getElementById("sheet").innerHTML='<h2>'+esc(msg)+'</h2><button class="btn" id="askY" style="background:var(--r)">'+esc(yes)+'</button><button class="btn sec" id="askN">'+L("cancelB")+'</button>';
+  document.getElementById("ov").classList.add("on");
+}
+document.addEventListener("click",function(e){
+  var id=e.target.id;
+  if(id==="askY"){var f=askYes;askYes=null;close();if(f)f()}
+  else if(id==="askN"){askYes=null;close()}
+});
 function collect(today){
   var n=document.getElementById("fn").value.trim();if(!n){document.getElementById("fn").focus();return}
   var o={name:n,icon:document.getElementById("fi").value.trim()||"📋",months:Math.max(1,+document.getElementById("fm").value||6),date:today?iso(new Date()):document.getElementById("fd").value};
@@ -345,7 +357,7 @@ document.addEventListener("click",function(e){
   else if(id==="bt")collect(true);
   else if(id==="bs")collect(false);
   else if(id==="bc"||id==="ov")close();
-  else if(id==="bd"){if(confirm(L("delItemQ"))){items().splice(editing,1);save();render();close()}}
+  else if(id==="bd"){var di=editing;ask(L("delItemQ"),L("delItem"),function(){items().splice(di,1);save();render()})}
 });
 function counts(u){var r=0,o=0;u.items.forEach(function(it){var l=st(it).lvl;if(l==2)r++;if(l==1)o++});return{r:r,o:o}}
 function canN(){return typeof Notification!=="undefined"&&!isNat()}
@@ -420,7 +432,7 @@ document.addEventListener("click",function(e){
     if(!f){document.getElementById("uf").focus();return}
     if(editU==="new"){var ux=readUx();var nu={id:"u"+Date.now(),fio:f,call:ux.call,ic:ux.ic,items:defItems()};S.users.push(nu);S.active=nu.id;save();render();close();showUsers(false)}
     else{var ux=readUx();S.users.forEach(function(x){if(x.id===editU){x.fio=f;x.call=ux.call;x.ic=ux.ic}});save();render();renderUsers();close()}}
-  else if(id==="ud"){if(confirm(L("delUserQ"))){S.users=S.users.filter(function(x){return x.id!==editU});if(S.active===editU)S.active=S.users[0].id;save();render();renderUsers();close()}}
+  else if(id==="ud"){var du=editU;ask(L("delUserQ"),L("delUser"),function(){S.users=S.users.filter(function(x){return x.id!==du});if(S.active===du)S.active=S.users[0].id;save();render();renderUsers()})}
 });
 function pad(n){return String(n).padStart(2,"0")}
 function hm(m){return Math.floor(m/60)+":"+pad(m%60)}
@@ -555,11 +567,11 @@ function tab(n){
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-t]");if(t){tab(+t.getAttribute("data-t"));return}
-  var fd=e.target.closest("[data-fd]");if(fd){if(confirm(L("delRecQ"))){cur().flights.splice(+fd.getAttribute("data-fd"),1);save();renderCalc()}return}
+  var fd=e.target.closest("[data-fd]");if(fd){var fi=+fd.getAttribute("data-fd");ask(L("delRecQ"),L("delB"),function(){cur().flights.splice(fi,1);save();renderCalc()});return}
   var id=e.target.id;
   if(id==="cadd")addFlight();
   else if(id==="nb2"){try{Notification.requestPermission().then(function(){renderSet();renderN();notify()})}catch(x){}}
-  else if(id==="rst"){if(confirm(L("resetQ"))){try{localStorage.removeItem("pilot_v3");localStorage.removeItem("pilot_items2");localStorage.removeItem("pilot_dates")}catch(x){}location.reload()}}
+  else if(id==="rst"){ask(L("resetQ"),L("reset"),function(){try{localStorage.removeItem("pilot_v3");localStorage.removeItem("pilot_items2");localStorage.removeItem("pilot_dates")}catch(x){}location.reload()})}
 });
 document.addEventListener("change",function(e){if(e.target.id==="wd"){var v=Math.max(1,Math.min(365,+e.target.value||30));S.warn=v;WARN=v;save();render()}});
 
@@ -602,9 +614,9 @@ var YAK='<svg class="yak" viewBox="0 4 614 236" role="img" aria-label="Як-52" 
 var editIc=0;
 var SORT_IC='<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><rect x="3" y="6" width="18" height="2.4" rx="1.2"/><rect x="3" y="11" width="13" height="2.4" rx="1.2"/><rect x="3" y="16" width="8" height="2.4" rx="1.2"/></svg>';
 
-Object.assign(I18N.ru,{allUsers:"Все пилоты ({n})",addUser:"Добавить пилота",newUser:"Новый пилот",user:"Пилот",callL:"Позывной",callEx:"например, Беркут-21",iconL:"Иконка",noCall:"Позывной не задан",pilotsBtn:"Пилоты",delUser:"Удалить пилота",delUserQ:"Удалить этого пилота?",moveT:"Переместить пилота",moveP:"выберите позицию в списке",unL:"Или добавить по username",unHint:"Если у человека есть аккаунт в приложении, введите его username. Ему придёт запрос, и после подтверждения его профиль появится в списке пилотов.",needLogin:"Чтобы добавлять по username, войдите в аккаунт: Настройки → Аккаунт.",selfUser:"Это ваш собственный username.",reqSentU:"Запрос отправлен @{u}. Когда он подтвердит, его профиль появится в списке пилотов.",calcHist:"История",calcErr:"Ошибка: так считать нельзя"});
-Object.assign(I18N.en,{allUsers:"All pilots ({n})",addUser:"Add pilot",newUser:"New pilot",user:"Pilot",callL:"Call sign",callEx:"e.g. Berkut-21",iconL:"Icon",noCall:"No call sign",pilotsBtn:"Pilots",delUser:"Delete pilot",delUserQ:"Delete this pilot?",moveT:"Move pilot",moveP:"choose a position in the list",unL:"Or add by username",unHint:"If the person has an account in the app, enter their username. They get a request, and once they accept, their profile appears in the pilots list.",needLogin:"To add by username, sign in first: Settings → Account.",selfUser:"That is your own username.",reqSentU:"Request sent to @{u}. Once they accept, their profile appears in the pilots list.",calcHist:"History",calcErr:"Error: can’t calculate that"});
-Object.assign(I18N.uz,{allUsers:"Barcha uchuvchilar ({n})",addUser:"Uchuvchi qo’shish",newUser:"Yangi uchuvchi",user:"Uchuvchi",callL:"Chaqiriq belgisi",callEx:"masalan, Berkut-21",iconL:"Belgi",noCall:"Chaqiriq belgisi yo’q",pilotsBtn:"Uchuvchilar",delUser:"Uchuvchini o’chirish",delUserQ:"Bu uchuvchi o’chirilsinmi?",moveT:"Uchuvchini ko’chirish",moveP:"ro’yxatdagi o’rinni tanlang",unL:"Yoki username orqali qo’shish",unHint:"Agar odamning ilovada akkaunti bo’lsa, uning username’ini kiriting. Unga so’rov boradi, tasdiqlagandan so’ng uning profili uchuvchilar ro’yxatida paydo bo’ladi.",needLogin:"Username orqali qo’shish uchun akkauntga kiring: Sozlamalar → Akkaunt.",selfUser:"Bu sizning username’ingiz.",reqSentU:"@{u} ga so’rov yuborildi. U tasdiqlagach, profili uchuvchilar ro’yxatida paydo bo’ladi.",calcHist:"Tarix",calcErr:"Xato: bunday hisoblab bo’lmaydi"});
+Object.assign(I18N.ru,{allUsers:"Все пилоты ({n})",addUser:"Добавить пилота",newUser:"Новый пилот",user:"Пилот",callL:"Позывной",callEx:"например, Беркут-21",iconL:"Иконка",noCall:"Позывной не задан",pilotsBtn:"Пилоты",delUser:"Удалить пилота",delUserQ:"Удалить этого пилота?",moveT:"Переместить пилота",moveP:"выберите позицию в списке",cancelB:"Отмена",delB:"Удалить",unL:"Или добавить по username",unHint:"Если у человека есть аккаунт в приложении, введите его username. Ему придёт запрос, и после подтверждения его профиль появится в списке пилотов.",needLogin:"Чтобы добавлять по username, войдите в аккаунт: Настройки → Аккаунт.",selfUser:"Это ваш собственный username.",reqSentU:"Запрос отправлен @{u}. Когда он подтвердит, его профиль появится в списке пилотов.",calcHist:"История",calcErr:"Ошибка: так считать нельзя"});
+Object.assign(I18N.en,{allUsers:"All pilots ({n})",addUser:"Add pilot",newUser:"New pilot",user:"Pilot",callL:"Call sign",callEx:"e.g. Berkut-21",iconL:"Icon",noCall:"No call sign",pilotsBtn:"Pilots",delUser:"Delete pilot",delUserQ:"Delete this pilot?",moveT:"Move pilot",moveP:"choose a position in the list",cancelB:"Cancel",delB:"Delete",unL:"Or add by username",unHint:"If the person has an account in the app, enter their username. They get a request, and once they accept, their profile appears in the pilots list.",needLogin:"To add by username, sign in first: Settings → Account.",selfUser:"That is your own username.",reqSentU:"Request sent to @{u}. Once they accept, their profile appears in the pilots list.",calcHist:"History",calcErr:"Error: can’t calculate that"});
+Object.assign(I18N.uz,{allUsers:"Barcha uchuvchilar ({n})",addUser:"Uchuvchi qo’shish",newUser:"Yangi uchuvchi",user:"Uchuvchi",callL:"Chaqiriq belgisi",callEx:"masalan, Berkut-21",iconL:"Belgi",noCall:"Chaqiriq belgisi yo’q",pilotsBtn:"Uchuvchilar",delUser:"Uchuvchini o’chirish",delUserQ:"Bu uchuvchi o’chirilsinmi?",moveT:"Uchuvchini ko’chirish",moveP:"ro’yxatdagi o’rinni tanlang",cancelB:"Bekor qilish",delB:"O’chirish",unL:"Yoki username orqali qo’shish",unHint:"Agar odamning ilovada akkaunti bo’lsa, uning username’ini kiriting. Unga so’rov boradi, tasdiqlagandan so’ng uning profili uchuvchilar ro’yxatida paydo bo’ladi.",needLogin:"Username orqali qo’shish uchun akkauntga kiring: Sozlamalar → Akkaunt.",selfUser:"Bu sizning username’ingiz.",reqSentU:"@{u} ga so’rov yuborildi. U tasdiqlagach, profili uchuvchilar ro’yxatida paydo bo’ladi.",calcHist:"Tarix",calcErr:"Xato: bunday hisoblab bo’lmaydi"});
 document.getElementById("ul").addEventListener("click",function(e){
   var b=e.target.closest("[data-mv]");
   if(b){e.stopPropagation();openMove(b.getAttribute("data-mv"))}
