@@ -102,6 +102,10 @@ create policy "user_data: accepted grantee sends" on public.user_data
 create policy "user_data: owner removes" on public.user_data
   for delete to authenticated
   using (owner_id = (select auth.uid()));
+-- "Reset all data" in the app also removes entries the user sent to others (migration user_data_sender_delete)
+create policy "user_data: sender removes" on public.user_data
+  for delete to authenticated
+  using (added_by = (select auth.uid()));
 
 -- ---------- shared_state: owner's pilots, readable by accepted grantees ----------
 create table public.shared_state (
