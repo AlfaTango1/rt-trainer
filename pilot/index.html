@@ -82,24 +82,27 @@ main{padding-bottom:110px}
 .ttl{font-size:22px;font-weight:800;margin:6px 4px 14px}
 .lg{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:15px}
 /* time calculator: iOS-calculator look, always dark */
-.calc{background:#000;color:#fff;border-radius:30px;padding:14px 14px 18px;margin-bottom:12px}
-.calc .ch{display:flex;justify-content:space-between;align-items:center}
+.calc{position:relative;background:#000;color:#fff;border-radius:30px;padding:14px 14px 18px;margin-bottom:12px}
+/* history button sits in the display corner, as on iOS, so the keypad keeps the height */
+.calc .ch{position:absolute;left:14px;top:14px;z-index:1}
 .calc .ib{width:46px;height:46px;border-radius:50%;border:0;background:#1c1c1e;color:#fff;display:flex;align-items:center;justify-content:center;padding:0}
 .calc .ib.on{background:#3a3a3c}
 .disp{text-align:right;min-height:132px;padding:6px 8px 10px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .disp #cr{color:#8e8e93;font-size:24px;min-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .disp #ce{font-size:64px;font-weight:300;line-height:1.1;white-space:nowrap;letter-spacing:-1px}
 .disp #ce i{font-style:normal;opacity:.35}
-.chist{max-height:132px;overflow:auto;padding:2px 8px 8px;text-align:right}
+.chist{max-height:132px;overflow:auto;padding:2px 8px 8px 56px;text-align:right}
 .chist button{display:block;width:100%;border:0;background:none;color:#8e8e93;font:inherit;font-size:17px;text-align:right;padding:6px 0;border-bottom:1px solid #1c1c1e}
 .chist button b{color:#fff;font-weight:500}
-.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kp button{border:0;border-radius:50%;aspect-ratio:1;width:100%;padding:0;font:inherit;font-size:32px;font-weight:400;color:#fff;
- background:linear-gradient(#3b3b3d,#2a2a2c);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+/* key size --k: from the width here; fitKeys() also caps it by the height left above the tab bar */
+.kp{--k:calc((min(100vw,520px) - 92px)/4);display:grid;grid-template-columns:repeat(4,var(--k));justify-content:space-between;row-gap:12px}
+@media (max-height:740px){.disp{min-height:96px}.disp #ce{line-height:1}}
+.kp button{border:0;border-radius:50%;aspect-ratio:1;width:var(--k);padding:0;font:inherit;font-size:calc(var(--k)*.42);font-weight:400;color:#fff;
+ background:linear-gradient(#3b3b3d,#2a2a2c);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .kp .fn{background:linear-gradient(#77777b,#5a5a5e)}
-.kp .op{background:linear-gradient(#ffaa2b,#ff9500);font-size:38px}
+.kp .op{background:linear-gradient(#ffaa2b,#ff9500);font-size:calc(var(--k)*.5)}
 .kp button:active{filter:brightness(1.35)}
-.kp button svg{width:34px;height:34px}
+.kp button svg{width:45%;height:45%}
 .nav button.sos{color:var(--r)}.nav button.sos.on{color:var(--r);font-weight:800}
 .sosw{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
 .sosb{flex:1;display:block;background:#d92d2d;color:#fff;border-radius:24px;padding:18px 20px;text-decoration:none;font-weight:800;font-size:21px}
@@ -454,8 +457,8 @@ function renderCalc(){
   document.getElementById("v2").innerHTML='<div class="ttl">'+L("calcT")+'</div>'+
   '<div class="calc"><div class="ch"><button class="ib" id="chb" aria-label="'+L("calcHist")+'"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
   '<div class="chist" id="chl" hidden></div><div class="disp" id="cdp"><div id="cr"></div><div id="ce">0</div></div><div class="kp">'+
-  [["B",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5m0-5l-5 5" stroke-linecap="round"/></svg>',"fn"],["C","AC","fn"],[":",":","fn"],["÷","÷","op"],
-   ["7","7"],["8","8"],["9","9"],["×","×","op"],["4","4"],["5","5"],["6","6"],["−","−","op"],["1","1"],["2","2"],["3","3"],["+","+","op"],
+  [["B",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5m0-5l-5 5" stroke-linecap="round"/></svg>',"fn"],["C","AC","fn"],["÷","÷","op"],["×","×","op"],
+   ["7","7"],["8","8"],["9","9"],["−","−","op"],["4","4"],["5","5"],["6","6"],["+","+","op"],["1","1"],["2","2"],["3","3"],[":",":","op"],
    ["00","00"],["0","0"],[",",","],["=","=","op"]].map(function(k){return '<button data-k="'+k[0]+'" class="'+(k[2]||"")+'" aria-label="'+(k[0]==="B"?"⌫":k[0])+'">'+k[1]+'</button>'}).join("")+'</div></div>'+
   '<div class="card"><h3>'+L("flightH")+' · '+esc(u.fio)+'</h3><div class="stats"><div><b>'+hm(all)+'</b><small>'+L("total")+'</small></div><div><b>'+hm(mo)+'</b><small>'+L("month")+'</small></div><div><b>'+hm(yr)+'</b><small>'+L("year")+'</small></div></div></div>'+
   '<div class="card"><h3>'+L("addFl")+'</h3><label>'+L("dateL")+'</label><input id="cd" type="date" value="'+iso(now)+'">'+
@@ -463,7 +466,7 @@ function renderCalc(){
   '<label>'+L("manual")+'</label><input id="cm" placeholder="1:25" inputmode="numeric">'+
   '<button class="btn" id="cadd">'+L(u.remote?"cl_send":"add")+'</button>'+(u.remote?'<p class="note">'+L("cl_rnote")+'</p>':'')+'</div>'+
   '<div class="card"><h3>'+L("lastFl")+'</h3>'+(list||'<p>'+L("noRec")+'</p>')+'</div>';
-  updTC();
+  updTC();fitKeys();
 }
 var cx="",cdone=false,OPS="+−×÷",cerr=false;
 /* "h:m" is a time; one digit after ":" is tens of minutes as on a clock (0:1 = 0:10). Plain numbers are hours in +/− and factors in ×/÷. */
@@ -532,13 +535,22 @@ function press(k){
   }
   updTC();
 }
+/* shrink the keys on short screens so all 5 rows fit above the tab bar (never below a 44 px touch target) */
+function fitKeys(){
+  var kp=document.querySelector(".kp");if(!kp||document.getElementById("v2").hidden)return;
+  kp.style.removeProperty("--k");
+  var avail=document.querySelector(".nav").getBoundingClientRect().top-(kp.getBoundingClientRect().top+window.scrollY)-10;
+  var k=Math.max(44,Math.min((kp.clientWidth-36)/4,(avail-48)/5));
+  kp.style.setProperty("--k",Math.floor(k)+"px");
+}
+window.addEventListener("resize",fitKeys);
 function renderHist(){
   var l=document.getElementById("chl");if(!l)return;
   l.innerHTML=CH.length?CH.map(function(h,i){return '<button data-ch="'+i+'">'+esc(h.e)+' = <b>'+esc(h.r)+'</b></button>'}).join(""):'<p style="color:#8e8e93;margin:8px 0">'+L("noRec")+'</p>';
 }
 document.addEventListener("click",function(e){
   var b=e.target.closest("#chb");
-  if(b){var l=document.getElementById("chl");l.hidden=!l.hidden;b.classList.toggle("on",!l.hidden);if(!l.hidden)renderHist();return}
+  if(b){var l=document.getElementById("chl");l.hidden=!l.hidden;b.classList.toggle("on",!l.hidden);if(!l.hidden)renderHist();fitKeys();return}
   var h=e.target.closest("[data-ch]");if(h){var x=CH[+h.getAttribute("data-ch")];if(x){cx=x.r;cdone=true;cerr=false;updTC()}}
 });
 document.addEventListener("click",function(e){var k=e.target.closest("[data-k]");if(k)press(k.getAttribute("data-k"))});
