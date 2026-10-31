@@ -178,6 +178,8 @@ select{width:100%;font-size:16px;padding:13px;border-radius:14px;border:0;backgr
 .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .c{min-width:0;overflow:hidden}
 .c .t,.c .b,.c .s{min-width:0;overflow-wrap:anywhere}
+.pc .rb{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:99px;background:var(--inp);color:var(--mut);font-size:14px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmn{margin:0 0 6px;color:var(--mut);font-size:15px}.rmn b{color:var(--tx)}
 </style>
 </head>
 <body>
@@ -239,7 +241,7 @@ function load(){
   if(!S.n)S.n={};WARN=+S.warn||30;
 }
 function isNat(){return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}
-function save(){try{localStorage.setItem("pilot_v3",JSON.stringify(S))}catch(e){}scheduleNative()}
+function save(){try{localStorage.setItem("pilot_v3",JSON.stringify(S))}catch(e){}scheduleNative();schedulePub()}
 function scheduleNative(){
   var LN=isNat()&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(!LN)return;
   LN.requestPermissions().then(function(p){
@@ -257,7 +259,11 @@ function scheduleNative(){
     });
   }).catch(function(){});
 }
-function cur(){return S.users.filter(function(u){return u.id===S.active})[0]||S.users[0]}
+/* RM: pilots other accounts share with us (read-only, id "r:<owner>:<pilot id>") */
+var RM=[];try{RM=JSON.parse(localStorage.getItem("pilot_remote")||"[]")||[]}catch(e){RM=[]}
+function curL(){return S.users.filter(function(u){return u.id===S.active})[0]||S.users[0]}
+function cur(){if(String(S.active).indexOf("r:")===0){var r=RM.filter(function(u){return u.id===S.active})[0];if(r)return r}return curL()}
+function isR(){return !!cur().remote}
 function items(){return cur().items}
 var I18N={"ru": {"nav1": "Оповещения", "nav2": "Налёт", "nav3": "Настройки", "add": "Добавить", "addUser": "Добавить пользователя", "noDate": "Нет даты", "tapSet": "Нажмите, чтобы указать", "overdue": "Просрочено на {n} дн.", "wasDue": "Срок был {s}", "dueToday": "Срок сегодня", "timeToDo": "Пора проходить", "leftD": "Ещё {n} дн.", "leftM": "Ещё {n} мес.", "until": "до {s}", "sumRed": "🔴 Срок пришёл", "sumOr": "🟠 Скоро срок", "sumGr": "🟢 Всё в норме", "sumGrSub": "Срочных проверок нет", "okN": "Всё в норме", "newItem": "Новый пункт", "name": "Название", "nameEx": "Например: Тренажёр", "iconL": "Иконка (эмодзи)", "every": "Как часто проходить (месяцев)", "lastDate": "Дата последнего прохождения", "doneToday": "✓ Пройдено сегодня", "save": "Сохранить", "delItem": "Удалить пункт", "close": "Закрыть", "delItemQ": "Удалить пункт?", "notifTitle": "✈️ Пора пройти проверку", "dueNowP": "Срок пришёл: ", "dueSoonP": "Скоро срок: ", "enableN": "🔔 Включить уведомления", "allUsers": "Все пользователи ({n})", "newUser": "Новый пользователь", "user": "Пользователь", "fio": "Фамилия Имя Отчество", "fioEx": "Иванов Иван Иванович", "delUser": "Удалить пользователя", "delUserQ": "Удалить пользователя и его проверки?", "delRecQ": "Удалить запись?", "calcT": "🧮 Калькулятор времени", "flightH": "Налёт", "total": "Всего", "month": "За месяц", "year": "За год", "addFl": "Добавить полёт", "dateL": "Дата", "tko": "Взлёт", "ldg": "Посадка", "manual": "Или налёт вручную (ч:мм)", "lastFl": "Последние полёты", "noRec": "Пока нет записей", "fmtErr": "Формат: 1:25", "needFl": "Укажите дату и время полёта", "setT": "⚙️ Настройки и информация", "warnH": "Когда предупреждать", "warnP": "Карточка станет оранжевой за столько дней до срока:", "notifH": "Уведомления", "status": "Статус: ", "nBg": "Работают по расписанию, даже когда приложение закрыто", "nGranted": "Включены", "nDenied": "Запрещены в настройках телефона", "nOff": "Выключены", "nNone": "Не поддерживаются", "nInfo": "Уведомление показывается при открытии приложения для пунктов с оранжевым или красным статусом.", "colorsH": "Цвета", "cG": "Проверка в норме", "cO": "Скоро срок", "cR": "Срок пришёл или просрочен", "aboutH": "О приложении", "aboutP": "Версия 1.0. Все данные хранятся только на этом устройстве, у каждого пользователя свои проверки и налёт.", "reset": "Сбросить все данные", "resetQ": "Удалить всех пользователей, проверки и налёт?", "themeH": "Тема", "tAuto": "Авто", "tDay": "☀️ День", "tNight": "🌙 Ночь", "langH": "Язык", "it_oyap": "ОЯП, ОСП R=50,150,300", "it_crit": "Критический режим", "it_niao": "НИАО", "it_forced": "Вынужденное покидание", "it_vlk": "ВЛК", "it_umo": "УМО"}, "en": {"nav1": "Alerts", "nav2": "Flight time", "nav3": "Settings", "add": "Add", "addUser": "Add user", "noDate": "No date", "tapSet": "Tap to set", "overdue": "Overdue by {n} d", "wasDue": "Was due {s}", "dueToday": "Due today", "timeToDo": "Time to complete", "leftD": "{n} d left", "leftM": "{n} mo left", "until": "until {s}", "sumRed": "🔴 Due now", "sumOr": "🟠 Due soon", "sumGr": "🟢 All good", "sumGrSub": "No urgent checks", "okN": "All good", "newItem": "New item", "name": "Name", "nameEx": "e.g. Simulator", "iconL": "Icon (emoji)", "every": "How often (months)", "lastDate": "Date last completed", "doneToday": "✓ Done today", "save": "Save", "delItem": "Delete item", "close": "Close", "delItemQ": "Delete this item?", "notifTitle": "✈️ Time for a check", "dueNowP": "Due now: ", "dueSoonP": "Due soon: ", "enableN": "🔔 Enable notifications", "allUsers": "All users ({n})", "newUser": "New user", "user": "User", "fio": "Full name", "fioEx": "Smith John", "delUser": "Delete user", "delUserQ": "Delete user and their checks?", "delRecQ": "Delete this entry?", "calcT": "🧮 Time calculator", "flightH": "Flight time", "total": "Total", "month": "This month", "year": "This year", "addFl": "Add flight", "dateL": "Date", "tko": "Takeoff", "ldg": "Landing", "manual": "Or enter time manually (h:mm)", "lastFl": "Recent flights", "noRec": "No entries yet", "fmtErr": "Format: 1:25", "needFl": "Enter date and flight time", "setT": "⚙️ Settings & info", "warnH": "When to warn", "warnP": "The card turns orange this many days before the due date:", "notifH": "Notifications", "status": "Status: ", "nBg": "Scheduled; they work even when the app is closed", "nGranted": "Enabled", "nDenied": "Blocked in phone settings", "nOff": "Off", "nNone": "Not supported", "nInfo": "Shown when you open the app for items that are orange or red.", "colorsH": "Colors", "cG": "Check is fine", "cO": "Due soon", "cR": "Due or overdue", "aboutH": "About", "aboutP": "Version 1.0. All data is stored only on this device; each user has their own checks and flight time.", "reset": "Reset all data", "resetQ": "Delete all users, checks and flight time?", "themeH": "Theme", "tAuto": "Auto", "tDay": "☀️ Day", "tNight": "🌙 Night", "langH": "Language", "it_oyap": "OYaP, OSP R=50,150,300", "it_crit": "Critical mode", "it_niao": "NIAO", "it_forced": "Forced abandonment", "it_vlk": "Medical board (VLK)", "it_umo": "UMO"}, "uz": {"nav1": "Ogohlantirishlar", "nav2": "Uchish vaqti", "nav3": "Sozlamalar", "add": "Qo’shish", "addUser": "Foydalanuvchi qo’shish", "noDate": "Sana yo’q", "tapSet": "Belgilash uchun bosing", "overdue": "{n} kun kechikdi", "wasDue": "Muddat: {s}", "dueToday": "Muddat bugun", "timeToDo": "Topshirish vaqti", "leftD": "{n} kun qoldi", "leftM": "{n} oy qoldi", "until": "{s} gacha", "sumRed": "🔴 Muddat keldi", "sumOr": "🟠 Muddat yaqin", "sumGr": "🟢 Hammasi joyida", "sumGrSub": "Shoshilinch tekshiruv yo’q", "okN": "Hammasi joyida", "newItem": "Yangi band", "name": "Nomi", "nameEx": "Masalan: Trenajyor", "iconL": "Belgi (emoji)", "every": "Necha oyda bir marta (oy)", "lastDate": "Oxirgi topshirilgan sana", "doneToday": "✓ Bugun topshirildi", "save": "Saqlash", "delItem": "Bandni o’chirish", "close": "Yopish", "delItemQ": "Bandni o’chirasizmi?", "notifTitle": "✈️ Tekshiruv vaqti", "dueNowP": "Muddat keldi: ", "dueSoonP": "Muddat yaqin: ", "enableN": "🔔 Bildirishnomalarni yoqish", "allUsers": "Barcha foydalanuvchilar ({n})", "newUser": "Yangi foydalanuvchi", "user": "Foydalanuvchi", "fio": "F.I.Sh.", "fioEx": "Aliyev Ali Aliyevich", "delUser": "Foydalanuvchini o’chirish", "delUserQ": "Foydalanuvchi va uning tekshiruvlari o’chirilsinmi?", "delRecQ": "Yozuv o’chirilsinmi?", "calcT": "🧮 Vaqt kalkulyatori", "flightH": "Uchish vaqti", "total": "Jami", "month": "Shu oy", "year": "Shu yil", "addFl": "Parvoz qo’shish", "dateL": "Sana", "tko": "Uchish", "ldg": "Qo’nish", "manual": "Yoki vaqtni qo’lda kiriting (s:dd)", "lastFl": "So’nggi parvozlar", "noRec": "Hozircha yozuvlar yo’q", "fmtErr": "Format: 1:25", "needFl": "Sana va parvoz vaqtini kiriting", "setT": "⚙️ Sozlamalar va ma’lumot", "warnH": "Qachon ogohlantirish", "warnP": "Karta muddatdan shuncha kun oldin to’q sariq bo’ladi:", "notifH": "Bildirishnomalar", "status": "Holati: ", "nBg": "Jadval bo’yicha ishlaydi, ilova yopiq bo’lsa ham", "nGranted": "Yoqilgan", "nDenied": "Telefon sozlamalarida taqiqlangan", "nOff": "O’chirilgan", "nNone": "Qo’llab-quvvatlanmaydi", "nInfo": "Ilova ochilganda to’q sariq yoki qizil bandlar uchun ko’rsatiladi.", "colorsH": "Ranglar", "cG": "Tekshiruv me’yorda", "cO": "Muddat yaqin", "cR": "Muddat keldi yoki o’tgan", "aboutH": "Ilova haqida", "aboutP": "1.0-versiya. Barcha ma’lumotlar faqat shu qurilmada saqlanadi, har bir foydalanuvchining o’z tekshiruvlari va uchish vaqti bor.", "reset": "Barcha ma’lumotlarni tozalash", "resetQ": "Barcha foydalanuvchilar, tekshiruvlar va uchish vaqti o’chirilsinmi?", "themeH": "Mavzu", "tAuto": "Avto", "tDay": "☀️ Kun", "tNight": "🌙 Tun", "langH": "Til", "it_oyap": "OYaP, OSP R=50,150,300", "it_crit": "Kritik rejim", "it_niao": "NIAO", "it_forced": "Majburiy tark etish", "it_vlk": "Tibbiy komissiya (VLK)", "it_umo": "UMO"}};
 function L(k,v){var s=(I18N[S.lang||"ru"]||I18N.ru)[k];if(s==null)s=I18N.ru[k];if(s==null)s=k;if(v)for(var x in v)s=s.split("{"+x+"}").join(v[x]);return s}
@@ -289,14 +295,16 @@ function render(){
     var s=st(it);if(s.lvl==2)r.push(dn(it));if(s.lvl==1)o.push(dn(it));
     h+='<button class="c '+s.cls+'" data-i="'+i+'"><div class="t"><i>'+esc(it.icon||"📋")+'</i>'+esc(dn(it))+'</div><div><div class="b">'+s.big+'</div><div class="s">'+s.sub+'</div></div></button>';
   });
-  h+='<button class="c add" data-i="new"><span>＋</span>'+L("add")+'</button>';
-  document.getElementById("grid").innerHTML=h;document.getElementById("whoN").textContent="👤 "+cur().fio;
+  if(!isR())h+='<button class="c add" data-i="new"><span>＋</span>'+L("add")+'</button>';
+  document.getElementById("grid").innerHTML=h;document.getElementById("whoN").textContent=(isR()?"☁️ ":"👤 ")+cur().fio;
+  document.getElementById("addTop").style.visibility=isR()?"hidden":"";
   var m=document.getElementById("sum");
   if(r.length)m.innerHTML='<div class="big">'+L("sumRed")+'</div><div class="sub">'+esc(r.join(", "))+'</div>';
   else if(o.length)m.innerHTML='<div class="big">'+L("sumOr")+'</div><div class="sub">'+esc(o.join(", "))+'</div>';
   else m.innerHTML='<div class="big">'+L("sumGr")+'</div><div class="sub">'+L("sumGrSub")+'</div>';
 }
 function openSheet(i){
+  if(isR()){if(i!=="new")openRemoteItem(i);return}
   editing=i;var it=i==="new"?{name:"",icon:"📋",months:6,date:""}:items()[i];
   document.getElementById("sheet").innerHTML='<h2>'+(i==="new"?L("newItem"):esc(dn(it)))+'</h2>'+
   '<label>'+L("name")+'</label><input id="fn" value="'+esc(dn(it))+'" placeholder="'+L("nameEx")+'">'+
@@ -345,18 +353,19 @@ function renderN(){
 }
 function planeIc(i){i=+i;return ICONS[(i>=0&&i<ICONS.length)?i:0]}
 function renderUsers(){
-  document.getElementById("uT").textContent=L("allUsers",{n:S.users.length});
+  document.getElementById("uT").textContent=L("allUsers",{n:S.users.length+RM.length});
   var mb=document.getElementById("menuBtn");if(mb)mb.setAttribute("aria-label",L("pilotsBtn"));
-  document.getElementById("ul").innerHTML=S.users.map(function(u){
+  document.getElementById("ul").innerHTML=S.users.concat(RM).map(function(u){
     var c=counts(u),p=String(u.fio||"").trim().split(/\s+/),l1=p[0]||"",l2=p.slice(1).join(" ");
     var sub=c.r?'<span class="dot r"></span>'+L("dueNowP")+c.r:c.o?'<span class="dot o"></span>'+L("dueSoonP")+c.o:'<span class="dot g"></span>'+L("okN");
     var cs=String(u.call||"").trim(),id=esc(u.id);
-    return '<div class="pc'+(u.id===S.active?' act':'')+'" role="button" tabindex="0" data-u="'+id+'">'+
-      '<div class="ph"><div class="pi">'+planeIc(u.ic)+'</div><div class="pt"><div class="pn"><span>'+esc(l1)+'</span><span>'+(l2?esc(l2):"&nbsp;")+'</span></div><div class="pst">'+sub+'</div></div></div>'+
-      '<button class="um" data-um="'+id+'" aria-label="✎">✎</button>'+
+    return '<div class="pc'+(u.id===S.active?' act':'')+(u.remote?' rm':'')+'" role="button" tabindex="0" data-u="'+id+'">'+
+      '<div class="ph"><div class="pi">'+planeIc(u.ic)+'</div><div class="pt"><div class="pn"><span>'+esc(l1)+'</span><span>'+(l2?esc(l2):"&nbsp;")+'</span></div><div class="pst">'+sub+'</div>'+
+      (u.remote?'<div class="rb">☁️ @'+esc(u.uname)+'</div>':'')+'</div></div>'+
+      (u.remote?'':'<button class="um" data-um="'+id+'" aria-label="✎">✎</button>')+
       YAK+
       '<div class="pb"><div class="cs'+(cs?'':' no')+'">'+(cs?esc(cs):esc(L("noCall")))+'</div>'+
-      (S.users.length>1?'<button class="mv" data-mv="'+id+'" aria-label="'+esc(L("moveT"))+'">'+SORT_IC+'</button>':'')+'</div></div>';
+      (!u.remote&&S.users.length>1?'<button class="mv" data-mv="'+id+'" aria-label="'+esc(L("moveT"))+'">'+SORT_IC+'</button>':'')+'</div></div>';
   }).join("");
 }
 function readUx(){var e=document.getElementById("ucs");return{call:e?e.value.trim().slice(0,20):"",ic:editIc}}
@@ -404,7 +413,7 @@ function renderCalc(){
   var now=new Date(),ym=iso(now).slice(0,7),y=String(now.getFullYear()),all=0,mo=0,yr=0;
   u.flights.forEach(function(f){all+=f.min;if(f.date.slice(0,7)===ym)mo+=f.min;if(f.date.slice(0,4)===y)yr+=f.min});
   var list=u.flights.map(function(f,i){return{f:f,i:i}}).sort(function(a,b){return a.f.date<b.f.date?1:-1}).slice(0,30).map(function(x){
-    return '<div class="fl"><div><b>'+hm(x.f.min)+'</b><small>'+fmt(parse(x.f.date))+(x.f.off?' · '+x.f.off+'–'+x.f.on:'')+'</small></div><button data-fd="'+x.i+'" aria-label="Удалить">✕</button></div>'}).join("");
+    return '<div class="fl"><div><b>'+hm(x.f.min)+'</b><small>'+fmt(parse(x.f.date))+(x.f.off?' · '+x.f.off+'–'+x.f.on:'')+'</small></div>'+(u.remote?'':'<button data-fd="'+x.i+'" aria-label="Удалить">✕</button>')+'</div>'}).join("");
   document.getElementById("v2").innerHTML='<div class="ttl">'+L("calcT")+'</div>'+
   '<div class="card"><div class="disp"><div id="cr"></div><div id="ce">0</div></div><div class="kp">'+
   [["C","C","fn"],["B","⌫","fn"],["÷","÷","op"],["×","×","op"],["7","7"],["8","8"],["9","9"],["−","−","op"],["4","4"],["5","5"],["6","6"],["+","+","op"],["1","1"],["2","2"],["3","3"],[":",":"],["0","0"],["00","00"],["=","=","eq"]].map(function(k){return '<button data-k="'+k[0]+'" class="'+(k[2]||"")+'">'+k[1]+'</button>'}).join("")+'</div></div>'+
@@ -412,7 +421,7 @@ function renderCalc(){
   '<div class="card"><h3>'+L("addFl")+'</h3><label>'+L("dateL")+'</label><input id="cd" type="date" value="'+iso(now)+'">'+
   '<div class="two"><div><label>'+L("tko")+'</label><input id="co" type="time"></div><div><label>'+L("ldg")+'</label><input id="cn" type="time"></div></div>'+
   '<label>'+L("manual")+'</label><input id="cm" placeholder="1:25" inputmode="numeric">'+
-  '<button class="btn" id="cadd">'+L("add")+'</button></div>'+
+  '<button class="btn" id="cadd">'+L(u.remote?"cl_send":"add")+'</button>'+(u.remote?'<p class="note">'+L("cl_rnote")+'</p>':'')+'</div>'+
   '<div class="card"><h3>'+L("lastFl")+'</h3>'+(list||'<p>'+L("noRec")+'</p>')+'</div>';
   updTC();
 }
@@ -466,7 +475,9 @@ function addFlight(){
   else if(o&&n){var a=tm(o),b=tm(n);min=b-a;if(min<0)min+=1440}
   if(!d||!min||min<=0){alert(L("needFl"));return}
   var f={date:d,min:min};if(!m){f.off=o;f.on=n}
-  var u=cur();if(!u.flights)u.flights=[];u.flights.push(f);save();renderCalc();
+  var u=cur();
+  if(u.remote){f.k="flight";f.pid=u.pid;pushRec(u.owner,f,true);return}
+  if(!u.flights)u.flights=[];u.flights.push(f);save();renderCalc();
 }
 function renderSet(){
   var np=canN()?Notification.permission:"none",nt=isNat()?L("nBg"):{granted:L("nGranted"),denied:L("nDenied"),"default":L("nOff"),none:L("nNone")}[np];
@@ -535,15 +546,18 @@ document.addEventListener("keydown",function(e){
 /* ===== cloud: accounts and shared access (Supabase) ===== */
 var SB_URL="https://ljbxptaahqdvpzrbqtpp.supabase.co",
 SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqYnhwdGFhaHFkdnB6cmJxdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTA4NTEsImV4cCI6MjEwODk4Njg1MX0.JumMW6-5H0YeCMh5dtxtbk3wXgqQYvNLktPTaCWTQdM";
-var sb=null,K={s:null,names:{},grants:[],box:[],msg:"",mode:"in",f:{},busy:false,sig:"",addTo:null,addType:"flight"};
+var sb=null,K={s:null,names:{},grants:[],box:[],msg:"",mode:"in",f:{},busy:false,sig:"",addTo:null,addType:"flight",pubSig:"",pubT:null};
 var CK=["oyap","crit","niao","forced","vlk","umo"];
 var KT={
 ru:{cl_title:"☁️ Аккаунт и совместный доступ",cl_off:"Нет связи с сервером. Проверьте интернет.",cl_in:"Войти",cl_up:"Регистрация",cl_email:"Email",cl_pass:"Пароль (от 8 символов)",cl_user:"Username (a–z, 0–9, _; 3–20 символов)",cl_out:"Выйти",cl_signed:"Вы вошли как",cl_need:"Заполните email и пароль",cl_baduser:"Username: a–z, 0–9, _; 3–20 символов",cl_shortpw:"Пароль не короче 8 символов",cl_err_user:"Username занят или недопустим",cl_confirm:"Письмо отправлено. Подтвердите email и войдите.",cl_reqH:"Запросить доступ",cl_reqP:"Введите username человека, в профиль которого хотите добавлять данные. Он должен подтвердить запрос.",cl_reqBtn:"Отправить запрос",cl_reqDone:"Запрос отправлен, если такой пользователь существует.",cl_many:"Слишком много неотвеченных запросов",cl_inH:"Кто может добавлять данные вам",cl_pend:"хочет добавлять данные в ваш профиль",cl_acc:"Принять",cl_dec:"Отклонить",cl_okAcc:"может добавлять данные",cl_rev:"Отозвать",cl_none:"Пока никого",cl_outH:"Кому вы можете добавлять данные",cl_wait:"ждёт подтверждения",cl_cancel:"Отменить",cl_add:"Добавить данные",cl_revd:"доступ отозван",cl_boxH:"Входящие записи",cl_apply:"Принять",cl_to:"в профиль «{n}»",cl_flight:"Налёт",cl_check:"Проверка",cl_type:"Тип записи",cl_checkL:"Проверка",cl_send:"Отправить",cl_sent:"Запись отправлена",cl_denied:"Запись не принята: нет доступа",cl_baddate:"Укажите дату",cl_noitem:"В этом профиле нет такой проверки",cl_from:"от",
-aboutP:"Версия 2.0. Ваши проверки и налёт хранятся на этом устройстве. На сервер попадают только аккаунт, запросы доступа и записи, которые пользователи отправляют друг другу."},
+cl_rnote:"Изменение уйдёт владельцу профиля во «Входящие записи». Он должен его принять.",cl_shared:"видит ваших пилотов и может отправлять записи",
+aboutP:"Версия 2.1. Ваши проверки и налёт хранятся на этом устройстве. На сервер попадают аккаунт, запросы доступа и записи, которые пользователи отправляют друг другу. Если вы приняли чей-то запрос доступа, этот человек видит ваших пилотов, проверки и налёт."},
 en:{cl_title:"☁️ Account and shared access",cl_off:"Can’t reach the server. Check your connection.",cl_in:"Sign in",cl_up:"Sign up",cl_email:"Email",cl_pass:"Password (8+ characters)",cl_user:"Username (a–z, 0–9, _; 3–20 chars)",cl_out:"Sign out",cl_signed:"Signed in as",cl_need:"Enter email and password",cl_baduser:"Username: a–z, 0–9, _; 3–20 characters",cl_shortpw:"Password must be at least 8 characters",cl_err_user:"Username is taken or not allowed",cl_confirm:"Email sent. Confirm it, then sign in.",cl_reqH:"Request access",cl_reqP:"Enter the username of the person whose profile you want to add data to. They must approve the request.",cl_reqBtn:"Send request",cl_reqDone:"Request sent, if that user exists.",cl_many:"Too many unanswered requests",cl_inH:"Who can add data to your profile",cl_pend:"wants to add data to your profile",cl_acc:"Accept",cl_dec:"Decline",cl_okAcc:"can add data",cl_rev:"Revoke",cl_none:"Nobody yet",cl_outH:"Whose profile you can add data to",cl_wait:"waiting for approval",cl_cancel:"Cancel",cl_add:"Add data",cl_revd:"access revoked",cl_boxH:"Incoming entries",cl_apply:"Accept",cl_to:"into “{n}”",cl_flight:"Flight time",cl_check:"Check",cl_type:"Entry type",cl_checkL:"Check",cl_send:"Send",cl_sent:"Entry sent",cl_denied:"Entry rejected: no access",cl_baddate:"Enter a date",cl_noitem:"This profile has no such check",cl_from:"from",
-aboutP:"Version 2.0. Your checks and flight time are stored on this device. Only your account, access requests and entries users send to each other go to the server."},
+cl_rnote:"The change goes to the profile owner’s Incoming entries. They must accept it.",cl_shared:"sees your pilots and can send entries",
+aboutP:"Version 2.1. Your checks and flight time are stored on this device. Your account, access requests and entries users send to each other go to the server. If you accept someone’s access request, they can see your pilots, checks and flight time."},
 uz:{cl_title:"☁️ Akkaunt va umumiy kirish",cl_off:"Serverga ulanib bo’lmadi. Internetni tekshiring.",cl_in:"Kirish",cl_up:"Ro’yxatdan o’tish",cl_email:"Email",cl_pass:"Parol (kamida 8 belgi)",cl_user:"Username (a–z, 0–9, _; 3–20 belgi)",cl_out:"Chiqish",cl_signed:"Siz kirgansiz:",cl_need:"Email va parolni kiriting",cl_baduser:"Username: a–z, 0–9, _; 3–20 belgi",cl_shortpw:"Parol kamida 8 belgidan iborat bo’lsin",cl_err_user:"Username band yoki yaroqsiz",cl_confirm:"Xat yuborildi. Emailni tasdiqlab, keyin kiring.",cl_reqH:"Kirish so’rash",cl_reqP:"Profiliga ma’lumot qo’shmoqchi bo’lgan odamning username’ini kiriting. U so’rovni tasdiqlashi kerak.",cl_reqBtn:"So’rov yuborish",cl_reqDone:"Agar bunday foydalanuvchi mavjud bo’lsa, so’rov yuborildi.",cl_many:"Javobsiz so’rovlar juda ko’p",cl_inH:"Kim sizga ma’lumot qo’sha oladi",cl_pend:"profilingizga ma’lumot qo’shmoqchi",cl_acc:"Qabul qilish",cl_dec:"Rad etish",cl_okAcc:"ma’lumot qo’sha oladi",cl_rev:"Bekor qilish",cl_none:"Hozircha hech kim",cl_outH:"Kimga ma’lumot qo’sha olasiz",cl_wait:"tasdiqlanishini kutmoqda",cl_cancel:"Bekor qilish",cl_add:"Ma’lumot qo’shish",cl_revd:"kirish bekor qilingan",cl_boxH:"Kiruvchi yozuvlar",cl_apply:"Qabul qilish",cl_to:"«{n}» profiliga",cl_flight:"Uchish vaqti",cl_check:"Tekshiruv",cl_type:"Yozuv turi",cl_checkL:"Tekshiruv",cl_send:"Yuborish",cl_sent:"Yozuv yuborildi",cl_denied:"Yozuv qabul qilinmadi: kirish yo’q",cl_baddate:"Sanani kiriting",cl_noitem:"Bu profilda bunday tekshiruv yo’q",cl_from:"kimdan",
-aboutP:"2.0-versiya. Tekshiruv va uchish vaqti shu qurilmada saqlanadi. Serverga faqat akkaunt, kirish so’rovlari va foydalanuvchilar bir-biriga yuboradigan yozuvlar tushadi."}
+cl_rnote:"O’zgarish profil egasining «Kiruvchi yozuvlar» bo’limiga boradi. U uni qabul qilishi kerak.",cl_shared:"uchuvchilaringizni ko’radi va yozuv yubora oladi",
+aboutP:"2.1-versiya. Tekshiruv va uchish vaqti shu qurilmada saqlanadi. Serverga akkaunt, kirish so’rovlari va foydalanuvchilar bir-biriga yuboradigan yozuvlar tushadi. Kimningdir kirish so’rovini qabul qilsangiz, u uchuvchilaringiz, tekshiruvlar va uchish vaqtini ko’radi."}
 };
 for(var kl in KT)Object.assign(I18N[kl],KT[kl]);
 
@@ -552,11 +566,82 @@ function val(id){var e=document.getElementById(id);return e?e.value:""}
 function okDate(s){return typeof s==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(parse(s))===s}
 function okRec(p){
   if(!p||typeof p!=="object")return false;
+  if(p.pid!=null&&!(typeof p.pid==="string"&&p.pid.length<=40))return false;
   if(p.k==="flight")return okDate(p.date)&&Number.isInteger(p.min)&&p.min>0&&p.min<=1440;
-  if(p.k==="check")return okDate(p.date)&&CK.indexOf(p.id)>=0;
+  if(p.k==="check")return okDate(p.date)&&(CK.indexOf(p.id)>=0||/^x\d{1,16}$/.test(p.id));
   return false;
 }
-function recText(p){return p.k==="flight"?L("cl_flight")+" "+hm(p.min)+" · "+fmt(parse(p.date)):L("it_"+p.id)+" — "+fmt(parse(p.date))}
+/* local pilot an incoming entry is meant for: the one it names, else the selected local pilot */
+function tgt(p){return S.users.filter(function(u){return u.id===p.pid})[0]||curL()}
+function recText(p){
+  if(p.k==="flight")return L("cl_flight")+" "+hm(p.min)+" · "+fmt(parse(p.date));
+  var it=tgt(p).items.filter(function(x){return x.id===p.id})[0];
+  return (it?dn(it):L("it_"+p.id))+" — "+fmt(parse(p.date));
+}
+function pushRec(owner,p,isFlight){
+  if(!sb||!K.s){alert(L("cl_off"));return}
+  sb.from("user_data").insert({owner_id:owner,added_by:K.s.user.id,payload:p}).then(function(r){
+    if(r.error){alert(L("cl_denied"));return}
+    close();alert(L("cl_sent"));if(isFlight)renderCalc();
+  },function(){alert(L("cl_off"))});
+}
+function openRemoteItem(i){
+  var u=cur(),it=u.items[i];if(!it)return;editing=i;
+  var s=st(it);
+  document.getElementById("sheet").innerHTML='<h2>'+esc(dn(it))+'</h2>'+
+  '<p class="rmn">☁️ @'+esc(u.uname)+' · '+esc(u.fio)+'</p><p class="rmn"><b>'+s.big+'</b> · '+s.sub+'</p>'+
+  '<label>'+L("lastDate")+'</label><input id="fd" type="date" value="'+esc(it.date)+'">'+
+  '<button class="btn" data-cx="rsend" data-cv="today">'+L("doneToday")+'</button>'+
+  '<button class="btn sec" data-cx="rsend">'+L("cl_send")+'</button>'+
+  '<p class="note">'+L("cl_rnote")+'</p>'+
+  '<button class="btn sec" id="bc">'+L("close")+'</button>';
+  document.getElementById("ov").classList.add("on");
+}
+function sendRemoteItem(today){
+  var u=cur(),it=u.remote&&u.items[editing];if(!it)return;
+  var p={k:"check",id:it.id,date:today?iso(new Date()):val("fd"),pid:u.pid};
+  if(!okRec(p)){alert(L("cl_baddate"));return}
+  pushRec(u.owner,p,false);
+}
+/* what other accounts see of us: pilots with checks and flights, no settings */
+function pubData(){
+  return{v:1,pilots:S.users.map(function(u){return{id:u.id,fio:u.fio,call:u.call||"",ic:+u.ic||0,
+    items:u.items.map(function(it){return{id:it.id,name:it.name,icon:it.icon||"",months:+it.months||6,date:it.date||""}}),
+    flights:(u.flights||[]).slice(-1000)}})};
+}
+function schedulePub(){
+  if(typeof K==="undefined"||!K||!K.s)return;
+  clearTimeout(K.pubT);K.pubT=setTimeout(publish,1500);
+}
+async function publish(){
+  if(!sb||!K.s)return;
+  var me=K.s.user.id,shared=K.grants.some(function(g){return g.owner_id===me&&g.status==="accepted"});
+  var data=shared?pubData():null,sig=shared?JSON.stringify(data):"none";
+  if(sig===K.pubSig)return;
+  try{
+    var r=shared?await sb.from("shared_state").upsert({owner_id:me,data:data,updated_at:new Date().toISOString()})
+                :await sb.from("shared_state").delete().eq("owner_id",me);
+    if(!r.error)K.pubSig=sig;
+  }catch(e){}
+}
+/* data from other accounts is untrusted: keep only well-formed fields */
+function cleanR(owner,p){
+  if(!p||typeof p!=="object"||typeof p.id!=="string"||!Array.isArray(p.items))return null;
+  function str(v,n){return typeof v==="string"?v.slice(0,n):""}
+  var items=p.items.slice(0,100).filter(function(it){return it&&typeof it.id==="string"&&it.id.length<=40}).map(function(it){
+    var m=Math.round(+it.months);return{id:it.id,name:str(it.name,80)||"—",icon:str(it.icon,8),months:m>=1&&m<=60?m:6,date:okDate(it.date)?it.date:""}});
+  var fl=(Array.isArray(p.flights)?p.flights:[]).slice(-1000).filter(function(f){return f&&okDate(f.date)&&Number.isInteger(f.min)&&f.min>0&&f.min<=1440}).map(function(f){
+    var o={date:f.date,min:f.min};if(/^\d\d:\d\d$/.test(f.off||"")&&/^\d\d:\d\d$/.test(f.on||"")){o.off=f.off;o.on=f.on}return o});
+  return{id:"r:"+owner+":"+p.id.slice(0,40),remote:true,owner:owner,uname:nm(owner),pid:p.id.slice(0,40),
+    fio:str(p.fio,80)||"?",call:str(p.call,20),ic:Math.max(0,Math.min(ICONS.length-1,Math.round(+p.ic)||0)),items:items,flights:fl};
+}
+function setRM(rm){
+  if(JSON.stringify(rm)===JSON.stringify(RM))return;
+  RM=rm;try{localStorage.setItem("pilot_remote",JSON.stringify(RM))}catch(e){}
+  if(String(S.active).indexOf("r:")===0&&!RM.some(function(u){return u.id===S.active})){S.active=S.users[0].id;save()}
+  render();if(document.getElementById("uv").classList.contains("on"))renderUsers();
+  if(!document.getElementById("v2").hidden)renderCalc();
+}
 function rerenderSet(force){
   var v=document.getElementById("v3");if(!v||v.hidden)return;
   var a=document.activeElement;
@@ -588,7 +673,7 @@ function cloudHTML(){
     var inc=K.grants.filter(function(g){return g.owner_id===me&&g.status!=="revoked"});
     h+='<h3 class="kh">'+L("cl_inH")+'</h3>'+(inc.length?inc.map(function(g){
       var pend=g.status==="pending";
-      return '<div class="kr"><div><b>@'+esc(nm(g.grantee_id))+'</b><small>'+L(pend?"cl_pend":"cl_okAcc")+'</small></div>'+
+      return '<div class="kr"><div><b>@'+esc(nm(g.grantee_id))+'</b><small>'+L(pend?"cl_pend":"cl_shared")+'</small></div>'+
         (pend?'<button class="ok" data-cx="acc" data-cv="'+esc(g.grantee_id)+'">'+L("cl_acc")+'</button><button data-cx="dec" data-cv="'+esc(g.grantee_id)+'">'+L("cl_dec")+'</button>'
              :'<button data-cx="rev" data-cv="'+esc(g.grantee_id)+'">'+L("cl_rev")+'</button>')+'</div>';
     }).join(""):'<p>'+L("cl_none")+'</p>');
@@ -602,7 +687,7 @@ function cloudHTML(){
     if(K.box.length){
       h+='<h3 class="kh">'+L("cl_boxH")+'</h3>'+K.box.map(function(r){
         var ok=okRec(r.payload);
-        return '<div class="kr"><div><b>'+(ok?esc(recText(r.payload)):'—')+'</b><small>'+L("cl_from")+' @'+esc(nm(r.added_by))+' · '+esc(L("cl_to",{n:cur().fio}))+'</small></div>'+
+        return '<div class="kr"><div><b>'+(ok?esc(recText(r.payload)):'—')+'</b><small>'+L("cl_from")+' @'+esc(nm(r.added_by))+' · '+esc(L("cl_to",{n:ok?tgt(r.payload).fio:curL().fio}))+'</small></div>'+
           (ok?'<button class="ok" data-cx="apply" data-cv="'+r.id+'">'+L("cl_apply")+'</button>':'')+'<button data-cx="drop" data-cv="'+r.id+'" aria-label="✕">✕</button></div>';
       }).join("");
     }
@@ -629,6 +714,17 @@ async function refreshCloud(force){
     var names={};rs[0].data.forEach(function(p){names[p.id]=p.username});
     K.names=names;K.grants=rs[1].data;K.box=rs[2].data;
     if(K.msg===L("cl_off"))K.msg="";
+    var acc={};K.grants.forEach(function(g){if(g.grantee_id===me&&g.status==="accepted")acc[g.owner_id]=1});
+    var ss=await sb.from("shared_state").select("owner_id,data");
+    if(!ss.error){
+      var rm=[];
+      ss.data.forEach(function(row){
+        if(!acc[row.owner_id]||!row.data||!Array.isArray(row.data.pilots))return;
+        row.data.pilots.slice(0,50).forEach(function(p){var x=cleanR(row.owner_id,p);if(x)rm.push(x)});
+      });
+      setRM(rm);
+    }
+    publish();
   }catch(e){K.msg=L("cl_off");force=true}
   var sig=JSON.stringify([K.names,K.grants,K.box,K.msg]);
   badge();
@@ -704,7 +800,7 @@ async function sendRec(){
 async function applyRec(id){
   var r=K.box.filter(function(x){return x.id===id})[0];
   if(!r||!okRec(r.payload))return;
-  var u=cur(),p=r.payload,it=null;
+  var p=r.payload,u=tgt(p),it=null;
   if(p.k==="check"){it=u.items.filter(function(x){return x.id===p.id})[0];if(!it){alert(L("cl_noitem"));return}}
   try{
     var dl=await sb.from("user_data").delete().eq("id",id);
@@ -741,6 +837,7 @@ document.addEventListener("click",function(e){
   else if(x==="drop")dropRec(+v);
   else if(x==="sendk")sendRec();
   else if(x==="kclose")close();
+  else if(x==="rsend")sendRemoteItem(v==="today");
 });
 function initCloud(){
   if(!window.supabase||!supabase.createClient)return;
@@ -749,7 +846,7 @@ function initCloud(){
     K.s=s;K.sig="";
     setTimeout(function(){
       if(s)refreshCloud(true);
-      else{K.names={};K.grants=[];K.box=[];badge();rerenderSet(true)}
+      else{K.names={};K.grants=[];K.box=[];K.pubSig="";setRM([]);badge();rerenderSet(true)}
     },0);
   });
   setInterval(function(){if(!document.hidden)refreshCloud(false)},60000);
