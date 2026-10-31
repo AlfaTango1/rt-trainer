@@ -452,20 +452,13 @@ function renderCalc(){
   var u=cur();if(!u.flights)u.flights=[];
   var now=new Date(),ym=iso(now).slice(0,7),y=String(now.getFullYear()),all=0,mo=0,yr=0;
   u.flights.forEach(function(f){all+=f.min;if(f.date.slice(0,7)===ym)mo+=f.min;if(f.date.slice(0,4)===y)yr+=f.min});
-  var list=u.flights.map(function(f,i){return{f:f,i:i}}).sort(function(a,b){return a.f.date<b.f.date?1:-1}).slice(0,30).map(function(x){
-    return '<div class="fl"><div><b>'+hm(x.f.min)+'</b><small>'+fmt(parse(x.f.date))+(x.f.off?' · '+x.f.off+'–'+x.f.on:'')+'</small></div>'+(u.remote?'':'<button data-fd="'+x.i+'" aria-label="Удалить">✕</button>')+'</div>'}).join("");
   document.getElementById("v2").innerHTML='<div class="ttl">'+L("calcT")+'</div>'+
   '<div class="calc"><div class="ch"><button class="ib" id="chb" aria-label="'+L("calcHist")+'"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
   '<div class="chist" id="chl" hidden></div><div class="disp" id="cdp"><div id="cr"></div><div id="ce">0</div></div><div class="kp">'+
   [["B",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5m0-5l-5 5" stroke-linecap="round"/></svg>',"fn"],["C","AC","fn"],["÷","÷","op"],["×","×","op"],
    ["7","7"],["8","8"],["9","9"],["−","−","op"],["4","4"],["5","5"],["6","6"],["+","+","op"],["1","1"],["2","2"],["3","3"],[":",":","op"],
    ["00","00"],["0","0"],[",",","],["=","=","op"]].map(function(k){return '<button data-k="'+k[0]+'" class="'+(k[2]||"")+'" aria-label="'+(k[0]==="B"?"⌫":k[0])+'">'+k[1]+'</button>'}).join("")+'</div></div>'+
-  '<div class="card"><h3>'+L("flightH")+' · '+esc(u.fio)+'</h3><div class="stats"><div><b>'+hm(all)+'</b><small>'+L("total")+'</small></div><div><b>'+hm(mo)+'</b><small>'+L("month")+'</small></div><div><b>'+hm(yr)+'</b><small>'+L("year")+'</small></div></div></div>'+
-  '<div class="card"><h3>'+L("addFl")+'</h3><label>'+L("dateL")+'</label><input id="cd" type="date" value="'+iso(now)+'">'+
-  '<div class="two"><div><label>'+L("tko")+'</label><input id="co" type="time"></div><div><label>'+L("ldg")+'</label><input id="cn" type="time"></div></div>'+
-  '<label>'+L("manual")+'</label><input id="cm" placeholder="1:25" inputmode="numeric">'+
-  '<button class="btn" id="cadd">'+L(u.remote?"cl_send":"add")+'</button>'+(u.remote?'<p class="note">'+L("cl_rnote")+'</p>':'')+'</div>'+
-  '<div class="card"><h3>'+L("lastFl")+'</h3>'+(list||'<p>'+L("noRec")+'</p>')+'</div>';
+  '<div class="card"><h3>'+L("flightH")+' · '+esc(u.fio)+'</h3><div class="stats"><div><b>'+hm(all)+'</b><small>'+L("total")+'</small></div><div><b>'+hm(mo)+'</b><small>'+L("month")+'</small></div><div><b>'+hm(yr)+'</b><small>'+L("year")+'</small></div></div></div>';
   updTC();fitKeys();
 }
 var cx="",cdone=false,OPS="+−×÷",cerr=false;
