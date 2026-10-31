@@ -175,3 +175,16 @@ revoke all on function public.username_available(text) from public;
 grant execute on function public.username_available(text) to anon, authenticated;
 
 revoke all on function public.handle_new_user() from public, anon, authenticated;
+
+-- ---------- backups: private cloud copy of each account's own data (migration "backups") ----------
+create table public.backups (
+  owner_id   uuid primary key references public.profiles(id) on delete cascade,
+  data       jsonb not null,
+  updated_at timestamptz not null default now(),
+  constraint backups_size check (pg_column_size(data) < 1000000)
+);
+alter table public.backups enable row level security;
+create policy "backups: owner only" on public.backups
+  for all to authenticated
+  using ((select auth.uid()) = owner_id)
+  with check ((select auth.uid()) = owner_id);
