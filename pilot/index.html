@@ -449,16 +449,12 @@ function pad(n){return String(n).padStart(2,"0")}
 function hm(m){return Math.floor(m/60)+":"+pad(m%60)}
 function tm(v){var p=(v||"").split(":");return p.length==2?(+p[0])*60+(+p[1]):null}
 function renderCalc(){
-  var u=cur();if(!u.flights)u.flights=[];
-  var now=new Date(),ym=iso(now).slice(0,7),y=String(now.getFullYear()),all=0,mo=0,yr=0;
-  u.flights.forEach(function(f){all+=f.min;if(f.date.slice(0,7)===ym)mo+=f.min;if(f.date.slice(0,4)===y)yr+=f.min});
   document.getElementById("v2").innerHTML='<div class="ttl">'+L("calcT")+'</div>'+
   '<div class="calc"><div class="ch"><button class="ib" id="chb" aria-label="'+L("calcHist")+'"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
   '<div class="chist" id="chl" hidden></div><div class="disp" id="cdp"><div id="cr"></div><div id="ce">0</div></div><div class="kp">'+
   [["B",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5m0-5l-5 5" stroke-linecap="round"/></svg>',"fn"],["C","AC","fn"],["÷","÷","op"],["×","×","op"],
    ["7","7"],["8","8"],["9","9"],["−","−","op"],["4","4"],["5","5"],["6","6"],["+","+","op"],["1","1"],["2","2"],["3","3"],[":",":","op"],
-   ["00","00"],["0","0"],[",",","],["=","=","op"]].map(function(k){return '<button data-k="'+k[0]+'" class="'+(k[2]||"")+'" aria-label="'+(k[0]==="B"?"⌫":k[0])+'">'+k[1]+'</button>'}).join("")+'</div></div>'+
-  '<div class="card"><h3>'+L("flightH")+' · '+esc(u.fio)+'</h3><div class="stats"><div><b>'+hm(all)+'</b><small>'+L("total")+'</small></div><div><b>'+hm(mo)+'</b><small>'+L("month")+'</small></div><div><b>'+hm(yr)+'</b><small>'+L("year")+'</small></div></div></div>';
+   ["00","00"],["0","0"],[",",","],["=","=","op"]].map(function(k){return '<button data-k="'+k[0]+'" class="'+(k[2]||"")+'" aria-label="'+(k[0]==="B"?"⌫":k[0])+'">'+k[1]+'</button>'}).join("")+'</div></div>';
   updTC();fitKeys();
 }
 var cx="",cdone=false,OPS="+−×÷",cerr=false;
