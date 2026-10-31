@@ -1,7 +1,9 @@
-var C="pilot-v7",F=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","icon-180.png","logo.webp","qr.js","jsqr.js"];
+// Pilot offline support: only this app's own files are cached; online sync requests (Supabase) always go straight to the network.
+var C="pilot-v8",F=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","icon-180.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(F)}));self.skipWaiting()});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x.indexOf("pilot-")===0&&x!==C}).map(function(x){return caches.delete(x)}))}));self.clients.claim()});
 self.addEventListener("fetch",function(e){
-  if(e.request.method!=="GET")return;
-  e.respondWith(fetch(e.request).then(function(r){var cp=r.clone();caches.open(C).then(function(c){c.put(e.request,cp)});return r}).catch(function(){return caches.match(e.request).then(function(m){return m||caches.match("index.html")})}));
+  var u=new URL(e.request.url);
+  if(e.request.method!=="GET"||u.origin!==location.origin)return;
+  e.respondWith(fetch(e.request).then(function(r){if(r.ok){var cp=r.clone();caches.open(C).then(function(c){c.put(e.request,cp)})}return r}).catch(function(){return caches.match(e.request).then(function(m){return m||caches.match("index.html")})}));
 });
