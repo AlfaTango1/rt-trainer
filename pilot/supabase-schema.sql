@@ -130,9 +130,10 @@ create policy "shared_state: accepted grantee reads" on public.shared_state
   ));
 
 -- ---------- functions called by the app ----------
--- ask for access by username; says nothing about whether the username exists
+-- ask for access by username; returns 'ok', 'not_found' or 'self' so the app can tell a typo apart
+-- (username_available() already answers whether a name is taken, so this reveals nothing new)
 create function public.request_access(p_username text)
-returns void
+returns text
 language plpgsql
 security definer
 set search_path = ''
@@ -148,14 +149,18 @@ begin
     raise exception 'too many unanswered requests';
   end if;
   select id into target from public.profiles where lower(username) = lower(trim(p_username));
-  if target is null or target = me then
-    return;
+  if target is null then
+    return 'not_found';
+  end if;
+  if target = me then
+    return 'self';
   end if;
   insert into public.access_grants (owner_id, grantee_id)
   values (target, me)
   on conflict (owner_id, grantee_id) do update
     set status = 'pending'
     where public.access_grants.status = 'revoked';
+  return 'ok';
 end;
 $$;
 revoke all on function public.request_access(text) from public, anon;
