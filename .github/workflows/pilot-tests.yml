@@ -1,0 +1,24 @@
+# Runs pilot/tests.html in headless Chrome on every change to the Pilot app.
+# A red cross on the commit in GitHub means a check of the app logic broke.
+name: Pilot tests
+
+on:
+  push:
+    paths: ['pilot/**', '.github/workflows/pilot-tests.yml']
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the tests in headless Chrome
+        run: |
+          python3 -m http.server 8000 >/dev/null 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=30000 \
+            --dump-dom "http://localhost:8000/pilot/tests.html" > out.html
+          grep -o '<h1 id="result"[^>]*>[^<]*' out.html | sed 's/.*>//'
+          sed -n '/<pre id="out">/,/<\/pre>/p' out.html | sed 's/<[^>]*>//g'
+          grep -q '<h1 id="result"[^>]*>PASS' out.html

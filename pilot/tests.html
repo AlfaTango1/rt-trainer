@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pilot tests</title>
+<style>
+body{font:14px -apple-system,Segoe UI,Roboto,sans-serif;margin:16px;color:#111;background:#fff}
+h1{font-size:20px;margin:0 0 8px}
+pre{white-space:pre-wrap;font:12px ui-monospace,Consolas,monospace;background:#f4f4f6;padding:10px;border-radius:10px}
+iframe{width:375px;height:300px;border:1px solid #ddd;border-radius:10px}
+</style>
+</head>
+<body>
+<!-- Automatic checks of the app logic: calculator, due dates, pilot card, commander summary, reminders, date guard.
+     Runs the real index.html in a frame; the browser's saved app data is copied before and put back after,
+     so opening this page on a phone does not change anything. CI: .github/workflows/pilot-tests.yml -->
+<h1 id="result">RUNNING</h1>
+<pre id="out"></pre>
+<iframe id="app" title="app"></iframe>
+<script>
+(function(){
+  var out=document.getElementById("out"),res=document.getElementById("result"),pass=0,fail=0;
+  function log(s){out.textContent+=s+"\n"}
+  function eq(name,got,want){
+    var g=JSON.stringify(got),w=JSON.stringify(want);
+    if(g===w){pass++;log("ok   "+name)}else{fail++;log("FAIL "+name+"\n     got  "+g+"\n     want "+w)}
+  }
+  /* keep the user's own data safe */
+  var saved={};
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);saved[k]=localStorage.getItem(k)}}catch(e){}
+  function restore(){try{localStorage.clear();for(var k in saved)localStorage.setItem(k,saved[k])}catch(e){}}
+
+  var f=document.getElementById("app");
+  f.onload=function(){setTimeout(run,1500)};
+  f.src="index.html?test="+Date.now();
+
+  function run(){
+    var w=f.contentWindow;
+    try{
+      var S0=w.S,RM0=w.RM,save0=w.save,alert0=w.alert,lang0=w.S.lang;
+      w.save=function(){};w.alert=function(m){w.__alerts.push(m)};w.__alerts=[];
+      w.S.lang="ru";
+      var today=w.iso(new Date());
+      function ago(months,days){var d=new Date();d.setMonth(d.getMonth()-months);d.setDate(d.getDate()-(days||0));return w.iso(d)}
+
+      /* calculator */
+      eq("calc 1:30+0:45",w.evalFull("1:30+0:45"),"2:15");
+      eq("calc 0:1+1 (one minute digit = tens)",w.evalFull("0:1+1"),"1:10");
+      eq("calc 1:00−2:30",w.evalFull("1:00−2:30"),"−1:30");
+      eq("calc 2:30×3",w.evalFull("2:30×3"),"7:30");
+      eq("calc 7:30÷2",w.evalFull("7:30÷2"),"3:45");
+      eq("calc 0:59+0:01",w.evalFull("0:59+0:01"),"1:00");
+      eq("calc time×time is an error",w.evalFull("1:00×1:00"),null);
+      eq("calc ÷0 is an error",w.evalFull("1:00÷0"),null);
+      w.press("C");["5",":","7"].forEach(w.press);
+      eq("calc minutes can't start with 6-9",w.cx,"5:");
+      w.press("C");
+
+      /* dates */
+      eq("addM end of month",w.iso(w.addM(new Date(2026,0,31),1)),"2026-02-28");
+      eq("addM leap year",w.iso(w.addM(new Date(2028,0,31),1)),"2028-02-29");
+      eq("status: due today",w.st({date:ago(6),months:6}).lvl,2);
+      eq("status: overdue",w.st({date:ago(6,10),months:6}).lvl,2);
+      eq("status: soon (orange)",w.st({date:ago(5,25),months:6}).lvl,1);
+      eq("status: fine (green)",w.st({date:today,months:6}).lvl,0);
+      eq("status: no date",w.st({date:"",months:6}).lvl,-1);
+
+      /* pilot card line */
+      function pilot(fio,extra,dates){var it=w.defItems();it.forEach(function(x){x.date=dates===undefined?today:dates});return{id:"t"+Math.random(),fio:fio,call:"",ic:0,ac:"yak52",items:it.concat(extra||[]),flights:[]}}
+      eq("card: all fine says 'all good'",w.nearest(pilot("A")).text,w.L("okN"));
+      var p2=pilot("B");p2.items[0].date="";
+      eq("card: missing dates are not 'all good'",w.nearest(p2).text,w.L("nearUnd",{n:1}));
+      var p3=pilot("C");p3.items[4].date=ago(12,5);
+      eq("card: overdue names the check",w.nearest(p3).lvl,2);
+      eq("card: no dates at all",w.nearest(pilot("D",[],"")).text,w.L("nearNone"));
+
+      /* commander summary with custom checks */
+      w.S={users:[pilot("Overdue",[{id:"x1",name:"Тренажёр",icon:"",months:3,date:ago(4)}]),pilot("Fine",[{id:"x2",name:" тренажёр ",icon:"",months:3,date:today},{id:"x3",name:"Прыжки",icon:"",months:12,date:""}]),pilot("Plain")],
+           active:null,lang:"ru",per:{},n:{}};
+      w.RM=[];
+      var rows=w.sumRows();
+      eq("summary: custom checks become columns, same name merged",rows.cols.slice(6).map(function(c){return c.short}),["Тренажёр","Прыжки"]);
+      eq("summary: overdue custom check puts the pilot first",rows[0].u.fio,"Overdue");
+      eq("summary: no such check = empty cell",w.cellTxt(rows[2].cells[6]),"");
+      eq("summary: check without date = dash",w.cellTxt(rows.filter(function(r){return r.u.fio==="Fine"})[0].cells[7]),"—");
+
+      /* reminders */
+      eq("reminders: default 30/7/1 days",w.rem(),[30,7,1]);
+      w.S.rem=[7,60,99];
+      eq("reminders: unknown values dropped, sorted",w.rem(),[60,7]);
+
+      /* last-completed date can't be in the future */
+      w.S={users:[pilot("Edit")],active:null,lang:"ru",per:{},n:{}};w.S.active=w.S.users[0].id;
+      var future=new Date();future.setFullYear(future.getFullYear()+1);
+      w.openSheet(0);w.document.getElementById("fd").value=w.iso(future);w.collect(false);
+      eq("future date rejected",w.S.users[0].items[0].date,today);
+      eq("future date message",w.__alerts.length,1);
+      w.close();
+
+      w.S=S0;w.RM=RM0;w.S.lang=lang0;w.save=save0;w.alert=alert0;
+    }catch(e){fail++;log("FAIL crashed: "+(e&&e.stack||e))}
+    restore();
+    res.textContent=(fail?"FAIL ":"PASS ")+pass+"/"+(pass+fail);
+    res.style.color=fail?"#d33":"#2a2";
+    f.remove();
+  }
+})();
+</script>
+</body>
+</html>
