@@ -257,7 +257,7 @@ select{width:100%;font-size:16px;padding:13px;border-radius:14px;border:0;backgr
 <script>
 var WARN=30,S={users:[],active:null},editing=null,editU=null;
 /* standard checks; their period can be changed for all pilots in Settings (S.per) */
-var APP_V="2.4 · 01.11.2026";
+var APP_V="2.5 · 01.11.2026";
 var PER0={oyap:3,crit:6,niao:6,forced:6,vlk:12,umo:12};
 function per(id){return(S&&S.per&&+S.per[id])||PER0[id]}
 function defItems(){return[
@@ -645,7 +645,7 @@ var ICONS=[
 /* three-blade propeller */
 '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-1.1-3.1-1.5-6.6-.8-9.5.2-.9 1.4-.9 1.6 0 .7 2.9.3 6.4-.8 9.5z"/><path d="M12 12c-1.1-3.1-1.5-6.6-.8-9.5.2-.9 1.4-.9 1.6 0 .7 2.9.3 6.4-.8 9.5z" transform="rotate(120 12 12)"/><path d="M12 12c-1.1-3.1-1.5-6.6-.8-9.5.2-.9 1.4-.9 1.6 0 .7 2.9.3 6.4-.8 9.5z" transform="rotate(240 12 12)"/><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="1" '+CUT+'/><path d="M3.6 8.2a9.2 9.2 0 0 1 3.6-4.6M20.4 15.8a9.2 9.2 0 0 1-3.6 4.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".5"/></svg>',
 /* compass rose */
-'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M12 3l2.1 6.9L21 12l-6.9 2.1L12 21l-2.1-6.9L3 12l6.9-2.1z"/><path d="M12 3l2.1 6.9L12 12zM21 12l-6.9 2.1L12 12zM12 21l-2.1-6.9L12 12zM3 12l6.9-2.1L12 12z" '+CUT+' opacity=".45"/><path d="M12 .6v1.6M23.4 12h-1.6M12 23.4v-1.6M.6 12h1.6" stroke="currentColor" stroke-width="1.2"/></svg>',
+'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.60 19.00H13.60" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".3"/><path d="M13.60 19.00A7.8 7.8 0 1 0 6.10 9.05" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".5"/><g transform="translate(6.27 13.87) rotate(160) scale(1.5)"><path d="M0-3.4c.35 0 .55.7.6 1.6l.05 1 2.9 1.7v.9L.6.3.45 1.8l1.1.8v.7L0 2.9l-1.55.4v-.7l1.1-.8L-.6.3-3.55 1.2v-.9l2.9-1.7.05-1c.05-.9.25-1.6.6-1.6z"/></g></svg>',
 /* parachute */
 '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.3 10.6C2.3 5.6 6.6 2.2 12 2.2s9.7 3.4 9.7 8.4c-1.3-1-3-1-4.3 0-1.3-1-3-1-4.3 0h-2.2c-1.3-1-3-1-4.3 0-1.3-1-3-1-4.3 0z"/><path d="M8.2 10.4C8.5 6.7 9.9 3.6 12 2.4c2.1 1.2 3.5 4.3 3.8 8" fill="none" stroke="var(--card,#fff)" stroke-width="1" opacity=".6"/><path d="M2.8 10.8l8 7M21.2 10.8l-8 7M8.3 10.9l2.8 6.6M15.7 10.9l-2.8 6.6" fill="none" stroke="currentColor" stroke-width=".9"/><circle cx="12" cy="18.3" r="1.4"/><path d="M10.7 19.7h2.6l.5 3H10.2z"/></svg>',
 /* roundel with star */
