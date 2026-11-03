@@ -1,0 +1,64 @@
+name: Build desktop
+# Windows installer + portable .exe, macOS .dmg and Linux AppImage of the same app, published as one release.
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'desktop/**', '.github/workflows/build-desktop.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Prepare app files
+        shell: bash
+        run: |
+          cd desktop
+          mkdir -p app
+          cp ../index.html ../manifest.json ../icon-192.png ../icon-512.png ../icon.svg app/
+          cp ../icon-1024.png icon.png
+          npm version --no-git-tag-version "1.0.${{ github.run_number }}"
+          npm install --no-audit --no-fund
+      - name: Build
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop
+          if [ "$RUNNER_OS" = "Windows" ]; then npx electron-builder --win --publish never;
+          elif [ "$RUNNER_OS" = "macOS" ]; then npx electron-builder --mac --publish never;
+          else npx electron-builder --linux --publish never; fi
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.dmg
+            desktop/dist/*.AppImage
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - run: ls -la out
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-v1.0.${{ github.run_number }}
+          name: RT Trainer for computer 1.0.${{ github.run_number }}
+          body: |
+            Windows: RT-Trainer-…-nsis.exe installs the app (desktop shortcut); RT-Trainer-…-portable.exe runs without installing.
+            macOS: open the .dmg and drag RT Trainer to Applications. The first time, right-click the app → Open (it is not signed by Apple).
+            Linux: make the .AppImage executable and run it.
+            Voice input (Speak) works best in Chrome or Edge: https://alfatango1.github.io/rt-trainer/ (install it with the Install icon in the address bar).
+          files: out/*
