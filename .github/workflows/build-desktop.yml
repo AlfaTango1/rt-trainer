@@ -57,7 +57,7 @@ jobs:
           tag_name: desktop-v1.0.${{ github.run_number }}
           name: RT Trainer for computer 1.0.${{ github.run_number }}
           body: |
-            Windows: RT-Trainer-…-nsis.exe installs the app (desktop shortcut); RT-Trainer-…-portable.exe runs without installing.
+            Windows: RT-Trainer-Setup-….exe installs the app (desktop shortcut); RT-Trainer-Portable-….exe runs without installing.
             macOS: open the .dmg and drag RT Trainer to Applications. The first time, right-click the app → Open (it is not signed by Apple).
             Linux: make the .AppImage executable and run it.
             Voice input (Speak) works best in Chrome or Edge: https://alfatango1.github.io/rt-trainer/ (install it with the Install icon in the address bar).
