@@ -41,6 +41,7 @@ main{max-width:520px;margin:0 auto;padding:14px 14px 40px}
 .c.nd{min-height:128px}
 .c .t i{flex:none;display:flex}.c .t i svg{width:22px;height:22px}
 .c.g{--card:var(--g)}.c.o{--card:var(--o)}.c.r{--card:var(--r)}
+#fe.dim{opacity:.45}
 .icp.ckp{grid-template-columns:repeat(6,1fr);gap:6px}.icp.ckp button{height:48px;border-radius:14px;--card:var(--inp)}.icp.ckp button svg{width:26px;height:26px}
 @media (max-width:400px){.c .b{font-size:clamp(17px,5.4vw,23px)}}
 .c .t small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
@@ -409,9 +410,10 @@ function openSheet(i){
   editing=i;var it=i==="new"?{name:"",icon:"📋",months:6,date:""}:items()[i];
   document.getElementById("sheet").innerHTML='<h2>'+(i==="new"?L("newItem"):esc(dn(it)))+'</h2>'+
   '<label>'+L("name")+'</label><input id="fn" value="'+esc(dn(it))+'" placeholder="'+L("nameEx")+'">'+
-  '<label>'+L("iconL")+'</label><input id="fi" type="hidden" value="'+esc(it.icon||"")+'"><div class="icp ckp" id="ckp">'+
-  Object.keys(CKI).map(function(k){return '<button type="button" data-ck="'+k+'" class="'+(k===it.icon?'on':'')+'" aria-label="'+k.slice(2)+'">'+CKI[k]+'</button>'}).join("")+'</div>'+
-  '<label>'+L("emoL")+'</label><input id="fe" value="'+esc(CKI[it.icon]?"":it.icon||"")+'" placeholder="😀 ✈️ 🚁" autocomplete="off" enterkeyhint="done">'+
+  '<label>'+L("iconL")+'</label><div class="icp ckp" id="ckp">'+
+  Object.keys(CKI).map(function(k){return '<button type="button" data-ck="'+k+'" class="'+(k===it.icon?'on':'')+'" aria-label="'+k.slice(2)+'" aria-pressed="'+(k===it.icon)+'">'+CKI[k]+'</button>'}).join("")+'</div>'+
+  '<p class="note" style="margin:6px 2px 0;text-align:left">'+L("icHint")+'</p>'+
+  '<label>'+L("emoL")+'</label><input id="fe" class="'+(CKI[it.icon]?'dim':'')+'" value="'+esc(CKI[it.icon]||!it.icon||it.icon==="📋"?"":it.icon)+'" placeholder="😀 ✈️ 🚁" autocomplete="off" enterkeyhint="done">'+
   '<label>'+L("every")+'</label><input id="fm" type="number" min="1" max="60" value="'+it.months+'">'+
   '<label>'+L("lastDate")+'</label><input id="fd" type="date" max="'+iso(new Date())+'" value="'+it.date+'">'+
   '<button class="btn" id="bt">'+L("doneToday")+'</button>'+
@@ -422,18 +424,21 @@ function openSheet(i){
   document.getElementById("ov").classList.add("on");
 }
 function close(){document.getElementById("ov").classList.remove("on")}
-/* check icon: tapping a drawn icon or typing an emoji/sticker-emoji from the keyboard; the last choice wins */
+/* check icon: a lit drawn icon is used; tapping it again turns it off and the emoji/sticker from the field below is used instead.
+   Typing in the field also turns the lit icon off. While an icon is lit the field is dimmed. */
+function ckSet(b){
+  document.querySelectorAll("#ckp button").forEach(function(x){x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});
+  var fe=document.getElementById("fe");if(fe)fe.classList.toggle("dim",!!b);
+}
 document.addEventListener("click",function(e){
   var b=e.target.closest&&e.target.closest("[data-ck]");if(!b)return;
-  document.getElementById("fi").value=b.getAttribute("data-ck");document.getElementById("fe").value="";
-  document.querySelectorAll("#ckp button").forEach(function(x){x.classList.toggle("on",x===b)});
+  ckSet(b.classList.contains("on")?null:b);
 });
 document.addEventListener("input",function(e){
   if(e.target.id!=="fe")return;
   var v=icClean(e.target.value);
   if(v!==e.target.value.trim()&&!e.isComposing)e.target.value=v;
-  document.getElementById("fi").value=v;
-  document.querySelectorAll("#ckp button").forEach(function(x){x.classList.remove("on")});
+  ckSet(null);
 });
 /* in-app yes/no sheet: native confirm() is blocked (answers "no" at once) in some app webviews */
 var askYes=null;
@@ -449,8 +454,8 @@ document.addEventListener("click",function(e){
 });
 function collect(today){
   var n=document.getElementById("fn").value.trim();if(!n){document.getElementById("fn").focus();return}
-  var fv=document.getElementById("fi").value;
-  var o={name:n,icon:CKI[fv]?fv:(icClean(fv)||"📋"),months:Math.max(1,+document.getElementById("fm").value||6),date:today?iso(new Date()):document.getElementById("fd").value};
+  var lit=document.querySelector("#ckp button.on");
+  var o={name:n,icon:lit?lit.getAttribute("data-ck"):(icClean(document.getElementById("fe").value)||"📋"),months:Math.max(1,+document.getElementById("fm").value||6),date:today?iso(new Date()):document.getElementById("fd").value};
   if(o.date&&o.date>iso(new Date())){alert(L("futDate"));return}
   if(editing==="new"){o.id="x"+Date.now();items().push(o)}else{var old=items()[editing];o.id=old.id;if(dn(old)===o.name)o.name=old.name;items()[editing]=o}
   save();render();close();
@@ -775,6 +780,9 @@ var CKI=(function(){
 })();
 I18N.ru.emoL="Или эмодзи с клавиатуры";I18N.en.emoL="Or an emoji from the keyboard";I18N.uz.emoL="Yoki klaviaturadan emoji";
 I18N.en.iconL="Icon";I18N.uz.iconL="Belgi";
+I18N.ru.icHint="Нажмите на иконку, чтобы выбрать её. Нажмите ещё раз, чтобы снять выбор: тогда будет стоять эмодзи из поля ниже.";
+I18N.en.icHint="Tap an icon to choose it. Tap it again to unselect it: the emoji from the field below is used instead.";
+I18N.uz.icHint="Belgini tanlash uchun bosing. Tanlovni bekor qilish uchun yana bosing: unda pastdagi maydondagi emoji qo’yiladi.";
 /* an item's icon as HTML: one of CKI, otherwise the emoji/text the user typed */
 function icHtml(s){return CKI[s]||esc(s&&s.indexOf("a:")!==0?s:"📋")}
 /* what the emoji field keeps: the newest emoji if one was just typed after something else, else up to 4 characters; never more than 8 UTF-16 units (cloud limit) */
