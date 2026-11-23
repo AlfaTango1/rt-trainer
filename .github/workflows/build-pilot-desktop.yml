@@ -1,0 +1,52 @@
+name: Build Pilot for computer
+
+# Windows installer (Pilot-Setup-….exe) and portable .exe of the Pilot app (pilot-desktop/).
+# The app opens the live Pilot site, so changes in pilot/ reach it without a new build.
+# Runs when pilot-desktop/ changes, or from the Actions tab ("Run workflow").
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['pilot-desktop/**', '.github/workflows/build-pilot-desktop.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build the installer
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          cd pilot-desktop
+          cp ../pilot/icon-512.png icon.png
+          npm version --no-git-tag-version "1.0.${{ github.run_number }}"
+          npm install --no-audit --no-fund
+          npx electron-builder --win --publish never
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pilot-Windows
+          path: pilot-desktop/dist/*.exe
+
+      - name: Publish (Releases)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pilot-desktop-v1.0.${{ github.run_number }}
+          name: Pilot for computer 1.0.${{ github.run_number }}
+          make_latest: false
+          body: |
+            Pilot-Setup-….exe installs Pilot with shortcuts on the desktop and in the Start menu.
+            Pilot-Portable-….exe runs without installing.
+            Windows may warn that the app is not signed: More info → Run anyway.
+          files: pilot-desktop/dist/*.exe

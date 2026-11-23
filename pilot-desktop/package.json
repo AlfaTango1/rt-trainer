@@ -1,0 +1,59 @@
+{
+  "name": "pilot-desktop",
+  "productName": "Pilot",
+  "version": "1.0.0",
+  "description": "Pilot: check deadlines and flight time",
+  "main": "main.js",
+  "author": "Jasurbek Rustamov",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "io.github.alfatango1.pilot.desktop",
+    "productName": "Pilot",
+    "files": [
+      "main.js",
+      "offline.html",
+      "icon.png"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Пилот",
+      "uninstallDisplayName": "Пилот",
+      "installerLanguages": [
+        "ru_RU"
+      ],
+      "language": "1049",
+      "artifactName": "Pilot-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Pilot-Portable-${version}.${ext}"
+    }
+  }
+}
