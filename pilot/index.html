@@ -38,6 +38,16 @@ main{max-width:520px;margin:0 auto;padding:14px 14px 40px}
 .c.g{background:var(--g)}.c.o{background:var(--o)}.c.r{background:var(--r)}
 .c.add{align-items:center;justify-content:center;color:var(--mut);font-weight:700;background:transparent;border:2px dashed var(--mut);font-size:16px;gap:6px}
 .c.add span{font-size:36px;line-height:1}
+.c.nd{min-height:128px}
+.c .t i{flex:none;display:flex}.c .t i svg{width:22px;height:22px}
+.c.g{--card:var(--g)}.c.o{--card:var(--o)}.c.r{--card:var(--r)}
+.icp.ckp{grid-template-columns:repeat(6,1fr);gap:6px}.icp.ckp button{height:48px;border-radius:14px;--card:var(--inp)}.icp.ckp button svg{width:26px;height:26px}
+@media (max-width:400px){.c .b{font-size:clamp(17px,5.4vw,23px)}}
+.c .t small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
+.c .pb{height:5px;border-radius:9px;background:rgba(255,255,255,.28);margin-top:12px;overflow:hidden}
+.c .pb i{display:block;height:100%;border-radius:9px;background:#fff}
+.nav button i{padding:2px 18px;border-radius:99px;transition:background .2s}
+.nav button.on i{background:rgba(47,174,102,.2)}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
 .ov.on{display:flex}
 .sheet{background:var(--card);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:92%;overflow:auto}
@@ -269,16 +279,19 @@ select{width:100%;font-size:16px;padding:13px;border-radius:14px;border:0;backgr
 <script>
 var WARN=30,S={users:[],active:null},editing=null,editU=null;
 /* standard checks; their period can be changed for all pilots in Settings (S.per) */
-var APP_V="3.4 · 01.11.2026";
+var APP_V="3.5 · 23.11.2026";
 var PER0={oyap:3,crit:6,niao:6,forced:6,vlk:12,umo:12};
 function per(id){return(S&&S.per&&+S.per[id])||PER0[id]}
 function defItems(){return[
-{id:"oyap",name:"ОЯП, ОСП R=50,150,300",icon:"📡",months:per("oyap"),date:""},
-{id:"crit",name:"Критический режим",icon:"⚠️",months:per("crit"),date:""},
-{id:"niao",name:"НИАО",icon:"🧭",months:per("niao"),date:""},
-{id:"forced",name:"Вынужденное покидание",icon:"🪂",months:per("forced"),date:""},
-{id:"vlk",name:"ВЛК",icon:"🩺",months:per("vlk"),date:""},
-{id:"umo",name:"УМО",icon:"🎓",months:per("umo"),date:""}]}
+{id:"oyap",name:"ОЯП, ОСП R=50,150,300",icon:"a:ils",months:per("oyap"),date:""},
+{id:"crit",name:"Критический режим",icon:"a:spin",months:per("crit"),date:""},
+{id:"niao",name:"НИАО",icon:"a:tech",months:per("niao"),date:""},
+{id:"forced",name:"Вынужденное покидание",icon:"a:eject",months:per("forced"),date:""},
+{id:"vlk",name:"ВЛК",icon:"a:vlk",months:per("vlk"),date:""},
+{id:"umo",name:"УМО",icon:"a:umo",months:per("umo"),date:""}]}
+/* standard checks still showing the old default emoji get the drawn icon; an icon the user chose stays */
+var OLDIC={oyap:"📡",crit:"⚠️",niao:"🧭",forced:"🪂",vlk:"🩺",umo:"🎓"},NEWIC={oyap:"a:ils",crit:"a:spin",niao:"a:tech",forced:"a:eject",vlk:"a:vlk",umo:"a:umo"};
+function upIcons(){var ch=false;S.users.forEach(function(u){if(u.remote)return;(u.items||[]).forEach(function(it){if(OLDIC[it.id]&&it.icon===OLDIC[it.id]){it.icon=NEWIC[it.id];ch=true}})});return ch}
 function load(){
   try{S=JSON.parse(localStorage.getItem("pilot_v3")||"null")}catch(e){S=null}
   if(!S||!S.users||!S.users.length){
@@ -298,6 +311,7 @@ function load(){
     });
     S.v=4;S.n={};save();
   }
+  if(upIcons())save();
   if(!S.n)S.n={};WARN=+S.warn||30;
 }
 /* reminders: days before the due date (S.rem), plus the due day itself; pilots seen by username count unless S.remRM is false */
@@ -351,19 +365,24 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;
 function st(it){
   if(!it.date)return{cls:"",big:L("noDate"),sub:L("tapSet"),lvl:-1};
   var due=addM(parse(it.date),+it.months||6),t=new Date();t=new Date(t.getFullYear(),t.getMonth(),t.getDate());
-  var d=Math.round((due-t)/864e5),sub=L("until",{s:fmt(due)});
-  if(d<0)return{cls:"r",big:L("overdue",{n:-d}),sub:L("wasDue",{s:fmt(due)}),lvl:2};
-  if(d===0)return{cls:"r",big:L("dueToday"),sub:L("timeToDo"),lvl:2};
-  if(d<=WARN)return{cls:"o",big:L("leftD",{n:d}),sub:sub,lvl:1};
-  return{cls:"g",big:d>60?L("leftM",{n:Math.round(d/30.4)}):L("leftD",{n:d}),sub:sub,lvl:0};
+  var d=Math.round((due-t)/864e5),sub=L("until",{s:fmt(due)}),sp=(due-parse(it.date))/864e5,pf=sp>0?Math.min(1,Math.max(0,1-d/sp)):1;
+  if(d<0)return{cls:"r",big:L("overdue",{n:-d}),sub:L("wasDue",{s:fmt(due)}),lvl:2,d:d,pf:1};
+  if(d===0)return{cls:"r",big:L("dueToday"),sub:L("timeToDo"),lvl:2,d:d,pf:1};
+  if(d<=WARN)return{cls:"o",big:L("leftD",{n:d}),sub:sub,lvl:1,d:d,pf:pf};
+  return{cls:"g",big:d>60?L("leftM",{n:Math.round(d/30.4)}):L("leftD",{n:d}),sub:sub,lvl:0,d:d,pf:pf};
 }
 function render(){
   var h="",r=[],o=[],nd=[];
-  items().forEach(function(it,i){
-    var s=st(it);if(s.lvl==2)r.push(dn(it));if(s.lvl==1)o.push(dn(it));if(s.lvl<0)nd.push(dn(it));
-    h+='<button class="c '+s.cls+'" data-i="'+i+'"><div class="t"><i>'+esc(it.icon||"📋")+'</i>'+esc(dn(it))+'</div><div><div class="b">'+s.big+'</div><div class="s">'+s.sub+'</div></div></button>';
+  /* most urgent first: due/overdue, due soon, no date, then fine (nearest due first); data-i keeps the stored index */
+  var rk={"2":0,"1":1,"-1":2,"0":3};
+  items().map(function(it,i){return{it:it,i:i,s:st(it)}}).sort(function(a,b){
+    return rk[a.s.lvl]-rk[b.s.lvl]||(a.s.lvl<0?0:a.s.d-b.s.d)||a.i-b.i;
+  }).forEach(function(x){
+    var it=x.it,i=x.i,s=x.s,nm=dn(it),m=/^(.*?)\s+(R\s*=.*)$/.exec(nm);
+    var ttl=m?esc(m[1])+'<small>'+esc(m[2].replace(/,(?=\S)/g,", "))+'</small>':esc(nm);
+    if(s.lvl==2)r.push(nm);if(s.lvl==1)o.push(nm);if(s.lvl<0)nd.push(nm);
+    h+='<button class="c '+(s.cls||"nd")+'" data-i="'+i+'"><div class="t"><i>'+icHtml(it.icon)+'</i><span>'+ttl+'</span></div><div><div class="b">'+s.big+'</div><div class="s">'+s.sub+'</div>'+(s.lvl>=0?'<div class="pb"><i style="width:'+Math.round(s.pf*100)+'%"></i></div>':'')+'</div></button>';
   });
-  if(!isR())h+='<button class="c add" data-i="new"><span>＋</span>'+L("add")+'</button>';
   document.getElementById("grid").innerHTML=h;document.getElementById("whoN").textContent=(isR()?"☁️ ":"👤 ")+cur().fio;
   document.getElementById("addTop").style.visibility=isR()?"hidden":"";
   var m=document.getElementById("sum");
@@ -390,7 +409,9 @@ function openSheet(i){
   editing=i;var it=i==="new"?{name:"",icon:"📋",months:6,date:""}:items()[i];
   document.getElementById("sheet").innerHTML='<h2>'+(i==="new"?L("newItem"):esc(dn(it)))+'</h2>'+
   '<label>'+L("name")+'</label><input id="fn" value="'+esc(dn(it))+'" placeholder="'+L("nameEx")+'">'+
-  '<label>'+L("iconL")+'</label><input id="fi" value="'+esc(it.icon||"")+'" maxlength="4">'+
+  '<label>'+L("iconL")+'</label><input id="fi" type="hidden" value="'+esc(it.icon||"")+'"><div class="icp ckp" id="ckp">'+
+  Object.keys(CKI).map(function(k){return '<button type="button" data-ck="'+k+'" class="'+(k===it.icon?'on':'')+'" aria-label="'+k.slice(2)+'">'+CKI[k]+'</button>'}).join("")+'</div>'+
+  '<label>'+L("emoL")+'</label><input id="fe" value="'+esc(CKI[it.icon]?"":it.icon||"")+'" placeholder="😀 ✈️ 🚁" autocomplete="off" enterkeyhint="done">'+
   '<label>'+L("every")+'</label><input id="fm" type="number" min="1" max="60" value="'+it.months+'">'+
   '<label>'+L("lastDate")+'</label><input id="fd" type="date" max="'+iso(new Date())+'" value="'+it.date+'">'+
   '<button class="btn" id="bt">'+L("doneToday")+'</button>'+
@@ -401,6 +422,19 @@ function openSheet(i){
   document.getElementById("ov").classList.add("on");
 }
 function close(){document.getElementById("ov").classList.remove("on")}
+/* check icon: tapping a drawn icon or typing an emoji/sticker-emoji from the keyboard; the last choice wins */
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-ck]");if(!b)return;
+  document.getElementById("fi").value=b.getAttribute("data-ck");document.getElementById("fe").value="";
+  document.querySelectorAll("#ckp button").forEach(function(x){x.classList.toggle("on",x===b)});
+});
+document.addEventListener("input",function(e){
+  if(e.target.id!=="fe")return;
+  var v=icClean(e.target.value);
+  if(v!==e.target.value.trim()&&!e.isComposing)e.target.value=v;
+  document.getElementById("fi").value=v;
+  document.querySelectorAll("#ckp button").forEach(function(x){x.classList.remove("on")});
+});
 /* in-app yes/no sheet: native confirm() is blocked (answers "no" at once) in some app webviews */
 var askYes=null;
 function ask(msg,yes,onYes){
@@ -415,7 +449,8 @@ document.addEventListener("click",function(e){
 });
 function collect(today){
   var n=document.getElementById("fn").value.trim();if(!n){document.getElementById("fn").focus();return}
-  var o={name:n,icon:document.getElementById("fi").value.trim()||"📋",months:Math.max(1,+document.getElementById("fm").value||6),date:today?iso(new Date()):document.getElementById("fd").value};
+  var fv=document.getElementById("fi").value;
+  var o={name:n,icon:CKI[fv]?fv:(icClean(fv)||"📋"),months:Math.max(1,+document.getElementById("fm").value||6),date:today?iso(new Date()):document.getElementById("fd").value};
   if(o.date&&o.date>iso(new Date())){alert(L("futDate"));return}
   if(editing==="new"){o.id="x"+Date.now();items().push(o)}else{var old=items()[editing];o.id=old.id;if(dn(old)===o.name)o.name=old.name;items()[editing]=o}
   save();render();close();
@@ -700,6 +735,57 @@ var ICONS=[
 '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.3 10.6C2.3 5.6 6.6 2.2 12 2.2s9.7 3.4 9.7 8.4c-1.3-1-3-1-4.3 0-1.3-1-3-1-4.3 0h-2.2c-1.3-1-3-1-4.3 0-1.3-1-3-1-4.3 0z"/><path d="M8.2 10.4C8.5 6.7 9.9 3.6 12 2.4c2.1 1.2 3.5 4.3 3.8 8" fill="none" stroke="var(--card,#fff)" stroke-width="1" opacity=".6"/><path d="M2.8 10.8l8 7M21.2 10.8l-8 7M8.3 10.9l2.8 6.6M15.7 10.9l-2.8 6.6" fill="none" stroke="currentColor" stroke-width=".9"/><circle cx="12" cy="18.3" r="1.4"/><path d="M10.7 19.7h2.6l.5 3H10.2z"/></svg>',
 /* roundel with star */
 '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="7.6" opacity=".28"/><path d="M12 4.3l2.2 4.7 5.1.5-3.9 3.5 1.1 5.1L12 15.4l-4.5 2.7 1.1-5.1-3.9-3.5 5.1-.5z"/></svg>'];
+/* icons a check can use instead of an emoji; stored in item.icon as "a:<key>" (fits the 8-character cloud limit).
+   Drawn for the standard checks and similar ones; the aircraft shape comes from the pilot jet icon. */
+var CKI=(function(){
+  var S='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+      F='<svg viewBox="0 0 24 24" fill="currentColor">',
+      o={},
+      C='var(--card,#fff)',jd=ICONS[0].match(/d="([^"]+)"/)[1],
+      jet=function(t,a){return '<path transform="'+t+' translate(-12 -12)" d="'+jd+'"'+(a||"")+'/>'},
+      ln=function(d,c,w,x){return '<path d="'+d+'" fill="none" stroke="'+(c||"currentColor")+'" stroke-width="'+(w||2)+'" stroke-linecap="round" stroke-linejoin="round"'+(x||"")+'/>'},
+      badge='<circle cx="17.6" cy="17.6" r="5.9" stroke="'+C+'" stroke-width="1.8"/>';
+  /* the six standard checks */
+  /* ОЯП, ОСП: landing approach along the glide path to the runway */
+  o["a:ils"]=F+'<path d="M12.6 22.6 15.8 13h3.3l3.5 9.6z"/><path d="M16.9 14.8h1.1l.2 2h-1.5zM16.6 18.6h1.7l.25 2.6h-2.2z" '+CUT+'/>'+ln("M10.4 10.6 15.8 14.6",0,1.6,' stroke-dasharray="1.8 2.2"')+jet("translate(6.6 7.4) rotate(127) scale(.5)")+'</svg>';
+  /* Критический режим: aircraft in a spin */
+  o["a:spin"]=F+ln("M12 3.2a8.8 8.8 0 1 1-8.8 8.8")+'<path d="M3.2 8.4.8 12.8h4.8z"/>'+jet("translate(12.4 12.4) rotate(200) scale(.52)")+'</svg>';
+  /* НИАО (engineering and aviation support): aircraft with a gear badge */
+  o["a:tech"]=F+jet("translate(10.2 10.2) scale(.84)")+badge+'<circle cx="17.6" cy="17.6" r="1.4" fill="none" stroke="'+C+'" stroke-width="1.3"/><circle cx="17.6" cy="17.6" r="3" fill="none" stroke="'+C+'" stroke-width="1.5" stroke-dasharray="1.5 1.64"/></svg>';
+  /* Вынужденное покидание: ejection seat going up */
+  o["a:eject"]=F+'<path d="M5.4 2h6.8l.2 3.6H5.9z"/><path d="M6.7 5h4.6l1.5 9H8.2z"/><rect x="8.2" y="12.4" width="9.6" height="3.6" rx="1.6"/><path d="M14.8 15.6h2.6l-.8 3.6h-1.9z"/><path d="M9.6 17.2h4.2l-2.1 5.3z" opacity=".55"/>'+ln("M20 11.5V2.8M17.3 5.5 20 2.8l2.7 2.7",0,1.9)+ln("M2.8 7.5v6",0,1.6,' opacity=".6"')+'</svg>';
+  /* ВЛК (medical board): stethoscope */
+  o["a:vlk"]=S+'<path d="M4.8 2.5h2.4M12.8 2.5h2.4"/><path d="M6 2.5v6a4 4 0 0 0 8 0v-6"/><path d="M10 12.5v2.6a4.5 4.5 0 0 0 9 0v-2.6"/><circle cx="19" cy="10.4" r="2.1"/></svg>';
+  /* УМО (in-depth medical examination): heart with a pulse line */
+  o["a:umo"]=F+'<path d="M12 21.2S3.3 15.8 3.3 9.6A4.9 4.9 0 0 1 12 6.6a4.9 4.9 0 0 1 8.7 3c0 6.2-8.7 11.6-8.7 11.6z"/>'+ln("M5.4 12.4h3l1.6-2.8 2.2 5.4 1.7-3.6h4.7",C,1.6)+'</svg>';
+  /* more checks */
+  /* simulator: screen with an aircraft symbol and horizon */
+  o["a:sim"]=F+'<rect x="2" y="3" width="20" height="13.5" rx="2.2"/>'+ln("M4.4 11.6 19.6 8.6",C,1.1,' opacity=".6"')+ln("M6.8 11h3.4l1.8 1.7 1.8-1.7h3.4",C,1.7)+ln("M8.5 21h7M12 16.5V21")+'</svg>';
+  /* instrument flying: attitude indicator */
+  o["a:ai"]=F+'<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.76 13.94 19.24 10.06A7.5 7.5 0 0 1 4.76 13.94z"/>'+ln("M6 12.2h3.8l2.2 2 2.2-2H18",C,3.6)+ln("M6 12.2h3.8l2.2 2 2.2-2H18",0,1.7)+ln("M12 2v3.2")+'</svg>';
+  /* flying technique check: aircraft with a check-mark badge */
+  o["a:chk"]=F+jet("translate(10.2 10.2) scale(.84)")+badge+ln("M15.1 17.7l1.7 1.7 3.4-3.5",C,1.7)+'</svg>';
+  /* flight logbook / flight hours */
+  o["a:log"]=F+'<path d="M5.5 2.2h12.3a1.7 1.7 0 0 1 1.7 1.7v16.2a1.7 1.7 0 0 1-1.7 1.7H5.5A1.5 1.5 0 0 1 4 20.3V3.7a1.5 1.5 0 0 1 1.5-1.5z"/>'+ln("M6.7 2.6v18.8",C,1.2)+jet("translate(13 11.6) scale(.52)",' fill="'+C+'"')+'</svg>';
+  /* altitude training / pressure chamber: oxygen cylinder */
+  o["a:oxy"]=F+'<path d="M7.6 8.4a4.4 4.4 0 0 1 8.8 0V20a2.2 2.2 0 0 1-2.2 2.2H9.8A2.2 2.2 0 0 1 7.6 20z"/><rect x="10.4" y="2" width="3.2" height="3" rx=".6"/>'+ln("M8.6 2.6h6.8",0,1.6)+'<text x="12" y="17.2" font-size="6.4" font-weight="800" text-anchor="middle" font-family="system-ui,Arial,sans-serif" fill="'+C+'">O₂</text></svg>';
+  /* sea survival: life ring */
+  o["a:sea"]=F+'<circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="4.6" stroke-dasharray="8.6 3.02" transform="rotate(-24 12 12)"/><circle cx="12" cy="12" r="10.6" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg>';
+  return o;
+})();
+I18N.ru.emoL="Или эмодзи с клавиатуры";I18N.en.emoL="Or an emoji from the keyboard";I18N.uz.emoL="Yoki klaviaturadan emoji";
+I18N.en.iconL="Icon";I18N.uz.iconL="Belgi";
+/* an item's icon as HTML: one of CKI, otherwise the emoji/text the user typed */
+function icHtml(s){return CKI[s]||esc(s&&s.indexOf("a:")!==0?s:"📋")}
+/* what the emoji field keeps: the newest emoji if one was just typed after something else, else up to 4 characters; never more than 8 UTF-16 units (cloud limit) */
+function icClean(v){
+  v=String(v||"").trim();if(!v)return"";
+  var g;try{g=Array.from(new Intl.Segmenter().segment(v),function(x){return x.segment})}catch(e){g=Array.from(v)}
+  var last=g[g.length-1];
+  try{if(g.length>1&&/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(last))g=[last]}catch(e){}
+  var r="";for(var i=0;i<g.length&&i<4;i++){if((r+g[i]).length>8)break;r+=g[i]}
+  return r||Array.from(g[0])[0];
+}
 /* Yak-52 side view, traced from the Wikimedia 3-view line drawing; gradients and clip paths live in the hidden <defs> svg */
 var YAK='<svg class="yak" viewBox="0 4 614 236" role="img" aria-label="Як-52" xmlns="http://www.w3.org/2000/svg">'+
 '<ellipse cx="300" cy="232" rx="290" ry="5" fill="#000" opacity=".14"/>'+
