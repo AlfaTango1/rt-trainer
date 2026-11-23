@@ -39,7 +39,8 @@ jobs:
           npm init -y > /dev/null
           npm install --no-audit --no-fund --legacy-peer-deps \
             @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 \
-            @capacitor/local-notifications@7
+            @capacitor/local-notifications@7 \
+            @capacitor/filesystem@7 @capacitor/share@7
           cat > capacitor.config.json <<'JSON'
           {
             "appId": "io.github.alfatango1.pilot",
@@ -51,6 +52,10 @@ jobs:
           JSON
           npx cap add android
           npx cap sync android
+          # the app's own print plugin (summary → Android print dialog / Save as PDF)
+          JD=android/app/src/main/java/io/github/alfatango1/pilot
+          test -f "$JD/MainActivity.java"
+          cp "$GITHUB_WORKSPACE"/pilot-android/java/*.java "$JD/"
 
       - name: Notification permissions and version number
         run: |

@@ -1333,6 +1333,9 @@ function initCloud(){
 /* ---------- commander summary: every pilot x standard check, worst first; PDF (print) and Excel (CSV) ---------- */
 var SHORT={ru:{oyap:"ОЯП",crit:"Крит.",niao:"НИАО",forced:"Покид.",vlk:"ВЛК",umo:"УМО"},en:{oyap:"OYaP",crit:"Crit.",niao:"NIAO",forced:"Eject",vlk:"VLK",umo:"UMO"},uz:{oyap:"OYaP",crit:"Krit.",niao:"NIAO",forced:"Tark",vlk:"VLK",umo:"UMO"}};
 function shortN(id){return(SHORT[S.lang||"ru"]||SHORT.ru)[id]}
+/* a Capacitor plugin when running inside the Android app, otherwise null (website, computer, iPhone) */
+function natPlug(n){var C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins[n]||null}
+I18N.ru.expErr="Не удалось выгрузить сводку";I18N.en.expErr="Could not export the summary";I18N.uz.expErr="Hisobotni chiqarib bo’lmadi";
 function daysLeft(it){if(!it||!it.date)return null;var t=new Date();t=new Date(t.getFullYear(),t.getMonth(),t.getDate());return Math.round((addM(parse(it.date),+it.months||6)-t)/864e5)}
 /* columns: the six standard checks, then every check pilots added themselves; same name (any case) = same column */
 function ckey(it){return CK.indexOf(it.id)>=0?it.id:"n:"+String(it.name||"").trim().toLowerCase()}
@@ -1374,6 +1377,9 @@ function printSummary(){
     'table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:6px;text-align:center;vertical-align:top}td small{display:block;font-size:10px;opacity:.85}'+
     'td:first-child{text-align:left;font-weight:600}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>'+
     '<h1>'+esc(L("sumT"))+'</h1><p>'+fmt(new Date())+'</p>'+sumTable(sumRows(),true)+'</body></html>';
+  /* Android app: its WebView has no window.print(); the app's PilotPrint plugin opens Android's print dialog (Save as PDF) */
+  var pp=natPlug("PilotPrint");
+  if(pp){pp.print({html:html,name:L("sumT")+" "+iso(new Date())}).catch(function(e){alert(L("expErr")+"\n"+(e&&e.message||e))});return}
   var f=document.createElement("iframe");f.style.cssText="position:fixed;width:0;height:0;border:0;right:0;bottom:0";document.body.appendChild(f);
   var d=f.contentWindow.document;d.open();d.write(html);d.close();
   setTimeout(function(){try{f.contentWindow.focus();f.contentWindow.print()}catch(e){}setTimeout(function(){f.remove()},60000)},300);
@@ -1386,8 +1392,17 @@ function csvSummary(){
     var dd=r.cells.map(function(c){return c.due?iso(c.due).split("-").reverse().join("."):""}),ll=r.cells.map(function(c){return c.d==null?"":c.d});
     return [r.u.fio+(r.u.remote?" (@"+r.u.uname+")":""),r.u.call||""].concat(dd,ll).map(q).join(";");
   }));
-  var b=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
-  a.href=URL.createObjectURL(b);a.download="pilots-"+iso(new Date())+".csv";document.body.appendChild(a);a.click();
+  var name="pilots-"+iso(new Date())+".csv",text="\ufeff"+lines.join("\r\n");
+  /* Android app: a download link does nothing in its WebView, so save the file to the app cache and open the share menu */
+  var fs=natPlug("Filesystem"),sh=natPlug("Share");
+  if(fs&&sh){
+    fs.writeFile({path:name,data:text,directory:"CACHE",encoding:"utf8"})
+      .then(function(r){return sh.share({title:L("sumT"),url:r.uri,dialogTitle:L("sumT")})})
+      .catch(function(e){var m=String(e&&e.message||e);if(!/cancel/i.test(m))alert(L("expErr")+"\n"+m)});
+    return;
+  }
+  var b=new Blob([text],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
 }
 document.addEventListener("click",function(e){
