@@ -814,6 +814,19 @@ nav button span{font-size:.64rem;letter-spacing:-.01em}}
 .vsheet{border-radius:22px 22px 0 0}
 /* respect reduced motion */
 @media (prefers-reduced-motion: reduce){.htile,.btn,.mn{transition:none}}
+.rplink{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;padding:7px 11px;border-radius:12px;background:var(--sunk);color:var(--muted)}
+.rplink i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.rplink.ok{color:var(--good)}.rplink.ok i{background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 25%,transparent)}
+.rplink.bad{background:color-mix(in srgb,var(--bad) 14%,var(--surface));color:var(--bad)}
+.rplink b{letter-spacing:.08em}
+.rpstrip{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;padding:8px 11px;border:1px dashed var(--line);border-radius:12px}
+.rpstrip span{display:flex;flex-direction:column}.rpstrip em{font-style:normal;font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rpstrip span:not(:first-child){font-family:var(--f-mono)}
+.rpw.rpcall{border-left-color:var(--accent);color:var(--ink)}
+/* own aircraft: soft beacon pulse */
+@keyframes acpulse{0%,100%{opacity:.10}50%{opacity:.32}}
+svg.scene circle.halo{animation:acpulse 1.8s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){svg.scene circle.halo{animation:none}}
 </style>
 
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -908,7 +921,7 @@ function keyClick(vol=.13){if(S.radioNoise===false)return;nburst(.012,900,.7,vol
 function squelchTail(vol=.11,len=.19){if(S.radioNoise===false)return;nburst(len,2300,.6,vol,t=>Math.min(1,t*14)*Math.pow(1-t,1.6))}
 function squelch(len=.09,vol=.05){nburst(len,1800,.8,vol,t=>1-t)}
 try{if(canSpeak()){loadVoices();speechSynthesis.addEventListener('voiceschanged',loadVoices)}}catch(e){}
-const WORDS=['ZARIN','AKSAY','BEKOT','SAMOR','KUMAR','DILNO','TOSKA','KUVA','DENOV','KASAN','AMDAR','OGODA','DIPAX','MIRZO'];
+const WORDS=['TISIB','KUFIM','DODUR','DIBAD','OGRIP','BAMUT','RODRO','USOLO','AMDAR','OGODA','DIPAX','LAPZE','NAKUK','MIRZO'];
 const ttsText=s=>s.replace(/\b[A-Z]{4,5}\b/g,w=>(WORDS.includes(w)||(w.length===5&&/[AEIOU]/.test(w)&&!/^(RVSM|TCAS|SQUAWK)$/.test(w)))?w[0]+w.slice(1).toLowerCase():w);
 /* radio background: a quiet band-limited hiss with small crackles while ATC is talking, like a real VHF receiver */
 let RNOISE=null;
@@ -981,7 +994,7 @@ const SCN=[
  {atc:'{CS}, {DEP} Ground, read you 5.',task:'Request departure information.',need:[['request departure information','"request departure information"']],model:'{CS}, request departure information'},
  {atc:'{CS}, runway {DR}, wind {DW1} degrees 8 knots, QNH 1015, temperature 14, dew point 6.',task:'Read back the runway and QNH.',need:[['{DRX}','Runway {DR}'],['qnh 1015','QNH 1015']],model:'Runway {DR}, QNH 1015, {CS}'},
  {atc:'{CS}, correct.',task:'Request your ATC clearance to {DST}. Include stand {STD} and information Charlie.',need:[['stand {STDX}','Stand {STD}'],['information charlie','Information Charlie'],['clearance','"ATC clearance"'],['{DSTN}','Destination {DST}']],model:'{CS}, stand {STD}, information Charlie, request ATC clearance to {DST}'},
- {atc:'{CS}, cleared to {DST} via ZARIN 1A departure, flight planned route, climb to altitude 6000 feet initially, contact Departure 125.8 when airborne, squawk 3472.',task:'Read back the clearance in full.',need:[['{DSTN}','Clearance limit {DST}'],['zarin 1 (a|alfa)\\b','Departure ZARIN 1A'],['flight planned route','"flight planned route"'],['6000','6000 feet initially'],['125\\.8','125.8 when airborne'],['3472','Squawk 3472']],model:'Cleared to {DST} via ZARIN 1A departure, flight planned route, 6000 feet initially, 125.8 when airborne, squawk 3472, {CS}'},
+ {atc:'{CS}, cleared to {DST} via TISIB 1A departure, flight planned route, climb to altitude 6000 feet initially, contact Departure 125.8 when airborne, squawk 3472.',task:'Read back the clearance in full.',need:[['{DSTN}','Clearance limit {DST}'],['tisib 1 (a|alfa)\\b','Departure TISIB 1A'],['flight planned route','"flight planned route"'],['6000','6000 feet initially'],['125\\.8','125.8 when airborne'],['3472','Squawk 3472']],model:'Cleared to {DST} via TISIB 1A departure, flight planned route, 6000 feet initially, 125.8 when airborne, squawk 3472, {CS}'},
  {atc:'{CS}, that is correct.',sit:'Doors closed, the tug is connected. Engines are not running yet.',task:'Request pushback. Give your stand.',need:[['request push ?back','"request pushback"'],['stand {STDX}','Stand {STD}']],model:'{CS}, stand {STD}, request pushback'},
  {atc:'{CS}, pushback approved, facing {FACE}.',task:'Read back.',need:[['push ?back approved','"Pushback approved"'],['facing {FACEX}','Facing {FACE}']],model:'Pushback approved, facing {FACE}, {CS}'},
  {sit:'Pushback complete, facing {FACE}. The tug is still connected.',task:'Request start-up.',need:[['start ?up','"start-up"']],model:'{CS}, request start-up'},
@@ -1005,7 +1018,7 @@ const SCN=[
  {atc:'{CS}, traffic 2 o\'clock, 10 miles, crossing right to left, 1000 feet above.',task:'You cannot see the traffic. Reply.',need:[['negative contact|looking out|traffic in sight','"Negative contact" or "Looking out"']],model:'Negative contact, {CS}'},
  {atc:'{CS}, clear of traffic. Report reaching FL320.',task:'Acknowledge.',need:[['wilco','"Wilco"']],model:'Wilco, {CS}'},
  {sit:'You are now level at FL320.',task:'Report reaching.',need:[['(reaching|maintaining) flight level 320','"Reaching FL320"']],model:'{CS}, reaching FL320'},
- {atc:'{CS}, roger.',sit:'Over ZARIN at time 52, FL320. Estimating AKSAY at 07, next BEKOT.',task:'Make a position report.',need:[['zarin','Position ZARIN'],['\\b52\\b','Time 52'],['flight level 320','Level FL320'],['aksay','Next point AKSAY'],['\\b0?7\\b','Estimate 07'],['bekot','Ensuing point BEKOT']],model:'{CS}, ZARIN 52, FL320, AKSAY 07, BEKOT'},
+ {atc:'{CS}, roger.',sit:'Over TISIB at time 52, FL320. Estimating DODUR at 07, next KUFIM.',task:'Make a position report.',need:[['tisib','Position TISIB'],['\\b52\\b','Time 52'],['flight level 320','Level FL320'],['dodur','Next point DODUR'],['\\b0?7\\b','Estimate 07'],['kufim','Ensuing point KUFIM']],model:'{CS}, TISIB 52, FL320, DODUR 07, KUFIM'},
  {atc:'{CS}, maintain Mach .78 or greater.',task:'Read back.',need:[['mach 0?\\.78','Mach .78 ("point seven eight")'],['or greater','"or greater"']],model:'Maintain Mach .78 or greater, {CS}'},
  {sit:'Severe turbulence. You can no longer keep RVSM height-keeping tolerances.',task:'Inform ATC.',need:[['unable rvsm','"Unable RVSM"'],['turbulence','Reason: turbulence']],model:'{CS}, unable RVSM due turbulence'},
  {atc:'{CS}, roger, report able to resume RVSM.',task:'Acknowledge.',need:[['wilco','"Wilco"']],model:'Wilco, {CS}'},
@@ -1084,7 +1097,7 @@ const WP=[[50,215],[180,150],[310,178],[440,118],[560,170]];
 const atWP=f=>{const i=Math.max(0,Math.min(3,Math.floor(f))),t=f-i,a=WP[i],b=WP[i+1];return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI]};
 function wpSym(x,y,comp){return comp?`<path class="wpc" d="M${x},${y-7} L${x+6.5},${y+5} L${x-6.5},${y+5} Z"/>`:`<path class="wp" d="M${x},${y-7} L${x+6.5},${y+5} L${x-6.5},${y+5} Z"/>`}
 function sRoute(o){
-  const v=V(),mx=MSX(),names=mx?[v.DEP,mx.wps[1],mx.wps[2],mx.wps[3],v.DST]:[v.DEP,'ZARIN','AKSAY','BEKOT',v.DST],codes=[(DEPAD()||{}).i,'','','',(DSTAD()||{}).i],id='h'+(++UID);
+  const v=V(),mx=MSX(),names=mx?[v.DEP,mx.wps[1],mx.wps[2],mx.wps[3],v.DST]:[v.DEP,'TISIB','DODUR','KUFIM',v.DST],codes=[(DEPAD()||{}).i,'','','',(DSTAD()||{}).i],id='h'+(++UID);
   let g=`<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="hatch"/></pattern></defs><rect class="chart" width="600" height="300"/>`;
   g+=`<path class="grat" d="M0,60H600M0,140H600M0,220H600M90,0V300M240,0V300M390,0V300M540,0V300"/>`;
   g+=`<text class="gl" x="4" y="56">N41°30'</text><text class="gl" x="4" y="136">N41°00'</text><text class="gl" x="4" y="216">N40°30'</text><text class="gl" x="94" y="296">E064°</text><text class="gl" x="244" y="296">E065°</text><text class="gl" x="394" y="296">E066°</text>`;
@@ -1116,7 +1129,7 @@ function sRoute(o){
   const hr=h*Math.PI/180;g+=`<line class="vec" x1="${x}" y1="${y}" x2="${x+Math.cos(hr)*44}" y2="${y+Math.sin(hr)*44}"/>`;
   if(o.traffic){const r=(h+60)*Math.PI/180,tx=x+Math.cos(r)*85,ty=y+Math.sin(r)*85;g+=pl(tx,ty,h-120,'tr',.7)+`<line class="trl" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"/>`+tag(tx+12,ty-6,['TFC 2 O\'CLOCK','+1000 FT · 10 NM'],100)}
   g+=tag(Math.min(490,x+14),Math.max(4,y-50),[csShort(),(o.lvl||'FL320')+'  GS 450'],80);
-  if(o.report)g+=tag(62,14,o.rep||['POSITION REPORT','ZARIN 52  FL320','AKSAY 07','NEXT BEKOT'],126);
+  if(o.report)g+=tag(62,14,o.rep||['POSITION REPORT','TISIB 52  FL320','DODUR 07','NEXT KUFIM'],126);
   if(o.mach)g+=tag(62,14,['SPEED CONTROL',(()=>{const st=GCTX&&GCTX.steps[GCTX.i];const m=st&&/mach \.?(\d+) or (greater|less)/i.exec(st.atc||'');return m?'M.'+m[1]+' OR '+m[2].toUpperCase():'M.78 OR GREATER'})()],120);
   if(o.back)g+=banner(300,24,'BACK ON ROUTE','goodt','middle');
   g+=scaleBar(420,288,63,'30 NM')+northArrow(570,30,0);
@@ -1125,7 +1138,7 @@ function sRoute(o){
 
 /* ---- holding chart ---- */
 function sHold(o){
-  const v=V(),mx=MSX(),hi=mx&&mx.holdInfo,fx=hi?hi.fix:(mx?mx.wps[4]:'KUVA'),frm=mx?mx.wps[3]:'BEKOT',hfl=hi?hi.fl:110;
+  const v=V(),mx=MSX(),hi=mx&&mx.holdInfo,fx=hi?hi.fix:(mx?mx.wps[4]:'KUVA'),frm=mx?mx.wps[3]:'KUFIM',hfl=hi?hi.fl:110;
   /* drawn as cleared: inbound track and turn direction from the holding clearance */
   const it=hi&&hi.it?hi.it:270,lh=!!(hi&&hi.lr==='left'),Y=y=>lh?300-y:y,sw=lh?0:1,ob=((it+180)%360)||360;
   let g=`<rect class="chart" width="600" height="300"/><path class="grat" d="M0,75H600M0,225H600M150,0V300M450,0V300"/>`;
@@ -1258,7 +1271,7 @@ function sRadar(o){
   for(let k=0;k<72;k++)g+=`<line class="cmp" x1="300" y1="${150-140}" x2="300" y2="${150-(k%9?136:131)}" transform="rotate(${k*5} 300 150)"/>`;
   g+=`<text class="rgl" x="300" y="8" text-anchor="middle">360</text><text class="rgl" x="446" y="154">090</text><text class="rgl" x="300" y="298" text-anchor="middle">180</text><text class="rgl" x="138" y="154" text-anchor="end">270</text>`;
   g+=`<path class="awr" d="M170,230 L300,150 L470,90 M300,150 L330,290"/>`;
-  for(const [x,y,n] of (MSX()?[[300,150,MSX().wps[2]],[170,230,MSX().wps[1]],[470,90,MSX().wps[3]]]:[[300,150,'AKSAY'],[170,230,'ZARIN'],[470,90,'BEKOT']]))g+=`<path class="wpr" d="M${x-4},${y} H${x+4} M${x},${y-4} V${y+4}"/><text class="rgl" x="${x+6}" y="${y+12}">${n}</text>`;
+  for(const [x,y,n] of (MSX()?[[300,150,MSX().wps[2]],[170,230,MSX().wps[1]],[470,90,MSX().wps[3]]]:[[300,150,'DODUR'],[170,230,'TISIB'],[470,90,'KUFIM']]))g+=`<path class="wpr" d="M${x-4},${y} H${x+4} M${x},${y-4} V${y+4}"/><text class="rgl" x="${x+6}" y="${y+12}">${n}</text>`;
   g+=`<g class="sweep"><line class="sw" x1="300" y1="150" x2="300" y2="12"/></g>`;
   g+=`<rect class="blip2" x="210" y="98" width="6" height="6"/><line class="ldr" x1="216" y1="98" x2="230" y2="84"/><text class="dbt2" x="232" y="76">XAB451</text><text class="dbt2" x="232" y="90">350 ↓ 460</text>`;
   g+=`<rect class="blip2" x="400" y="200" width="6" height="6"/><line class="ldr" x1="406" y1="200" x2="420" y2="214"/><text class="dbt2" x="422" y="224">XCD27</text><text class="dbt2" x="422" y="238">280 ↑ 410</text>`;
@@ -1987,7 +2000,7 @@ const APL=[
  {i:'ZBAA',n:'Beijing Capital',r:'36R',rwy:[[[-1500,0],180,3200,['18R','36L']],[[-200,0],180,3800,['18L','36R']],[[1800,0],180,3800,['19','01']]],apr:[[[-850,0],2600,750,0],[[800,0],2900,1000,0]]},
  {i:'LIRF',n:'Rome Fiumicino',r:'16R',rwy:[[[1500,100],162,3900,['16L','34R']],[[300,-900],162,3600,['16C','34C']],[[-1300,-700],162,3900,['16R','34L']],[[-200,2300],72,3300,['07','25']]],apr:[[[-400,600],900,1700,162]]},
  {i:'UUDD',n:'Moscow Domodedovo',r:'32R',rwy:[[[900,900],138,3794,['14L','32R']],[[-900,-900],138,3500,['14R','32L']]],apr:[[[0,0],1600,800,138]]},
- {i:'UTTT',n:'Tashkent',r:'08L',rwy:[[[0,450],78,4000,['08L','26R']],[[250,-150],78,3905,['08R','26L']]],apr:[[[-300,-900],2000,600,78]]},
+ {i:'UZTT',n:'Tashkent',r:'08L',rwy:[[[0,450],78,4000,['08L','26R']],[[250,-150],78,3905,['08R','26L']]],apr:[[[-300,-900],2000,600,78]]},
  {i:'LTFM',n:'Istanbul',r:'35L',rwy:[[[-3000,200],166,3750,['16R','34L']],[[-2550,100],166,3750,['16L','34R']],[[1150,0],176,4100,['17R','35L']],[[1650,0],176,4100,['17L','35R']],[[3900,300],180,3060,['18','36']]],apr:[[[-700,0],2400,1300,176]]}
 ];
 const LIBC={},LIBSVG={};function buildLibLayout(sp,OFF=230){const ck=sp.i+'|'+OFF;if(LIBC[ck])return JSON.parse(LIBC[ck]);const out=buildLibLayout0(sp,OFF);LIBC[ck]=JSON.stringify(out);return out}
@@ -2141,9 +2154,9 @@ const EMG=[
 {id:'e-nav',cat:'Aircraft systems',sev:'NON-ROUTINE',title:'Navigation failure',desc:'Unsure of your position: identification and vectors back to the route.',end:'{CS}, resume own navigation when able.',steps:[
  {st:'{DEP} Control|132.4',sit:'FL180. Your navigation system has failed and you are unsure of your position.',task:'Tell ATC and request your position.',need:[['unsure of (my |our )?position|lost','"Unsure of position"'],['request','"Request"'],['position|vectors','Position or vectors']],model:'{CS}, navigation failure, unsure of position, request my position',sc:{t:'radar',mode:'lost',p:3}},
  {atc:'{CS}, squawk ident.',task:'Read back.',need:[['squawk(ing)? ident','"Squawk ident"']],model:'Squawk ident, {CS}',sc:{t:'radar',mode:'ident',fl:'180',p:3}},
- {atc:'{CS}, identified 25 miles north of ZARIN. Turn right heading 160 to rejoin the route.',task:'Read back.',need:[['right heading 160','Right heading 160']],model:'Right heading 160, {CS}',sc:{t:'route',pos:1.2,lvl:'FL180',p:3}}]},
+ {atc:'{CS}, identified 25 miles north of TISIB. Turn right heading 160 to rejoin the route.',task:'Read back.',need:[['right heading 160','Right heading 160']],model:'Right heading 160, {CS}',sc:{t:'route',pos:1.2,lvl:'FL180',p:3}}]},
 {id:'e-rdo',cat:'Communication',sev:'NON-ROUTINE',title:'Radio failure',desc:'Receiver failed: transmit blind, squawk 7600, recover contact.',end:'{CS}, readability 3, continue.',steps:[
- {st:'{DEP} Control|132.4',sit:'Over BEKOT, FL240. You hear nothing, but your transmitter may work. You have set 7600. ETA {DST} 35.',task:'Transmit blind with position, level and intentions.',need:[['transmitting blind','"Transmitting blind"'],['receiver|radio','Reason: receiver failure'],['flight level 240','FL240'],['bekot','Position BEKOT'],['{DSTN}','Continuing to {DST}']],model:'{CS}, transmitting blind due receiver failure, squawking 7600, over BEKOT FL240, continuing to {DST}, estimating 35',sc:{t:'radar',mode:'nordo',sq:'7600',fl:'240',p:3}},
+ {st:'{DEP} Control|132.4',sit:'Over KUFIM, FL240. You hear nothing, but your transmitter may work. You have set 7600. ETA {DST} 35.',task:'Transmit blind with position, level and intentions.',need:[['transmitting blind','"Transmitting blind"'],['receiver|radio','Reason: receiver failure'],['flight level 240','FL240'],['kufim','Position KUFIM'],['{DSTN}','Continuing to {DST}']],model:'{CS}, transmitting blind due receiver failure, squawking 7600, over KUFIM FL240, continuing to {DST}, estimating 35',sc:{t:'radar',mode:'nordo',sq:'7600',fl:'240',p:3}},
  {atc:'{CS}, if you read, squawk ident.',sit:'Your receiver now works again with interference.',task:'Comply and say how you read.',need:[['squawk(ing)? ident','Squawk ident'],['read|interference','How you read']],model:'{CS}, squawking ident, reading you with interference',sc:{t:'radar',mode:'ident',sq:'7600',fl:'240',p:3}},
  {atc:'{CS}, identified. Squawk 2341, descend FL150.',task:'Read back.',need:[['2341','Squawk 2341'],['descend(ing)?( to)? flight level 150','Descend FL150']],model:'Squawk 2341, descending FL150, {CS}',sc:P('descent',240,150,4)}]},
 {id:'e-ws',cat:'Weather & birds',sev:'NON-ROUTINE',title:'Wind shear on final',desc:'Airspeed loss at 600 ft: go around and give a wind shear report.',end:'{CS}, hold at KUVA, expect further clearance at 20.',steps:[
@@ -2224,6 +2237,16 @@ const MS_SYL1=['BA','DO','KE','LU','MI','NA','RO','SA','TI','VE','ZE','GO','PA',
 const MS_SYL2=['LIK','RAN','DOS','MEX','NOR','TAL','VIN','SUR','KOL','BIT','RAX','MUN','DEL','GAN','TOV','LEX','POR','SIN','KAR','NEB','LOT','RIX','DAN','SOP','TEK','VAL','BOR','NIK','MAS','GUL'];
 function mPick(r,a){return a[Math.floor(r()*a.length)]}
 function mInt(r,a,b){return a+Math.floor(r()*(b-a+1))}
+/* real ATS routes and significant points of Uzbekistan (AIP ENR 4.3); the order of points along a route is not given there */
+const UZ_AWY={L139:'ENOVO INKAR KIBFU MOKDU OLFEG TULGA',L141:'AVZEG BAMGU DIPAX EKVIT ILGOZ MANAT MOKDU OGNOB RAPEX ROPIL TISIB ZORQI',L143:'BOKLA DEXFI FIFOQ IPFAB KUFIM POGON RAVOB RODKI TADEN TISIB UMZAN UVASU',L162:'DAKLI DIDOP NITNA NITNI ODIVA OTFOD OTKIM UMZAN UZNEW',L163:'ATLUD DIKRI DODUR ESIBO OGODA OLUMU RODRO TISIB',L165:'AKALI DIFNE GOBUL INDUD NUHEF YOYOZ',L170:'AKAZU EKVIT KUFIM MOSOM VAMUK',L855:'DIFNE GIGMA NAKUK NESIR OGLON TIGTA',L985:'AKALI DARVA GIGMA LAKOH MAKIX PIDWO',M161:'AMDAR BOLNA GIFKE IPFAB ODIVA OFDAF RIMDO ZORQI',M168:'ABEKA ABGEN DERKI DODUR IPRAR KUFIM LONDO MEVTE NETAT NIBTI OGNOB OLIKA PABDI',M741:'AMDAR ASLOK IDSAN OTFOD RITAL RONVU TOBOT USETU VORHE',M75:'DARVA MIMRI NESVA NITNA PIDWO RIMDO UBAGU',M875:'AMDAR INDUD ODIDI REBKE TIGTA VADOD',N143:'EKPAK FONHU OGOLI OTKIM POGON RITAL',N144:'AVZEG EKDUP FIFOQ IZJAT KORAG LURIB NAKUK RAHZI REBKE RENHE',N147:'BABIR BORIS EGZIG EVTEV GENKU GOBUL OFFES OTBOR PIDWO TAHIR UNBAS',N154:'KORAG PEFUW SIGFU TIGTA TOFBI',N193:'DIBAD EKDUP ELMAL IPNAR KUNAS LANOL LAPZE OGOLI SIPMO TAGAM UNBAS USOLO',P178:'DODUR MANAT OGRIP RAVEG TOLIB',P180:'ABEVO ASLOK BUGEB DILRO KUFIM LAPZE MOMUL OGRIP SUDAR',Q169:'AZREF BUPOR EKDUP GUZAH INDUD KORAG KUGZA MEVTE NAKUK OGSES OKDOR PINUD REBNA RENHE SOPNO TUDLI VANAB',Q325:'AKMAZ ODZEP OSLEB RONVU TITAR',T186:'ABANI AMDAR EKPAK FIZLE INDUD LAPZE OLIKA PETIT RATAR TOLIB TUKRI',T388:'BIBED BUPOR DAKLI POGON RAVEG REGMO TUKRI UBENA UVASU',T525:'BAKMO ENOVO IXOMA LELBA LEPVO MIKDI',T609:'BAMGU BIBON EDOSU EKLER ESIBO EZIFE KIBFU KOLIX LELBA NITNI PINUD RAPAT RINDO TISIB ULTON USETU USOLO',T733:'EGZIG GILAT KENFE KUNAS LAKOH QAPPA',T898:'DARVA NUHEF OGOLI SAFOB SUDAR ZAMWO',T916:'AKALI EFMIF KUNAS PEFUW UNVUB',Y114:'AFOZE BABIR BALSO EVKAK FIZLE INVOR IZVIP LAPZE LISNI LUPIK NAKUK NIMBA OGNOB REBNA UBENA',Y300:'ARPIZ EDOSU FIZLE GONAK LAVMI OMANO RONVU USETU',Y595:'BESAG EVMUR GIMLA OGNOB OGSES PIDWO SOPNO SOVOD UNONA VASIM VORHE ZAMWO ZURAB',Y720:'BITFO DEXFI DIKNA DILRO EKVIT LAPZE MIXBE PIDWO RUMAM',Y815:'IVOFE MIHIS MISRA NAKUK PEFUW TASHA',Y92:'AKALI ARGAS BABIR BUPOR DIFNE ILGOZ KERIV NETAT OGNOB TITAR TOLIB',Y927:'AKALI FUKCA GENKU KUGZA POGON RAHZI ULPAG',Z151:'DEXFI FONHU OZQAR PIDWO PUNIJ SAFOB',Z235:'ABLAG ENOVO ETOTA IRGUL NEPNU UFDOZ',Z407:'BUPOR BUTRA DAKLI FONHU KULIL LAPZE MAMAL ODIVA TAHIR USETU',Z514:'BIBON EZIFE GETLI KERIV NAKUK OGNOB SAFOB USETU',Z554:'AGDOS ASLOK BUPOR CHARD DIBAD DODUR EVROB INSOM OKESO',Z580:'BUPOR DODUR OGRIP REDPO TADEN',Z621:'AGNAN ATRAN KENFE LAPZE ODIDI',Z626:'DAKLI DARVA EDOSU KERIV OZIVE PETIT YOYOZ ZAMWO',Z627:'BORIS KUNAS OFFES REBKE UBAGU ZUKFU',Z640:'BUPOR DERKI GILAT LAPZE MOROV PETAB ROBAP',Z753:'ASBUG BAMGU BITFO IBMOB KUFIM OSBOR',Z767:'DEXFI FUNSE ODIVA TAGAM UFDOZ',Z777:'ERNUX INDUD MANAT NITNI RAPAT RASID'};
+const UZ_PTS=[...new Set(Object.values(UZ_AWY).join(' ').split(' '))];
+/* Tashkent (UZTT, ex UTTT): published SIDs and STARs */
+const UZTT_SID={'08':[['BAMUT',1,'A','DODUR'],['TISIB',1,'A','DIPAX'],['KUFIM',1,'A','OGRIP']],'26':[['BAMUT',1,'B','DODUR'],['TISIB',1,'B','DIPAX'],['OGRIP',1,'B','KUFIM']]};
+const UZTT_STAR={'08':[['KUFIM',1,'Z','TISIB'],['DIBAD',1,'Z','EVROB']],'26':[['KUFIM',1,'W','TISIB'],['KUFIM',1,'X','DIBAD']]};
+const isTAS=ad=>ad&&/^(UZTT|UTTT)$/.test(ad.i);
+/* a stretch of real route: an airway and three points on it, starting near the given point when possible */
+function uzRoute(r,start){const ks=Object.keys(UZ_AWY).filter(k=>!start||UZ_AWY[k].split(' ').includes(start));const K=mPick(r,ks.length?ks:Object.keys(UZ_AWY));let P=UZ_AWY[K].split(' ');
+  if(start&&P.includes(start)){P=[start,...P.filter(x=>x!==start)]}const k0=start?0:mInt(r,0,P.length-4);return {awy:K,pts:P.slice(k0,k0+4)}}
 function mWpName(r,used){for(let k=0;k<50;k++){const w=mPick(r,MS_SYL1)+mPick(r,MS_SYL2);if(!used.has(w)&&!WORDS.includes(w)){used.add(w);return w}}return 'NOVAR'}
 const MS_TYPES=['A320','A321','B737','B738','B777','A330','B787','E190','CRJ900','A350','B757','Il-76','An-26','C-130','ATR72','Q400'];
 const MS_TYPESAY={'B737':'Boeing 737','B738':'Boeing 737','B777':'Boeing 777','B787':'Boeing 787','B757':'Boeing 757','E190':'Embraer 190','CRJ900':'CRJ 900','ATR72':'ATR 72','Q400':'Dash 8','C-130':'Hercules','Il-76':'Ilyushin 76','An-26':'Antonov 26'};
@@ -2615,19 +2638,28 @@ function genMission(n){
   if(n<=20){di=S.dep<ads.length?S.dep:0;ai=S.dst<ads.length&&S.dst!==di?S.dst:(di?0:1)}
   const wDep=mInt(r,1,36)*10,wArr=mInt(r,1,36)*10,sDep=mInt(r,3,16),sArr=mInt(r,3,18);
   const dep=mAdClone(ads[di],r,wDep),arr=mAdClone(ads[ai],r,wArr);
-  const used=new Set();const wps=[mWpName(r,used),mWpName(r,used),mWpName(r,used),mWpName(r,used),mWpName(r,used)];
+  const RT=uzRoute(r,null);const wps=[mPick(r,UZ_PTS.filter(w=>!RT.pts.includes(w))),RT.pts[0],RT.pts[1],RT.pts[2],RT.pts[3]];let awyN=RT.awy;
   const kind=n%5===0?'dep':n%5===3?'arr':n%7===4?'enr':'full';
   const atis=mPick(r,MS_ATIS),atisW=PHON[atis],qnhD=mInt(r,996,1032),qnhA=mInt(r,996,1032),tmp=mInt(r,-8,34),dew=tmp-mInt(r,1,12);
   const atisA=kind==='full'?MS_ATIS[(MS_ATIS.indexOf(atis)+3+n%5)%MS_ATIS.length]:atis,atisAW=PHON[atisA];/* the destination has its own ATIS */
   const sq=String(mInt(r,1,7))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7),sq2=String(mInt(r,1,6))+mInt(r,0,7)+mInt(r,0,7)+mInt(r,0,7);
-  const fqG=mPick(r,['121.7','121.9','121.75']),fqT=mPick(r,['118.1','118.3','118.7','119.1','119.45']),fqD=mPick(r,['124.85','125.8','126.4','127.25']),fqC=mPick(r,['128.35','129.1','131.2','132.4','133.65','134.05']),fqC2=mPick(r,['127.5','130.45','132.95','135.2']),fqA=mPick(r,['119.8','120.2','124.3','125.25']),fqTa=mPick(r,['118.25','119.1','119.9','118.9']),fqGa=mPick(r,['121.6','121.85','122.05']);
-  const sidD=mInt(r,1,7),sidL=mPick(r,['A','B','C','D','E','K','M','Q','S','T','W']),starD=mInt(r,1,7),starL=mPick(r,['A','B','C','D','E','F','G','H','J','L','N','P','R','S','T']);
-  const initAlt=mPick(r,[4000,5000,6000,7000,8000]);let crz=mPick(r,[240,260,280,300,320,340,360,380]);const fl1=mPick(r,[110,130,150,170,190].filter(x=>x<crz-50)),desFL=mPick(r,[90,110,130,150].filter(x=>x<crz-60));
+  const fqG0=mPick(r,['121.7','121.9','121.75']),fqT0=mPick(r,['118.1','118.3','118.7','119.1','119.45']),fqD0=mPick(r,['124.85','125.8','126.4','127.25']),fqC=mPick(r,['128.35','129.1','131.2','132.4','133.65','134.05']),fqC2=mPick(r,['127.5','130.45','132.95','135.2']),fqA0=mPick(r,['119.8','120.2','124.3','125.25']),fqTa0=mPick(r,['118.25','119.1','119.9','118.9']),fqGa0=mPick(r,['121.6','121.85','122.05']);
+  /* Tashkent publishes its own frequencies: Ground 121.7, Tower 120.4, Approach 119.4 */
+  const fqG=isTAS(dep)?'121.7':fqG0,fqT=isTAS(dep)?'120.4':fqT0,fqD=isTAS(dep)?'119.4':fqD0,fqA=isTAS(arr)?'119.4':fqA0,fqTa=isTAS(arr)?'120.4':fqTa0,fqGa=isTAS(arr)?'121.7':fqGa0;
+  let sidD=mInt(r,1,7),sidL=mPick(r,['A','B','C','D','E','K','M','Q','S','T','W']),starD=mInt(r,1,7),starL=mPick(r,['A','B','C','D','E','F','G','H','J','L','N','P','R','S','T']);
+  let fqG2=null;
+  const initAlt=mPick(r,[4000,5000,6000,7000,8000]);let crz=mPick(r,[240,260,280,300,320,340,360,380]);/* Uzbekistan: transition altitude 13 000 ft, transition level FL150 - below it ATC gives altitudes on QNH */
+  const fl1=mPick(r,[150,170,190,210].filter(x=>x<crz-40)),desFL=mPick(r,[150,160,170].filter(x=>x<crz-60));
   const T1=mPick(r,MS_TYPES),T2=mPick(r,MS_TYPES),T3=mPick(r,MS_TYPES);
   const PD=groundPlan(dep),PA=groundPlan(arr);
   const DR=PD.des,AR=PA.des,DRX=rwyRe(DR),ARX=rwyRe(AR),hpn=PD.hp&&PD.hp.n?PD.hp.n:'',HPS=hpn?nameSpk(hpn)+' ':'',HPX=hpn?nameRx(hpn):'';
+  const DEPS=isTAS(dep)?'Approach':'Departure';/* Tashkent has no separate departure controller */
   const depN=dep.n,arrN=arr.n,depX=nameRe(depN),arrX=nameRe(arrN);
-  const ms={n,dep,arr,wps,hold:wps[4],qnhA,sq0:'----',wind:{d:wDep,s:sDep,ad:wArr,as:sArr},awy:['SID','W'+mInt(r,10,99),'W'+mInt(r,10,99),'STAR']};
+  /* Tashkent: the published SID / STAR for the runway in use, and the route joined from the SID */
+  if(isTAS(dep)){const L=UZTT_SID[String(DR).slice(0,2)]||UZTT_SID['08'],s=mPick(r,L);wps[0]=s[0];sidD=s[1];sidL=s[2];const R2=uzRoute(r,s[3]);wps[1]=R2.pts[0];wps[2]=R2.pts[1]||wps[2];if(!isTAS(arr)){wps[3]=R2.pts[2]||wps[3];wps[4]=R2.pts[3]||wps[4]}awyN=R2.awy}
+  if(isTAS(arr)){const L=UZTT_STAR[String(AR).slice(0,2)]||UZTT_STAR['08'],s=mPick(r,L);wps[3]=s[0];starD=s[1];starL=s[2];wps[2]=s[3];wps[4]='DODUR';if(wps[1]===wps[2]||wps[1]===wps[3])wps[1]=mPick(r,UZ_PTS.filter(w=>!wps.includes(w)))}
+  for(let i=1;i<5;i++)if(wps.indexOf(wps[i])!==i)wps[i]=mPick(r,UZ_PTS.filter(w=>!wps.includes(w)));
+  const ms={n,dep,arr,wps,hold:wps[4],qnhA,sq0:'----',wind:{d:wDep,s:sDep,ad:wArr,as:sArr},awy:['SID',awyN,awyN,'STAR']};
   const st=(stn,f)=>stn+'|'+f;
   const steps=[];let endMsg=null;const S_=(o)=>{if(scApp==='visual')visT(o);steps.push(o);return o};
   /* no ILS: the approach becomes vectors to a visual approach */
@@ -2666,7 +2698,11 @@ function genMission(n){
     S_({atc:'{CS}, roger, search and rescue alerted, emergency services are on the way. Report on the ground when able.',task:'Acknowledge.',need:[['wilco|roger','"Wilco"']],model:'Wilco, {CS}',sc:{t:'mayday',stage:0,fire:false,tags:['SEARCH AND RESCUE','ALERTED'],p:4}});
     tags.push('forced landing');endMsg='{CS}, roger, search and rescue are on their way.'};
   /* puts the scenarios of one part of the flight into the mission; 'end' means the flight stops here */
-  const SC=(ph,scene)=>{for(const si of (PL[ph]||[])){const X=scX();X.rw=ph.startsWith('gnd')||ph==='rwy'?DR:AR;X.twy=ph.startsWith('gnd')?(PD.names&&PD.names[0])||null:null;
+  const scT=si=>SCEN[si].L.map(l=>typeof l[1]==='number'?uPhrase(l[1]).e:l[1]).join(' ');
+  const SC=(ph,scene,filt)=>{for(const si of (PL[ph]||[])){if(filt&&!filt(si))continue;const tx0=scT(si);
+      if(ph==='gnd.hp'&&/backtrack/i.test(tx0))continue;/* the holding point is at the runway end: nothing to backtrack */
+      if(scApp==='visual'&&/fog|visibility|RVR/i.test(tx0))continue;/* a visual approach is not flown in fog */
+      const X=scX();X.rw=ph.startsWith('gnd')||ph==='rwy'?DR:AR;X.twy=ph.startsWith('gnd')?(PD.names&&PD.names[0])||null:null;
       X.FLP=ph==='dep'?fl1:ph==='crz'?crz:ph==='des'?desFL:null;
       if(/Sidestep/i.test(SCEN[si].L.map(l=>typeof l[1]==='number'?uPhrase(l[1]).e:l[1]).join(' '))&&!/[LR]$/.test(AR))continue;/* a sidestep needs parallel runways */
       const ss=scenSteps(si,X,scene);ss.forEach(s=>S_(s));tags.push('non-routine');const e=SCEN[si].e;
@@ -2759,15 +2795,18 @@ function genMission(n){
       S_({sit:'The fire crew reports no fire. The aircraft can taxi.',task:'Request to vacate the runway and return to the stand.',need:[['vacat|return','"vacate" / "return to stand"'],['stand','"stand"']],model:'{CS}, request to vacate the runway and return to stand',sc:G_('rto',1,{txt:'STOPPED ON RUNWAY',trucks:true})});
       tags.push('rejected take-off');endMsg=`{CS}, vacate when able, taxi to stand ${PD.std} via ${PD.txr||'the apron'}, contact Ground ${fqG}.`;return finish()}}
     // Tower: airborne time and transfer to Departure
-    {const tA=pad((n*7+13)%60);S_({atc:`{CS}, airborne at ${tA}, contact ${depN} Departure ${fqD}.`,task:'Read back the frequency.',need:[[fqRx(fqD),'Frequency '+fqD]],model:`${fqD}, {CS}`,sc:{t:'route',pos:.15,lvl:'1000 FT ↑',p:2}})}
+    {const tA=pad((n*7+13)%60);S_({atc:`{CS}, airborne at ${tA}, contact ${depN} ${DEPS} ${fqD}.`,task:'Read back the frequency.',need:[[fqRx(fqD),'Frequency '+fqD]],model:`${fqD}, {CS}`,sc:{t:'route',pos:.15,lvl:'1000 FT ↑',p:2}})}
     // departure
     const pass=mPick(r,[1500,2000,2500,3000].filter(x=>x<initAlt));
-    S_({st:st(depN+' Departure',fqD),sit:`You are now on Departure frequency ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with Departure.',need:[[depX+' (departure|radar)',`Station "${depN} Departure"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} Departure, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
-    const dv=r();
-    if(dv<.35)S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, proceed direct ${wps[1]}.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['direct','"direct"'],[wpRx(wps[1]),'Point '+wps[1]]],model:`Climbing FL${fl1}, direct ${wps[1]}, {CS}`,sc:{t:'route',pos:.6,lvl:'FL'+fl1+' ↑',p:2}});
-    else if(dv<.7){const h=mInt(r,1,36)*10,lr=mPick(r,['left','right']);S_({atc:`{CS}, ${depN} Departure, identified, turn ${lr} heading ${pad(h,3)}, climb FL${fl1}.`,task:'Read back.',need:[[lr+' heading 0*'+h,lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+pad(h,3)],['flight level '+fl1,'FL'+fl1]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${pad(h,3)}, climbing FL${fl1}, {CS}`,sc:{t:'route',pos:.55,lvl:'FL'+fl1+' ↑',p:2}})}
-    else S_({atc:`{CS}, ${depN} Departure, identified, climb FL${fl1}, no speed restriction.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['no speed restriction','"No speed restriction"']],model:`Climbing FL${fl1}, no speed restriction, {CS}`,sc:{t:'profile',mode:'climb',a:Math.round(initAlt/100),b:fl1,p:2}});
-    if(SC('dep',{t:'route',pos:.7,lvl:'FL'+fl1+' ↑',p:2})==='end')return finish();
+    S_({st:st(depN+' '+DEPS,fqD),sit:`You are now on Departure frequency ${fqD}. Passing ${pass} feet, climbing to ${initAlt} feet on the ${wps[0]} ${sidD}${sidL}.`,task:'Make first contact with '+DEPS+'.',need:[[depX+' (departure|radar|approach)',`Station "${depN} ${DEPS}"`],['passing '+pass,'Passing '+pass+' feet'],[String(initAlt),'Climbing '+initAlt+' feet']],model:`${depN} ${DEPS}, {CS}, passing ${pass} feet, climbing ${initAlt} feet`,sc:{t:'route',pos:.3,lvl:pass+' FT ↑',p:2}});
+    /* "fly runway heading" comes first, before any other heading or direct */
+    const hdgSc=si=>/(RWY|runway) heading/i.test(scT(si)),depHdg=(PL.dep||[]).some(hdgSc);
+    if(depHdg&&SC('dep',{t:'route',pos:.5,lvl:initAlt+' ft ↑',p:2},hdgSc)==='end')return finish();
+    const dv0=r(),dv=depHdg?.9:dv0;
+    if(dv<.35)S_({atc:`{CS}, ${depN} ${DEPS}, identified, climb FL${fl1}, proceed direct ${wps[1]}.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['direct','"direct"'],[wpRx(wps[1]),'Point '+wps[1]]],model:`Climbing FL${fl1}, direct ${wps[1]}, {CS}`,sc:{t:'route',pos:.6,lvl:'FL'+fl1+' ↑',p:2}});
+    else if(dv<.7){const h=mInt(r,1,36)*10,lr=mPick(r,['left','right']);S_({atc:`{CS}, ${depN} ${DEPS}, identified, turn ${lr} heading ${pad(h,3)}, climb FL${fl1}.`,task:'Read back.',need:[[lr+' heading 0*'+h,lr.charAt(0).toUpperCase()+lr.slice(1)+' heading '+pad(h,3)],['flight level '+fl1,'FL'+fl1]],model:`${lr.charAt(0).toUpperCase()+lr.slice(1)} heading ${pad(h,3)}, climbing FL${fl1}, {CS}`,sc:{t:'route',pos:.55,lvl:'FL'+fl1+' ↑',p:2}})}
+    else S_({atc:`{CS}, ${depN} ${DEPS}, identified, climb FL${fl1}, no speed restriction.`,task:'Read back.',need:[['flight level '+fl1,'FL'+fl1],['no speed restriction','"No speed restriction"']],model:`Climbing FL${fl1}, no speed restriction, {CS}`,sc:{t:'profile',mode:'climb',a:Math.round(initAlt/100),b:fl1,p:2}});
+    if(SC('dep',{t:'route',pos:.7,lvl:'FL'+fl1+' ↑',p:2},si=>!hdgSc(si))==='end')return finish();
     if(kind==='dep'){S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}})}
     else S_({atc:`{CS}, contact ${depN} Control ${fqC}.`,task:'Read back.',need:[[fqRx(fqC),'Frequency '+fqC]],model:`${fqC}, {CS}`,sc:{t:'route',pos:.85,lvl:'FL'+fl1+' ↑',p:2}});
   }
@@ -2805,7 +2844,9 @@ function genMission(n){
     const starName=`${wps[3]} ${starD}${starL}`;const fromFL=kind==='arr'?mPick(r,[200,220,240]):crz;
     if(kind==='arr'){ms.sq0=sq;firstSit=`Mission ${n}: arriving at ${arrN}. Runway ${AR} in use, wind ${pad(wArr,3)}/${sArr}. ATIS information ${atisAW}, QNH ${qnhA}.`}
     S_({st:st(arrN+' Control',fqC2),sit:(kind==='arr'?firstSit+' ':'')+`Level FL${fromFL}, approaching ${wps[3]}.`,task:`Make first contact with ${arrN} Control.`,need:[[arrX+' control',`Station "${arrN} Control"`],['flight level '+fromFL,'FL'+fromFL]],model:`${arrN} Control, {CS}, FL${fromFL}`,sc:{t:'route',pos:2.7,lvl:'FL'+fromFL,p:3}});
-    S_({atc:`{CS}, ${arrN} Control, identified, descend FL${desFL}, ${starName} arrival, runway ${AR}.`,task:'Read back.',need:[['flight level '+desFL,'FL'+desFL],[procRx(wps[3],starD,starL),'Arrival '+starName],[ARX,'Runway '+AR]],model:`Descending FL${desFL}, ${starName} arrival, runway ${AR}, {CS}`,sc:{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4}});
+    /* when a later instruction continues the descent, the first clearance stops higher */
+    const desFL1=(PL.des||[]).some(si=>/FL ?\d{3}/.test(scT(si)))?Math.max(desFL,Math.min(fromFL-20,desFL+40)):desFL;
+    S_({atc:`{CS}, ${arrN} Control, identified, descend FL${desFL1}, ${starName} arrival, runway ${AR}.`,task:'Read back.',need:[['flight level '+desFL1,'FL'+desFL1],[procRx(wps[3],starD,starL),'Arrival '+starName],[ARX,'Runway '+AR]],model:`Descending FL${desFL1}, ${starName} arrival, runway ${AR}, {CS}`,sc:{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4}});
     if(SC('des',{t:'profile',mode:'descent',a:fromFL,b:desFL,p:4})==='end')return finish();
     S_({atc:`{CS}, contact ${arrN} Approach ${fqA}.`,task:'Read back.',need:[[fqRx(fqA),'Frequency '+fqA]],model:`${fqA}, {CS}`,sc:{t:'route',pos:3.2,lvl:'FL'+desFL+' ↓',p:4}});
     S_({st:st(arrN+' Approach',fqA),sit:`Descending to FL${desFL}. You have ATIS information ${atisAW}.`,task:'Make first contact with Approach.',need:[[arrX+' approach',`Station "${arrN} Approach"`],['flight level '+desFL,'FL'+desFL],['information '+phonRx(atisA),'Information '+atisAW]],model:`${arrN} Approach, {CS}, descending FL${desFL}, information ${atisAW}`,sc:{t:'route',pos:3.4,lvl:'FL'+desFL+' ↓',p:4}});
@@ -2868,6 +2909,7 @@ function genMission(n){
     {let cur=null;steps.forEach(st=>{const q=st.sc;if(!q)return;if(q.t==='profile'){if(['climb','descent','expedite'].includes(q.mode))cur=q.b;else if(q.mode==='level'||q.mode==='turb')cur=q.a;else if(['final','goaround','lowpass'].includes(q.mode))cur=null}
       else if(q.t==='route'&&cur&&/^FL\d+$/.test(q.lvl||'')&&q.lvl!=='FL'+cur)q.lvl='FL'+cur;else if(q.t==='radar'&&cur&&q.fl)q.fl=String(cur);else if(q.t==='ground')cur=null})}
     if(steps.length&&firstSit&&!steps[0].sit.startsWith('Mission'))steps[0].sit=firstSit+' '+steps[0].sit;
+    ms.strip={k:kind,dep:depN,arr:arrN,dr:DR,ar:AR,sid:wps[0]+' '+sidD+sidL,star:wps[3]+' '+starD+starL,awy:awyN,crz,sq};
     if(!steps[0].st)steps[0].st=st(depN+' Ground',fqG);
     steps.forEach(st=>['atc','model','sit'].forEach(k=>{if(st[k])st[k]=st[k].replace(/\b([Aa]) (?=[AEIO][A-Za-z]?-?\d)/g,'$1n ')}));if(endMsg)endMsg=endMsg.replace(/\b([Aa]) (?=[AEIO][A-Za-z]?-?\d)/g,'$1n ');
     const tl=uniq(tags).slice(0,3);
@@ -3195,28 +3237,36 @@ function rpIsDef(){return S.ads.length===3&&S.ads.every((a,k)=>!a.lay&&a.i===RP_
 function rpCustom(){return S.ads.some(a=>a.lay&&!(rpAds().find(x=>x.L===a.i)))}
 /* short code for the built-in aerodromes: mission, partner's role, departure, destination, call sign */
 function rpShort(n,role){if(!rpIsDef()||!/^[A-Za-z ]+$/.test(S.cs.name)||!/^[A-Za-z0-9]+$/.test(S.cs.num))return '';return n+(role==='atc'?'A':'P')+S.dep+S.dst+'-'+S.cs.name.trim().replace(/\s+/g,'.')+'-'+S.cs.num}
-async function rpCode(n,role){const o={v:1,n,r:role,cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds()};const u=new TextEncoder().encode(JSON.stringify(o));let z=null;try{z=await rpZip(u)}catch(e){}return z&&z.length<u.length?'z'+b64u(z):'j'+b64u(u)}
+async function rpCode(n,role){const o={v:1,n,r:role,cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds(),room:RD.room||undefined};const u=new TextEncoder().encode(JSON.stringify(o));let z=null;try{z=await rpZip(u)}catch(e){}return z&&z.length<u.length?'z'+b64u(z):'j'+b64u(u)}
 async function rpParse(code){code=String(code||'').trim();const m=code.match(/rp=([A-Za-z0-9_.-]+)/);if(m)code=m[1];
   const sh=code.match(/^(\d{1,3})([PA])(\d)(\d)-([A-Za-z.]+)-([A-Za-z0-9]+)$/i);
   if(sh){const n=+sh[1],r=sh[2].toUpperCase()==='A'?'atc':'pilot',d=+sh[3],a=+sh[4];if(!(n>=1&&n<=MISSION_N)||d>2||a>2||d===a)throw new Error('bad');return {v:1,n,r,d,a,cs:[sh[5].replace(/\./g,' '),sh[6]],ads:RP_DEF.map(x=>Object.assign({},x))}}
   const t=code.charAt(0);let u=unb64u(code.slice(1));if(t==='z')u=await rpZip(u,true);else if(t!=='j')throw new Error('bad');
   const o=JSON.parse(new TextDecoder().decode(u));if(!o||o.v!==1||!(o.n>=1&&o.n<=MISSION_N)||!['pilot','atc'].includes(o.r)||!Array.isArray(o.ads)||o.ads.length<2)throw new Error('bad');return o}
 /* join a partner's flight: this device takes the partner's aerodromes and call sign until the role play ends */
-async function rpJoin(code,msgEl){let o;try{o=await rpParse(code)}catch(e){if(msgEl)msgEl.innerHTML='<div class="fb no">This link or code is not valid. Ask your partner to send it again.</div>';return false}
+async function rpJoin(code,msgEl){const c=String(code||'').trim();if(/^[A-Za-z0-9]{6}$/.test(c)&&!/^\d/.test(c)){rpJoinRoom(c,msgEl);return true}
+  let o;try{o=await rpParse(c)}catch(e){if(msgEl)msgEl.innerHTML='<div class="fb no">This link or code is not valid. Ask your partner to send it again.</div>';return false}
+  return rpApply(o,o.room||null,msgEl)}
+function rpApply(o,room,msgEl){
   const ads=o.ads.map(a=>{if(a&&a.L){const p=APL.find(x=>x.i===a.L);return p?{n:p.n,i:p.i,r:p.r,lay:buildLibLayout(p)}:null}return a&&a.n&&a.i&&a.r?a:null}).filter(Boolean);
   if(ads.length<2||!(o.d<ads.length)||!(o.a<ads.length)){if(msgEl)msgEl.innerHTML='<div class="fb no">The aerodromes in this invitation could not be read.</div>';return false}
   if(!S.rpPrev)S.rpPrev={ads:S.ads,dep:S.dep,dst:S.dst,cs:S.cs};
   S.ads=ads;S.dep=o.d;S.dst=o.a;S.cs={name:String(o.cs[0]||'Air Force'),num:String(o.cs[1]||'123')};S.rpRole=o.r;save();
-  go('radio');startMission(o.n,o.r);return true}
+  go('radio');startMission(o.n,o.r,room||o.room||null);return true}
 function rpRestore(){if(S.rpPrev){const p=S.rpPrev;delete S.rpPrev;Object.assign(S,p);save()}}
 /* what each role may see of the situation: the pilot does not get the translation of the ATC words, ATC gets only that */
 function rpSit(step){const s=step.sit||'';if(!RD.rp)return s;const parts=s.split(' · ');
   if(RD.rp==='pilot')return step.atc&&/^Перевод:/.test(parts[0])?parts.slice(1).join(' · '):s;
   return step.atc&&!RD.rpPh&&/^Перевод:/.test(parts[0])?parts[0]:''}
 function rpRoleName(r){return r==='atc'?'ATC':'Pilot'}
-function rpTurnHtml(step,atcTxt){
+/* the flight both partners share: the same on both phones */
+function rpStrip(){const m=RD.sc&&RD.sc.ms;if(!m||!m.strip)return '';const s=m.strip,it=[['Call sign',csText()],['Route',s.dep+' → '+s.arr],s.k!=='arr'&&s.k!=='enr'?['Departure','RWY '+s.dr+' · '+s.sid]:null,['Route',s.awy+' · FL'+s.crz],s.k!=='dep'&&s.k!=='enr'?['Arrival',s.star+' · RWY '+s.ar]:null,['Squawk',s.sq]].filter(Boolean);
+  it.splice(3,0);return `<div class="rpstrip">${it.map(([k,v],i)=>`<span><em>${esc(k==='Route'&&i>1?'Airway':k)}</em>${esc(v)}</span>`).join('')}</div>`}
+function rpTurnHtml(step,atcTxt){return rpLinkHtml()+rpStrip()+rpTurnBody(step,atcTxt)}
+function rpTurnBody(step,atcTxt){
   if(RD.rp==='pilot'){if(!step.atc)return `<div class="rpw"><span class="who">You call first</span>The controller is waiting for your call.</div>`;
-    return `<div class="atcnow rpw"><span class="who">ATC · your partner</span>Listen to the controller.<span class="row" style="gap:6px;margin-top:6px"><button class="btn ghost sm" id="reveal" style="margin-top:0">Say again? Show text</button></span><span class="written" id="atxt" hidden>${esc(atcTxt)}</span></div>`}
+    const live=rpPeerOn();
+    return `<div class="atcnow rpw ${RD.rpSaid?'rpcall':''}"><span class="who">ATC · your partner</span>${live?(RD.rpSaid?'The controller has called you. Answer now.':'Wait: the controller is about to call you.'):'Listen to the controller.'}<span class="row" style="gap:6px;margin-top:6px"><button class="btn ghost sm" id="reveal" style="margin-top:0">Say again? Show text</button></span><span class="written" id="atxt" hidden>${esc(atcTxt)}</span></div>`}
   if(step.atc&&!RD.rpPh)return `<div class="atcnow rpme"><span class="who">You · ${esc(fill((RD.st||'ATC|').split('|')[0]))}</span>${esc(atcTxt)}${S.spoken?`<span class="written">${esc(fill(step.atc))}</span>`:''}</div>
     <p class="task"><span class="lbl">Your call</span> Say this to the pilot. Then listen to the reply.</p>`;
   const chk=step.atc?[csText()].concat(step.need.map(n=>fill(n[1]))):[];
@@ -3237,7 +3287,7 @@ function rpBind(step){
     tc.innerHTML=`<textarea id="tx" rows="2" placeholder="Type or tap Speak to check your words (optional)" aria-label="Your transmission" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
       <div class="tbtns rptb">${micB}<button class="btn" id="send" aria-label="Check"><b>Check</b></button><button class="btn pri" id="rpsaid"><b>Transmitted ▶</b></button></div>`;
     const chk={need:sayKeys(step.atc),model:step.atc,task:''},tx=$('#tx');
-    const ok=()=>{RD.rpPh=1;RD.fb='';vRadio()};
+    const ok=()=>{RD.rpPh=1;RD.rpSaid=true;RD.fb='';vRadio();rpPush()};
     const test=cands=>{let best=null;cands.forEach(c=>{const r=checkTx(chk,c);if(!best||r.miss.length<best.r.miss.length)best={c,r}});tx.value=best.c;
       if(!best.r.miss.length){$('#fb').innerHTML='<div class="fb ok">Clear and complete. Tap Transmitted when the pilot is ready.</div>';return}
       $('#fb').innerHTML=`<div class="fb no">Check your words. Missing:<ul>${best.r.miss.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`};
@@ -3250,15 +3300,15 @@ function rpBind(step){
   $('#rpno').onclick=()=>advanceAfterMotion(step,step.atc?'(readback not correct)':'(call incomplete)',false,['Pilot transmission'],[]);
   scrollLog()}
 async function rpInvite(){const n=RD.sc&&RD.sc.ms?RD.sc.ms.n:null;if(!n)return;const other=RD.rp==='atc'?'pilot':'atc';
-  const code=await rpCode(n,other),url=RP_URL+'#rp='+code,sh=rpShort(n,other);
+  const code=await rpCode(n,other),url=RP_URL+'#rp='+code,sh=RD.room||rpShort(n,other);
   closeSheet();const d=document.createElement('div');d.className='vsheet logsheet rpsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Invite your partner');
   d.innerHTML=`<div class="vs-in"><div class="vs-h"><b>Invite your partner</b><button class="btn" type="button" id="rpx">Close</button></div>
-    <p>Your partner flies <b>mission ${n}</b> as <b>${rpRoleName(other)}</b>. They open the link, or type the code in Radio → Role play → Join.</p>
+    <p>Your partner flies <b>mission ${n}</b> as <b>${rpRoleName(other)}</b>. On their phone: Radio → Role play → type this code → Join. Or send them the link.</p>
     ${sh?`<p class="rpcode mono">${esc(sh)}</p>`:''}
     <input class="mono" id="rpurl" readonly value="${esc(url)}" aria-label="Invitation link">
     <div class="row">${navigator.share?'<button class="btn pri" id="rpsh">Share link</button>':''}<button class="btn" id="rpcp">Copy link</button>${sh?'<button class="btn" id="rpcc">Copy code</button>':''}</div>
     ${rpCustom()?'<p class="muted" style="font-size:.85rem">Your own drawn aerodrome layout goes inside the link, so the link is long. Send the link, not the code.</p>':''}
-    <p class="muted" style="font-size:.85rem">Both screens show the same step number. Go step by step together: the controller speaks first, the pilot answers.</p><div id="rpcm"></div></div>`;
+    <p class="muted" style="font-size:.85rem">Keep this flight open while your partner joins: their phone gets the whole flight from yours, so both screens show the same aerodromes, call sign, runway and clearances. Then the step moves on both phones together.</p><div id="rpcm"></div></div>`;
   document.body.appendChild(d);
   const cp=t=>{const done=()=>{d.querySelector('#rpcm').innerHTML='<div class="fb ok">Copied.</div>'};try{navigator.clipboard.writeText(t).then(done,()=>{const i=d.querySelector('#rpurl');i.value=t;i.select();document.execCommand('copy');done()})}catch(e){const i=d.querySelector('#rpurl');i.select();try{document.execCommand('copy');done()}catch(_){}}};
   d.querySelector('#rpx').onclick=closeSheet;
@@ -3267,12 +3317,63 @@ async function rpInvite(){const n=RD.sc&&RD.sc.ms?RD.sc.ms.n:null;if(!n)return;c
 function rpPanel(){const r=S.rpRole||'';return `<div class="panel stack rpp" style="gap:10px"><div><span class="lbl">Role play</span><h2 style="margin-top:2px">Fly a mission with a partner</h2>
     <p class="muted" style="font-size:.9rem;margin-top:4px;max-width:62ch">One of you is the pilot, the other is the controller. You both fly the same mission: the pilot's screen shows only the pilot's words and the controller's screen only the ATC words. Talk to each other as on a real frequency.</p></div>
     <div class="seg" role="group" aria-label="Your role">${[['','Solo'],['pilot','I am the pilot'],['atc','I am ATC']].map(([k,l])=>`<button data-rp="${k}" aria-pressed="${r===k}">${l}</button>`).join('')}</div>
-    ${S.rpPrev?`<p class="rpnote">You are using your partner's aerodromes and call sign (${esc(csText())}). Tap <b>Solo</b> to go back to your own.</p>`:''}${r?`<p class="rpnote">Tap a mission number above to start it as <b>${rpRoleName(r)}</b>, then tap <b>Invite partner</b> on the flight screen.</p>`:''}
-    <div class="row rpjoin"><input type="text" id="rpcode" placeholder="Partner's link or code" aria-label="Partner's link or code" autocapitalize="off" autocomplete="off" spellcheck="false"><button class="btn" id="rpjoin">Join</button></div><div id="rpmsg"></div></div>`}
+    ${S.rpPrev?`<p class="rpnote">You are using your partner's aerodromes and call sign (${esc(csText())}). Tap <b>Solo</b> to go back to your own.</p>`:''}${r?`<p class="rpnote">Tap a mission number above to start it as <b>${rpRoleName(r)}</b>. The flight screen shows a 6-letter code: your partner types it below on their phone and taps <b>Join</b>.</p>`:`<p class="rpnote">Your partner already started? Type the 6-letter code from their screen and tap <b>Join</b>.</p>`}
+    <div class="row rpjoin"><input type="text" id="rpcode" placeholder="Code, e.g. K7PX2M" aria-label="Partner's code or link" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="rpjoin">Join</button></div><div id="rpmsg"></div></div>`}
 function rpPanelBind(){$$('[data-rp]').forEach(b=>b.onclick=()=>{S.rpRole=b.dataset.rp||'';if(!S.rpRole)rpRestore();save();vRadio()});
   const j=()=>{const v=$('#rpcode').value.trim();if(v)rpJoin(v,$('#rpmsg'))};if($('#rpjoin'))$('#rpjoin').onclick=j;if($('#rpcode'))$('#rpcode').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();j()}}}
-function startMission(n,rp){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,rp:rp||null,rpPh:0};vRadio();speakStep();window.scrollTo(0,0)}
-function leave(){const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
+/* ---------- live link between the two phones (Supabase Realtime broadcast): same flight, same step ---------- */
+const RP_WS=window.RP_WS_TEST||'wss://cblwqdejctpowcczkpic.supabase.co/realtime/v1/websocket?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNibHdxZGVqY3Rwb3djY3prcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0NjQwMTcsImV4cCI6MjEwOTA0MDAxN30.PiHZ-GGdX7D1uJe0L4rSN5409uYTDhkSN_Obwv-sH3A&vsn=1.0.0';
+let RPL=null;
+const RP_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function rpRoom(){const a=new Uint8Array(6);try{crypto.getRandomValues(a)}catch(e){for(let i=0;i<6;i++)a[i]=Math.random()*256}return [...a].map(x=>RP_AB[x%RP_AB.length]).join('')}
+function rpChk(sc){const t=sc.steps.map(s=>(s.atc||'')+'|'+s.model).join('#')+'#'+csText();let h=2166136261;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36).toUpperCase().slice(-4).padStart(4,'0')}
+function rpLinkOpen(room){if(RPL&&RPL.room===room)return RPL;rpLinkClose();if(typeof WebSocket==='undefined')return null;
+  const L={room,ref:1,peer:0,open:false,topic:'realtime:rt-rp-'+room};RPL=L;
+  L.send=(ev,payload)=>{if(L.ws&&L.ws.readyState===1)try{L.ws.send(JSON.stringify({topic:L.topic,event:'broadcast',payload:{type:'broadcast',event:ev,payload},ref:String(++L.ref),join_ref:'1'}))}catch(e){}};
+  const connect=()=>{if(RPL!==L)return;let ws;try{ws=new WebSocket(RP_WS)}catch(e){L.rt=setTimeout(connect,4000);return}L.ws=ws;
+    ws.onopen=()=>{ws.send(JSON.stringify({topic:L.topic,event:'phx_join',payload:{config:{broadcast:{self:false,ack:false},presence:{key:''},private:false}},ref:'1',join_ref:'1'}));
+      L.open=true;clearInterval(L.hb);L.hb=setInterval(()=>{try{ws.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++L.ref)}));if(RD.rp&&RD.sc)L.send('state',rpState())}catch(e){}},20000);
+      setTimeout(()=>{if(RD.rp&&RD.sc)L.send('hello',rpState());if(L.onOpen)L.onOpen()},300);rpLinkUI()};
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}if(m.event==='broadcast'&&m.payload&&RPL===L){const was=rpPeerOn();L.peer=Date.now();rpOnMsg(m.payload.event,m.payload.payload||{});if(!was&&RD.sc&&RD.rp&&!RD.done&&cur==='radio')vRadio();else rpLinkUI()}};
+    ws.onclose=()=>{clearInterval(L.hb);L.open=false;if(RPL===L){L.ws=null;rpLinkUI();L.rt=setTimeout(connect,3000)}};
+    ws.onerror=()=>{try{ws.close()}catch(e){}}};
+  connect();return L}
+function rpLinkClose(){if(!RPL)return;const L=RPL;RPL=null;clearTimeout(L.rt);clearInterval(L.hb);clearInterval(L.ask);try{L.ws&&L.ws.close()}catch(e){}}
+function rpState(){return {role:RD.rp,n:RD.sc&&RD.sc.ms?RD.sc.ms.n:0,chk:RD.chk,i:RD.i,said:!!RD.rpSaid,done:!!RD.done}}
+function rpPush(){if(RPL&&RD.rp&&RD.sc)RPL.send('state',rpState())}
+function rpPeerOn(){return !!(RPL&&RPL.open&&RPL.peer&&Date.now()-RPL.peer<65000)}
+function rpLinkHtml(){if(!RD.rp)return '';const code=RD.room?'<b class="mono">'+esc(RD.room)+'</b>':'';
+  if(RD.rpMismatch)return '<div class="rplink bad" id="rplink">Your partner has a different flight. Both leave the flight, then your partner joins with code '+code+'.</div>';
+  if(rpPeerOn())return '<div class="rplink ok" id="rplink"><i></i>Partner connected · flight '+code+' · check '+esc(RD.chk||'')+'</div>';
+  if(RPL&&RPL.open)return '<div class="rplink" id="rplink"><i></i>Waiting for your partner · code '+code+'</div>';
+  return '<div class="rplink off" id="rplink"><i></i>No live link. Go step by step together using the step number.</div>'}
+function rpLinkUI(){const el=document.getElementById('rplink');if(el)el.outerHTML=rpLinkHtml()}
+/* the partner's flight */
+function rpOnMsg(ev,p){
+  if(ev==='need-cfg'){if(RD.rp&&RD.sc&&RD.sc.ms&&RPL)RPL.send('cfg',{v:1,n:RD.sc.ms.n,r:RD.rp==='atc'?'pilot':'atc',cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds(),room:RPL.room});return}
+  if(ev==='cfg'){if(RPL&&RPL.wantCfg){RPL.wantCfg=false;clearInterval(RPL.ask);rpApply(p,RPL.room)}return}
+  if(ev==='hello'&&RPL)RPL.send('state',rpState());
+  if((ev==='state'||ev==='hello')&&RD.sc&&RD.rp){
+    if(p.n&&RD.sc.ms&&p.n!==RD.sc.ms.n&&p.role!==RD.rp&&!p.i&&RPL){startMission(p.n,RD.rp,RPL.room);return}/* the partner went on to another mission */
+    if(p.role===RD.rp){RD.rpMismatch=false;RD.rpSameRole=true;rpLinkUI();return}
+    if(p.chk&&RD.chk&&p.chk!==RD.chk){if(!RD.rpMismatch){RD.rpMismatch=true;rpLinkUI()}return}
+    if(RD.rpMismatch){RD.rpMismatch=false;rpLinkUI()}
+    const N=RD.sc.steps.length;
+    if((p.i>RD.i||(p.done&&!RD.done))&&!RD.done){
+      while(RD.i<Math.min(p.i,N)){const st=RD.sc.steps[RD.i];if(st.atc)RD.log.push({w:'atc',t:showAtc(st.atc),st:fill((RD.st||'').split('|')[0])});
+        RD.log.push({w:'you',t:RD.rp==='atc'?'(pilot answered)':'(answered)'});RD.res.push({first:RD.tries===0,task:fill(st.task),said:'',miss:[],model:st.model});RD.tries=0;RD.i++}
+      RD.rpPh=0;RD.rpSaid=!!p.said;RD.fb='';if(RD.i>=N)RD.done=true;vRadio();if(RD.rp==='pilot'&&RD.rpSaid)keyClick();return}
+    if(p.i===RD.i&&RD.rp==='pilot'&&p.said&&!RD.rpSaid){RD.rpSaid=true;keyClick();setTimeout(()=>squelchTail(),900);vRadio()}}}
+/* join a partner's flight by its 6-letter code: the partner's phone sends the whole flight */
+function rpJoinRoom(code,msgEl){const room=String(code).toUpperCase().replace(/[^A-Z0-9]/g,'');const L=rpLinkOpen(room);
+  if(!L){if(msgEl)msgEl.innerHTML='<div class="fb no">No connection on this device. Use the link your partner sent.</div>';return}
+  L.wantCfg=true;let k=0;if(msgEl)msgEl.innerHTML='<div class="fb wa">Connecting to flight '+esc(room)+'…</div>';
+  const ask=()=>{L.send('need-cfg',{});if(++k>12){clearInterval(L.ask);if(L.wantCfg){L.wantCfg=false;rpLinkClose();if(msgEl)msgEl.innerHTML='<div class="fb no">Flight '+esc(room)+' was not found. Your partner must have the flight open. Check the code, or use the link.</div>'}}};
+  L.onOpen=()=>{clearInterval(L.ask);ask();L.ask=setInterval(ask,1500)}}
+function startMission(n,rp,room){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,rp:rp||null,rpPh:0};
+  if(rp){RD.room=room||(RPL&&!RPL.wantCfg&&RPL.room)||rpRoom();RD.chk=rpChk(sc);rpLinkOpen(RD.room);rpPush()}else rpLinkClose();
+  vRadio();speakStep();window.scrollTo(0,0)}
+function leave(){rpLinkClose();const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${RD.rp==='atc'?(m.w==='atc'?'You · '+esc(m.st||'ATC'):'Pilot'):m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
 function scrollLog(){const f=()=>{const l=$('#log');if(l)l.scrollTop=l.scrollHeight};f();requestAnimationFrame(f)}
@@ -3306,10 +3407,10 @@ function advance(step,raw,first,miss,warn){
   RD.log.push({w:'you',t:raw});
   RD.res.push({first,task:fill(step.task),said:RD.firstSaid||raw,miss:miss||[],model:step.model});
   if(RD.rp!=='atc')stat('radio',first,first?null:spoken(fill(step.model)));
-  RD.rpPh=0;RD.fb=RD.rp==='atc'?'':first?`<div class="fb ok">Correct.${warn&&warn.length?'<br>'+warn.map(esc).join('<br>'):''}</div>`:(raw==='(skipped)'?'':`<div class="fb ok">Correct now. It took more than one try, so it is noted in your review.</div>`);
+  RD.rpPh=0;RD.rpSaid=false;RD.fb=RD.rp==='atc'?'':first?`<div class="fb ok">Correct.${warn&&warn.length?'<br>'+warn.map(esc).join('<br>'):''}</div>`:(raw==='(skipped)'?'':`<div class="fb ok">Correct now. It took more than one try, so it is noted in your review.</div>`);
   RD.i++;RD.adv=true;RD.tries=0;RD.firstMiss=null;RD.firstSaid=null;
   if(RD.i>=sc.steps.length){RD.done=true;const pct=Math.round(RD.res.filter(r=>r.first).length/sc.steps.length*100);if(RD.rp!=='atc'&&(!S.stats['radio-'+sc.id]||pct>S.stats['radio-'+sc.id]))S.stats['radio-'+sc.id]=pct;save();if(S.voice&&!RD.rp)say(spoken(fill(sc.end)))}
-  vRadio();if(!RD.done)speakStep();
+  vRadio();if(!RD.done)speakStep();rpPush();
 }
 function speakStep(){const s=RD.sc&&RD.sc.steps[RD.i];if(S.voice&&s&&s.atc&&!RD.rp)sayATC(spoken(fill(s.atc)))}
 
@@ -3504,7 +3605,7 @@ function vNumbers(){
     if(!NU.sp){const x=spellTarget();NU.sp=x.t;NU.spk=x.k;NU.spres=null}
     body=`<div class="panel stack"><div class="row" style="justify-content:space-between"><span class="lbl">Spell it with the ICAO alphabet</span><span class="score">Streak ${NU.streak} · ${NU.score[0]}/${NU.score[1]}</span></div>
      <p class="lbl" style="text-align:center">${esc(NU.spk||'')}</p><p class="big">${esc(NU.sp)}</p>
-     <p class="note">Spell only what is spelled on the radio: navaid identifiers, registrations, taxiways, location indicators. Five-letter waypoint names such as ZARIN or MIRZO are pronounceable and are said as one word, not spelled.</p>
+     <p class="note">Spell only what is spelled on the radio: navaid identifiers, registrations, taxiways, location indicators. Five-letter waypoint names such as TISIB or MIRZO are pronounceable and are said as one word, not spelled.</p>
      <input type="text" id="spin" placeholder="e.g. Bravo Tango Kilo…" aria-label="Your spelling" style="width:100%">
      <div class="row"><button class="btn pri" id="spgo">${NU.spres?'Next':'Check'}</button></div>
      ${NU.spres?`<div class="spellres">${NU.spres.map(r=>`<span class="${r.ok?'y':'n'}">${r.l} = ${esc(r.want)}${r.ok?'':' (you: '+esc(r.got||'—')+')'}</span>`).join('')}</div>`:''}</div>`;
