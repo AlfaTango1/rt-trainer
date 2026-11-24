@@ -1,11 +1,11 @@
-// Pilot for computer: the Pilot web app in its own window.
-// It opens the live site, so it updates itself like the website; the site's service worker
-// keeps it working without internet after the first start. Data stays in this app's own storage.
+// Pilot for computer: the Pilot app in its own window.
+// The app files (copied from pilot/ when the installer is built) are inside the installed program,
+// so it starts and works with no internet at all. The cloud copy and username requests work when there is internet.
+// A new installer is built automatically whenever pilot/ changes.
 const {app, BrowserWindow, session, shell, Menu} = require('electron');
 const path = require('path');
 
-const APP_URL = 'https://alfatango1.github.io/rt-trainer/pilot/';
-const inApp = (u) => typeof u === 'string' && u.startsWith(APP_URL);
+const PAGE = path.join(__dirname, 'app', 'index.html');
 let win = null;
 
 function createWindow() {
@@ -15,25 +15,21 @@ function createWindow() {
     icon: path.join(__dirname, 'icon.png'), autoHideMenuBar: true,
     webPreferences: {contextIsolation: true, sandbox: true}
   });
-  // links to other sites open in the normal browser
+  // web links open in the normal browser; the app itself never leaves its own files
   win.webContents.setWindowOpenHandler(({url}) => {
-    if (!inApp(url)) shell.openExternal(url);
+    if (/^https?:/i.test(url)) shell.openExternal(url);
     return {action: 'deny'};
   });
   win.webContents.on('will-navigate', (e, url) => {
-    if (!inApp(url) && !url.startsWith('file:')) { e.preventDefault(); shell.openExternal(url); }
-  });
-  // first start without internet (nothing cached yet): show a page that retries
-  win.webContents.on('did-fail-load', (e, code, desc, url, isMain) => {
-    if (isMain && code !== -3 && inApp(url)) win.loadFile(path.join(__dirname, 'offline.html'));
+    if (!url.startsWith('file:')) { e.preventDefault(); if (/^https?:/i.test(url)) shell.openExternal(url); }
   });
   // F5 / Ctrl+R reload (there is no menu bar)
   win.webContents.on('before-input-event', (e, input) => {
     if (input.type === 'keyDown' && (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r'))) {
-      e.preventDefault(); win.loadURL(APP_URL);
+      e.preventDefault(); win.webContents.reload();
     }
   });
-  win.loadURL(APP_URL);
+  win.loadFile(PAGE);
 }
 
 if (!app.requestSingleInstanceLock()) {

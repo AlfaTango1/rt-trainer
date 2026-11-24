@@ -1,13 +1,13 @@
 name: Build Pilot for computer
 
 # Windows installer (Pilot-Setup-….exe) and portable .exe of the Pilot app (pilot-desktop/).
-# The app opens the live Pilot site, so changes in pilot/ reach it without a new build.
-# Runs when pilot-desktop/ changes, or from the Actions tab ("Run workflow").
+# The app files from pilot/ are packed inside, so it works with no internet; a new installer is
+# built whenever pilot/ or pilot-desktop/ changes, or from the Actions tab ("Run workflow").
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['pilot-desktop/**', '.github/workflows/build-pilot-desktop.yml']
+    paths: ['pilot/**', 'pilot-desktop/**', '.github/workflows/build-pilot-desktop.yml']
 
 permissions:
   contents: write
@@ -29,6 +29,10 @@ jobs:
         run: |
           cd pilot-desktop
           cp ../pilot/icon-512.png icon.png
+          # the app files go inside the program, so it works with no internet
+          mkdir -p app
+          cp ../pilot/index.html ../pilot/ac.js ../pilot/manifest.webmanifest ../pilot/logo.webp ../pilot/icon-*.png app/
+          ls -la app
           npm version --no-git-tag-version "1.0.${{ github.run_number }}"
           npm install --no-audit --no-fund
           npx electron-builder --win --publish never
@@ -48,5 +52,6 @@ jobs:
           body: |
             Pilot-Setup-….exe installs Pilot with shortcuts on the desktop and in the Start menu.
             Pilot-Portable-….exe runs without installing.
+            Works with no internet; the cloud copy needs internet. To update, install the newer version over the old one (data stays).
             Windows may warn that the app is not signed: More info → Run anyway.
           files: pilot-desktop/dist/*.exe

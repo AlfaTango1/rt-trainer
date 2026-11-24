@@ -15,8 +15,8 @@
     "productName": "Pilot",
     "files": [
       "main.js",
-      "offline.html",
-      "icon.png"
+      "icon.png",
+      "app/**"
     ],
     "directories": {
       "output": "dist"
