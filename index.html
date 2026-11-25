@@ -2841,7 +2841,7 @@ function genMission(n){
   }
   /* ---------------- arrival ---------------- */
   if(kind==='full'||kind==='arr'){
-    const starName=`${wps[3]} ${starD}${starL}`;const fromFL=kind==='arr'?mPick(r,[200,220,240]):crz;
+    const starName=`${wps[3]} ${starD}${starL}`;const fromFL=kind==='arr'?mPick(r,[200,220,240]):crz;ms.fromFL=fromFL;
     if(kind==='arr'){ms.sq0=sq;firstSit=`Mission ${n}: arriving at ${arrN}. Runway ${AR} in use, wind ${pad(wArr,3)}/${sArr}. ATIS information ${atisAW}, QNH ${qnhA}.`}
     S_({st:st(arrN+' Control',fqC2),sit:(kind==='arr'?firstSit+' ':'')+`Level FL${fromFL}, approaching ${wps[3]}.`,task:`Make first contact with ${arrN} Control.`,need:[[arrX+' control',`Station "${arrN} Control"`],['flight level '+fromFL,'FL'+fromFL]],model:`${arrN} Control, {CS}, FL${fromFL}`,sc:{t:'route',pos:2.7,lvl:'FL'+fromFL,p:3}});
     /* when a later instruction continues the descent, the first clearance stops higher */
@@ -2909,7 +2909,7 @@ function genMission(n){
     {let cur=null;steps.forEach(st=>{const q=st.sc;if(!q)return;if(q.t==='profile'){if(['climb','descent','expedite'].includes(q.mode))cur=q.b;else if(q.mode==='level'||q.mode==='turb')cur=q.a;else if(['final','goaround','lowpass'].includes(q.mode))cur=null}
       else if(q.t==='route'&&cur&&/^FL\d+$/.test(q.lvl||'')&&q.lvl!=='FL'+cur)q.lvl='FL'+cur;else if(q.t==='radar'&&cur&&q.fl)q.fl=String(cur);else if(q.t==='ground')cur=null})}
     if(steps.length&&firstSit&&!steps[0].sit.startsWith('Mission'))steps[0].sit=firstSit+' '+steps[0].sit;
-    ms.strip={k:kind,dep:depN,arr:arrN,dr:DR,ar:AR,sid:wps[0]+' '+sidD+sidL,star:wps[3]+' '+starD+starL,awy:awyN,crz,sq};
+    ms.strip={k:kind,dep:depN,arr:arrN,dr:DR,ar:AR,sid:wps[0]+' '+sidD+sidL,star:wps[3]+' '+starD+starL,awy:awyN,crz:kind==='arr'&&ms.fromFL?ms.fromFL:crz,sq};
     if(!steps[0].st)steps[0].st=st(depN+' Ground',fqG);
     steps.forEach(st=>['atc','model','sit'].forEach(k=>{if(st[k])st[k]=st[k].replace(/\b([Aa]) (?=[AEIO][A-Za-z]?-?\d)/g,'$1n ')}));if(endMsg)endMsg=endMsg.replace(/\b([Aa]) (?=[AEIO][A-Za-z]?-?\d)/g,'$1n ');
     const tl=uniq(tags).slice(0,3);
@@ -3014,7 +3014,7 @@ function vRadio(){
       ${RD.rp==='atc'?'':RD.res.filter(r=>!r.first).length?`<div class="dtab"><table><tbody>${RD.res.filter(r=>!r.first).map(r=>`<tr><td>${esc(r.task)}</td><td><span class="muted">You said:</span> ${esc(r.said)}<br><span class="muted">Missing:</span> ${esc(r.miss.join('; '))}<br><span class="muted">Model:</span> <span class="mono">${esc(spoken(fill(r.model)))}</span></td></tr>`).join('')}</tbody></table></div>`:'<p>Every transmission was complete on the first try.</p>'}
       <div class="row"><button class="btn pri" id="again">Fly it again</button><button class="btn" id="back">${RD.from==='emergency'?'Choose another emergency':'Choose another flight'}</button>${sc.ms?`<button class="btn pri" id="mnext">Next mission →</button>`:''}</div></div></div>`;
     $('#again').onclick=()=>{RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,from:RD.from,rp:RD.rp,rpPh:0};vRadio();speakStep()};
-    $('#back').onclick=leave;if($('#mnext'))$('#mnext').onclick=()=>startMission(sc.ms.n%MISSION_N+1,RD.rp);
+    $('#back').onclick=leave;if($('#mnext'))$('#mnext').onclick=()=>{if(RD.rp&&RP_JOINED&&RPL&&RPL.room===RP_JOINED){rpResync();const b=$('#mnext');if(b){b.disabled=true;b.textContent='Waiting for your partner to start the next mission…'}return}startMission(sc.ms.n%MISSION_N+1,RD.rp)};
     scrollLog();return;
   }
   const step=sc.steps[RD.i];
@@ -3244,15 +3244,22 @@ async function rpParse(code){code=String(code||'').trim();const m=code.match(/rp
   const t=code.charAt(0);let u=unb64u(code.slice(1));if(t==='z')u=await rpZip(u,true);else if(t!=='j')throw new Error('bad');
   const o=JSON.parse(new TextDecoder().decode(u));if(!o||o.v!==1||!(o.n>=1&&o.n<=MISSION_N)||!['pilot','atc'].includes(o.r)||!Array.isArray(o.ads)||o.ads.length<2)throw new Error('bad');return o}
 /* join a partner's flight: this device takes the partner's aerodromes and call sign until the role play ends */
-async function rpJoin(code,msgEl){const c=String(code||'').trim();if(/^[A-Za-z0-9]{6}$/.test(c)&&!/^\d/.test(c)){rpJoinRoom(c,msgEl);return true}
+async function rpJoin(code,msgEl){const c=String(code||'').trim();if(/^[A-Za-z0-9]{6}$/.test(c.replace(/\s+/g,''))){rpJoinRoom(c,msgEl);return true}
   let o;try{o=await rpParse(c)}catch(e){if(msgEl)msgEl.innerHTML='<div class="fb no">This link or code is not valid. Ask your partner to send it again.</div>';return false}
   return rpApply(o,o.room||null,msgEl)}
+let RP_JOINED=null;/* the room this phone joined (the partner's phone holds the flight) */
+function rpResync(){if(!RPL||RPL.wantCfg)return;RPL.wantCfg=true;RD.rpSync=true;rpLinkUI();let k=0;clearInterval(RPL.ask);
+  const ask=()=>{if(!RPL)return;RPL.send('need-cfg',{});if(++k>10){clearInterval(RPL.ask);RPL.wantCfg=false;RD.rpSync=false;RD.rpMismatch=true;rpLinkUI()}};ask();RPL.ask=setInterval(ask,1500)}
+function rpApplySc(o,room){if(!S.rpPrev)S.rpPrev={ads:S.ads,dep:S.dep,dst:S.dst,cs:S.cs};
+  S.cs={name:String(o.cs[0]||'Air Force'),num:String(o.cs[1]||'123')};S.rpRole=o.r;save();RP_JOINED=room;
+  if(cur!=='radio')go('radio');startMission(o.sc.ms&&o.sc.ms.n,o.r,room,o.sc);return true}
 function rpApply(o,room,msgEl){
   const ads=o.ads.map(a=>{if(a&&a.L){const p=APL.find(x=>x.i===a.L);return p?{n:p.n,i:p.i,r:p.r,lay:buildLibLayout(p)}:null}return a&&a.n&&a.i&&a.r?a:null}).filter(Boolean);
   if(ads.length<2||!(o.d<ads.length)||!(o.a<ads.length)){if(msgEl)msgEl.innerHTML='<div class="fb no">The aerodromes in this invitation could not be read.</div>';return false}
   if(!S.rpPrev)S.rpPrev={ads:S.ads,dep:S.dep,dst:S.dst,cs:S.cs};
   S.ads=ads;S.dep=o.d;S.dst=o.a;S.cs={name:String(o.cs[0]||'Air Force'),num:String(o.cs[1]||'123')};S.rpRole=o.r;save();
-  go('radio');startMission(o.n,o.r,room||o.room||null);return true}
+  if(room||o.room)RP_JOINED=room||o.room;/* over the live link this phone then takes the partner's exact flight */
+  go('radio');startMission(o.n,o.r,room||o.room||null);if(RPL&&RP_JOINED)setTimeout(()=>{if(RPL)rpResync()},600);return true}
 function rpRestore(){if(S.rpPrev){const p=S.rpPrev;delete S.rpPrev;Object.assign(S,p);save()}}
 /* what each role may see of the situation: the pilot does not get the translation of the ATC words, ATC gets only that */
 function rpSit(step){const s=step.sit||'';if(!RD.rp)return s;const parts=s.split(' · ');
@@ -3325,7 +3332,7 @@ function rpPanelBind(){$$('[data-rp]').forEach(b=>b.onclick=()=>{S.rpRole=b.data
 const RP_WS=window.RP_WS_TEST||'wss://cblwqdejctpowcczkpic.supabase.co/realtime/v1/websocket?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNibHdxZGVqY3Rwb3djY3prcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0NjQwMTcsImV4cCI6MjEwOTA0MDAxN30.PiHZ-GGdX7D1uJe0L4rSN5409uYTDhkSN_Obwv-sH3A&vsn=1.0.0';
 let RPL=null;
 const RP_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-function rpRoom(){const a=new Uint8Array(6);try{crypto.getRandomValues(a)}catch(e){for(let i=0;i<6;i++)a[i]=Math.random()*256}return [...a].map(x=>RP_AB[x%RP_AB.length]).join('')}
+function rpRoom(){const a=new Uint8Array(6);try{crypto.getRandomValues(a)}catch(e){for(let i=0;i<6;i++)a[i]=Math.random()*256}return [...a].map((x,i)=>i?RP_AB[x%RP_AB.length]:RP_AB[x%24]).join('')}/* starts with a letter */
 function rpChk(sc){const t=sc.steps.map(s=>(s.atc||'')+'|'+s.model).join('#')+'#'+csText();let h=2166136261;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36).toUpperCase().slice(-4).padStart(4,'0')}
 function rpLinkOpen(room){if(RPL&&RPL.room===room)return RPL;rpLinkClose();if(typeof WebSocket==='undefined')return null;
   const L={room,ref:1,peer:0,open:false,topic:'realtime:rt-rp-'+room};RPL=L;
@@ -3343,20 +3350,26 @@ function rpState(){return {role:RD.rp,n:RD.sc&&RD.sc.ms?RD.sc.ms.n:0,chk:RD.chk,
 function rpPush(){if(RPL&&RD.rp&&RD.sc)RPL.send('state',rpState())}
 function rpPeerOn(){return !!(RPL&&RPL.open&&RPL.peer&&Date.now()-RPL.peer<65000)}
 function rpLinkHtml(){if(!RD.rp)return '';const code=RD.room?'<b class="mono">'+esc(RD.room)+'</b>':'';
-  if(RD.rpMismatch)return '<div class="rplink bad" id="rplink">Your partner has a different flight. Both leave the flight, then your partner joins with code '+code+'.</div>';
-  if(rpPeerOn())return '<div class="rplink ok" id="rplink"><i></i>Partner connected · flight '+code+' · check '+esc(RD.chk||'')+'</div>';
-  if(RPL&&RPL.open)return '<div class="rplink" id="rplink"><i></i>Waiting for your partner · code '+code+'</div>';
-  return '<div class="rplink off" id="rplink"><i></i>No live link. Go step by step together using the step number.</div>'}
+  if(RD.rpSync)return '<div class="rplink" id="rplink"><i></i>Loading your partner\'s flight…</div>';
+  if(RD.rpSameRole)return '<div class="rplink bad" id="rplink">You and your partner chose the same role. One of you leaves and joins as the other role.</div>';
+  if(RD.rpMismatch)return '<div class="rplink bad" id="rplink"><span>Your partner has a different flight. Your partner: close the flight, go to Radio → Role play, type <b class="mono">'+esc(RD.room||'')+'</b> and tap Join.</span></div>';
+  if(rpPeerOn())return '<div class="rplink ok" id="rplink"><i></i><span>Partner connected · flight '+code+' · check '+esc(RD.chk||'')+'</span></div>';
+  if(RPL&&RPL.open)return '<div class="rplink" id="rplink"><i></i><span>Waiting for your partner · code '+code+'</span></div>';
+  return '<div class="rplink off" id="rplink"><i></i><span>No live link. Go step by step together using the step number.</span></div>'}
 function rpLinkUI(){const el=document.getElementById('rplink');if(el)el.outerHTML=rpLinkHtml()}
 /* the partner's flight */
 function rpOnMsg(ev,p){
-  if(ev==='need-cfg'){if(RD.rp&&RD.sc&&RD.sc.ms&&RPL)RPL.send('cfg',{v:1,n:RD.sc.ms.n,r:RD.rp==='atc'?'pilot':'atc',cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds(),room:RPL.room});return}
-  if(ev==='cfg'){if(RPL&&RPL.wantCfg){RPL.wantCfg=false;clearInterval(RPL.ask);rpApply(p,RPL.room)}return}
+  /* the phone that started the flight sends the whole flight itself, so both phones show exactly the same thing
+     (their own aerodromes, settings or app version can no longer make the flights differ) */
+  if(ev==='need-cfg'){if(RD.rp&&RD.sc&&RD.sc.ms&&RPL&&RP_JOINED!==RPL.room)RPL.send('cfg',{v:2,n:RD.sc.ms.n,r:RD.rp==='atc'?'pilot':'atc',cs:[S.cs.name,S.cs.num],d:S.dep,a:S.dst,ads:rpAds(),room:RPL.room,sc:RD.sc});return}
+  if(ev==='cfg'){if(RPL&&RPL.wantCfg){RPL.wantCfg=false;clearInterval(RPL.ask);if(p.sc&&p.sc.steps)rpApplySc(p,RPL.room);else rpApply(p,RPL.room)}return}
   if(ev==='hello'&&RPL)RPL.send('state',rpState());
   if((ev==='state'||ev==='hello')&&RD.sc&&RD.rp){
-    if(p.n&&RD.sc.ms&&p.n!==RD.sc.ms.n&&p.role!==RD.rp&&!p.i&&RPL){startMission(p.n,RD.rp,RPL.room);return}/* the partner went on to another mission */
     if(p.role===RD.rp){RD.rpMismatch=false;RD.rpSameRole=true;rpLinkUI();return}
-    if(p.chk&&RD.chk&&p.chk!==RD.chk){if(!RD.rpMismatch){RD.rpMismatch=true;rpLinkUI()}return}
+    RD.rpSameRole=false;
+    /* a different flight (the partner went on to another mission, or the flights differ): the joined phone fetches the partner's flight */
+    if((p.chk&&RD.chk&&p.chk!==RD.chk)||(p.n&&RD.sc.ms&&p.n!==RD.sc.ms.n)){
+      if(RPL&&RP_JOINED===RPL.room){rpResync()}else if(!RD.rpMismatch){RD.rpMismatch=true;rpLinkUI()}return}
     if(RD.rpMismatch){RD.rpMismatch=false;rpLinkUI()}
     const N=RD.sc.steps.length;
     if((p.i>RD.i||(p.done&&!RD.done))&&!RD.done){
@@ -3365,15 +3378,15 @@ function rpOnMsg(ev,p){
       RD.rpPh=0;RD.rpSaid=!!p.said;RD.fb='';if(RD.i>=N)RD.done=true;vRadio();if(RD.rp==='pilot'&&RD.rpSaid)keyClick();return}
     if(p.i===RD.i&&RD.rp==='pilot'&&p.said&&!RD.rpSaid){RD.rpSaid=true;keyClick();setTimeout(()=>squelchTail(),900);vRadio()}}}
 /* join a partner's flight by its 6-letter code: the partner's phone sends the whole flight */
-function rpJoinRoom(code,msgEl){const room=String(code).toUpperCase().replace(/[^A-Z0-9]/g,'');const L=rpLinkOpen(room);
+function rpJoinRoom(code,msgEl){const room=String(code).toUpperCase().replace(/[^A-Z0-9]/g,'');RP_JOINED=room;const L=rpLinkOpen(room);
   if(!L){if(msgEl)msgEl.innerHTML='<div class="fb no">No connection on this device. Use the link your partner sent.</div>';return}
   L.wantCfg=true;let k=0;if(msgEl)msgEl.innerHTML='<div class="fb wa">Connecting to flight '+esc(room)+'…</div>';
   const ask=()=>{L.send('need-cfg',{});if(++k>12){clearInterval(L.ask);if(L.wantCfg){L.wantCfg=false;rpLinkClose();if(msgEl)msgEl.innerHTML='<div class="fb no">Flight '+esc(room)+' was not found. Your partner must have the flight open. Check the code, or use the link.</div>'}}};
   L.onOpen=()=>{clearInterval(L.ask);ask();L.ask=setInterval(ask,1500)}}
-function startMission(n,rp,room){const sc=mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,rp:rp||null,rpPh:0};
+function startMission(n,rp,room,given){if(!given&&!room&&!(RPL&&RPL.room===RP_JOINED))RP_JOINED=null;const sc=given||mission(n);RD={sc,i:0,log:[],tries:0,res:[],fb:'',done:false,st:sc.steps[0].st,rp:rp||null,rpPh:0};
   if(rp){RD.room=room||(RPL&&!RPL.wantCfg&&RPL.room)||rpRoom();RD.chk=rpChk(sc);rpLinkOpen(RD.room);rpPush()}else rpLinkClose();
   vRadio();speakStep();window.scrollTo(0,0)}
-function leave(){rpLinkClose();const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
+function leave(){rpLinkClose();RP_JOINED=null;const f=RD.from||'radio';RD={sc:null,i:0,log:[],tries:0,res:[],fb:'',done:false};go(f)}
 function comBar(pg,rx){const [st,f]=fill(RD.st||'|').split('|');return `<div class="com"><span class="f">${f?(+f).toFixed(3):''}</span><span class="st">${esc(st)}</span><span class="leds"><span class="led rx ${rx?'on pulse':''}">RX</span><span class="led tx">TX</span></span><span class="pg">${pg}</span></div>`}
 function logHtml(){return RD.log.map(m=>`<div class="msg ${m.w}"><span class="w">${RD.rp==='atc'?(m.w==='atc'?'You · '+esc(m.st||'ATC'):'Pilot'):m.w==='atc'?esc(m.st||'ATC'):'You'}</span>${esc(m.t)}</div>`).join('')}
 function scrollLog(){const f=()=>{const l=$('#log');if(l)l.scrollTop=l.scrollHeight};f();requestAnimationFrame(f)}
